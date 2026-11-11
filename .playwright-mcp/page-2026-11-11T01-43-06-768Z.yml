@@ -1,0 +1,58 @@
+- generic [ref=f7e5]:
+  - generic [ref=f7e6]:
+    - generic [ref=f7e7]:
+      - banner [ref=f7e8]:
+        - img "Logo Hội Doanh nghiệp Phường Tân Sơn" [ref=f7e9]
+        - generic [ref=f7e10]:
+          - paragraph [ref=f7e11]: KẾT NỐI · ĐỒNG HÀNH · PHÁT TRIỂN
+          - heading "Hội Doanh nghiệp Phường Tân Sơn" [level=1] [ref=f7e12]: Hội Doanh nghiệpPhường Tân Sơn
+          - paragraph [ref=f7e13]: Kính chào Quý Doanh nhân
+      - region "Hoạt động nổi bật" [ref=f7e14]:
+        - img "Hoạt động chung tay hỗ trợ cộng đồng" [ref=f7e17]
+        - generic [ref=f7e22]:
+          - button "Xem banner 1" [pressed] [ref=f7e23] [cursor=pointer]
+          - button "Xem banner 2" [ref=f7e25] [cursor=pointer]
+          - button "Xem banner 3" [ref=f7e27] [cursor=pointer]
+    - main [ref=f7e29]:
+      - generic [ref=f7e30]:
+        - generic [ref=f7e31]:
+          - generic [ref=f7e32]: ZALO OFFICIAL ACCOUNT
+          - heading "OA Hội Doanh nghiệp Phường Tân Sơn" [level=2] [ref=f7e33]: OA Hội Doanh nghiệpPhường Tân Sơn
+          - paragraph [ref=f7e34]: Quan tâm OA để nhận thông báo mới nhất.
+        - button "Quan tâm" [ref=f7e35] [cursor=pointer]
+      - generic [ref=f7e38]:
+        - heading "Tiện ích" [level=2] [ref=f7e39]
+        - generic [ref=f7e40]:
+          - button "Giới thiệu" [ref=f7e41] [cursor=pointer]
+          - button "Lịch sử hội phí" [ref=f7e47] [cursor=pointer]
+          - button "Lịch sử tham gia" [ref=f7e53] [cursor=pointer]
+          - button "Lịch sử tài trợ" [ref=f7e59] [cursor=pointer]
+          - button "Liên hệ" [ref=f7e65] [cursor=pointer]
+      - generic [ref=f7e70]:
+        - generic [ref=f7e71]:
+          - heading "Ban chấp hành hội" [level=2] [ref=f7e72]
+          - button "Tất cả" [ref=f7e73] [cursor=pointer]
+        - generic [ref=f7e76]: Dữ liệu mẫu
+        - generic [ref=f7e77]:
+          - article [ref=f7e78]:
+            - generic [ref=f7e79]: MA
+            - text: Chủ tịch Hội
+            - heading "Nguyễn Minh An" [level=3] [ref=f7e80]
+            - paragraph [ref=f7e81]: Công ty TNHH Minh An
+          - article [ref=f7e82]:
+            - generic [ref=f7e83]: NA
+            - text: Phó Chủ tịch Hội
+            - heading "Trần Ngọc Anh" [level=3] [ref=f7e84]
+            - paragraph [ref=f7e85]: Công ty CP Ngọc Anh
+          - article [ref=f7e86]:
+            - generic [ref=f7e87]: HN
+            - text: Ủy viên Ban chấp hành
+            - heading "Lê Hoàng Nam" [level=3] [ref=f7e88]
+            - paragraph [ref=f7e89]: Công ty TNHH Hoàng Nam
+      - paragraph [ref=f7e92]: Kết nối doanh nhân · Kiến tạo giá trị
+  - navigation "Điều hướng chính" [ref=f7e94]:
+    - button "Đăng kí" [ref=f7e95] [cursor=pointer]
+    - button "Hội viên" [ref=f7e101] [cursor=pointer]
+    - button "Trang chủ" [ref=f7e107] [cursor=pointer]
+    - button "Thông báo" [ref=f7e113] [cursor=pointer]
+    - button "Cá nhân" [ref=f7e118] [cursor=pointer]

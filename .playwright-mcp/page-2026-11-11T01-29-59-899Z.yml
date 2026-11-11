@@ -1,0 +1,45 @@
+- generic [ref=f1e5]:
+  - generic [ref=f1e6]:
+    - generic [ref=f1e7]:
+      - banner [ref=f1e8]:
+        - generic "Biểu trưng Hội Doanh nghiệp" [ref=f1e9]: TÂN SƠN HÒA
+        - generic [ref=f1e14]:
+          - paragraph [ref=f1e15]: KẾT NỐI · ĐỒNG HÀNH · PHÁT TRIỂN
+          - heading "Hội Doanh nghiệp Phường Tân Sơn Hòa" [level=1] [ref=f1e16]: Hội Doanh nghiệpPhường Tân Sơn Hòa
+          - paragraph [ref=f1e17]: Kính chào Quý Doanh nhân
+      - region "Hoạt động nổi bật" [ref=f1e18]:
+        - img "Hội Doanh nghiệp Tân Sơn Hòa chung tay hỗ trợ đồng bào miền Trung" [ref=f1e21]
+        - generic [ref=f1e26]:
+          - button "Xem banner 1" [pressed] [ref=f1e27] [cursor=pointer]
+          - button "Xem banner 2" [ref=f1e29] [cursor=pointer]
+          - button "Xem banner 3" [ref=f1e31] [cursor=pointer]
+    - main [ref=f1e33]:
+      - generic [ref=f1e34]:
+        - generic [ref=f1e35]:
+          - generic [ref=f1e36]: ZALO OFFICIAL ACCOUNT
+          - heading "OA Hội Doanh nghiệp Phường Tân Sơn Hòa" [level=2] [ref=f1e37]: OA Hội Doanh nghiệpPhường Tân Sơn Hòa
+          - paragraph [ref=f1e38]: Quan tâm OA để nhận thông báo mới nhất.
+        - button "Quan tâm" [ref=f1e39] [cursor=pointer]
+      - generic [ref=f1e42]:
+        - heading "Tiện ích" [level=2] [ref=f1e43]
+        - generic [ref=f1e44]:
+          - button "Giới thiệu" [ref=f1e45] [cursor=pointer]
+          - button "Lịch sử hội phí" [ref=f1e51] [cursor=pointer]
+          - button "Lịch sử tham gia" [ref=f1e57] [cursor=pointer]
+          - button "Lịch sử tài trợ" [ref=f1e63] [cursor=pointer]
+          - button "Liên hệ" [ref=f1e69] [cursor=pointer]
+      - generic [ref=f1e74]:
+        - generic [ref=f1e75]:
+          - heading "Ban chấp hành hội" [level=2] [ref=f1e76]
+          - button "Tất cả" [ref=f1e77] [cursor=pointer]
+        - generic [ref=f1e85]:
+          - text: ĐỒNG HÀNH CÙNG DOANH NGHIỆP
+          - heading "Kết nối những người dẫn dắt" [level=3] [ref=f1e86]
+          - paragraph [ref=f1e87]: Thông tin Ban chấp hành đang được cập nhật.
+      - paragraph [ref=f1e90]: Kết nối doanh nhân · Kiến tạo giá trị
+  - navigation "Điều hướng chính" [ref=f1e92]:
+    - button "Đăng kí" [ref=f1e93] [cursor=pointer]
+    - button "Hội viên" [ref=f1e99] [cursor=pointer]
+    - button "Trang chủ" [ref=f1e105] [cursor=pointer]
+    - button "Thông báo" [ref=f1e111] [cursor=pointer]
+    - button "Cá nhân" [ref=f1e116] [cursor=pointer]

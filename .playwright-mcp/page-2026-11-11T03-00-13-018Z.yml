@@ -1,0 +1,90 @@
+- generic [ref=f2e5]:
+  - generic [ref=f2e6]:
+    - generic [ref=f2e7]:
+      - banner [ref=f2e8]:
+        - img "Logo Hội Doanh nghiệp Phường Tân Sơn" [ref=f2e9]
+        - generic [ref=f2e10]:
+          - paragraph [ref=f2e11]: KẾT NỐI · ĐỒNG HÀNH · PHÁT TRIỂN
+          - heading "Hội Doanh nghiệp Phường Tân Sơn" [level=1] [ref=f2e12]: Hội Doanh nghiệpPhường Tân Sơn
+          - paragraph [ref=f2e13]: Kính chào Quý Doanh nhân
+      - region "Hoạt động nổi bật" [ref=f2e14]:
+        - img "Hoạt động chung tay hỗ trợ cộng đồng" [ref=f2e17]
+        - generic [ref=f2e22]:
+          - button "Xem banner 1" [pressed] [ref=f2e23] [cursor=pointer]
+          - button "Xem banner 2" [ref=f2e25] [cursor=pointer]
+          - button "Xem banner 3" [ref=f2e27] [cursor=pointer]
+    - main [ref=f2e29]:
+      - generic [ref=f2e30]:
+        - generic [ref=f2e31]:
+          - generic [ref=f2e32]: ZALO OFFICIAL ACCOUNT
+          - heading "OA Hội Doanh nghiệp Phường Tân Sơn" [level=2] [ref=f2e33]: OA Hội Doanh nghiệpPhường Tân Sơn
+          - paragraph [ref=f2e34]: Quan tâm OA để nhận thông báo mới nhất.
+        - button "Quan tâm" [ref=f2e35] [cursor=pointer]
+      - generic [ref=f2e38]:
+        - heading "Tiện ích" [level=2] [ref=f2e39]
+        - generic [ref=f2e40]:
+          - button "Giới thiệu" [ref=f2e41] [cursor=pointer]
+          - button "Lịch sử hội phí" [ref=f2e44] [cursor=pointer]
+          - button "Lịch sử tham gia" [ref=f2e47] [cursor=pointer]
+          - button "Lịch sử tài trợ" [ref=f2e50] [cursor=pointer]
+          - button "Liên hệ" [ref=f2e53] [cursor=pointer]
+          - button "Sự kiện" [ref=f2e56] [cursor=pointer]
+      - generic [ref=f2e59]:
+        - generic [ref=f2e60]:
+          - heading "Ban chấp hành hội" [level=2] [ref=f2e61]
+          - button "Tất cả" [ref=f2e62] [cursor=pointer]
+        - generic [ref=f2e65]: Dữ liệu mẫu
+        - generic [ref=f2e66]:
+          - article [ref=f2e67]:
+            - generic [ref=f2e68]: MA
+            - text: Chủ tịch Hội
+            - heading "Nguyễn Minh An" [level=3] [ref=f2e69]
+            - paragraph [ref=f2e70]: Công ty TNHH Minh An
+          - article [ref=f2e71]:
+            - generic [ref=f2e72]: NA
+            - text: Phó Chủ tịch Hội
+            - heading "Trần Ngọc Anh" [level=3] [ref=f2e73]
+            - paragraph [ref=f2e74]: Công ty CP Ngọc Anh
+          - article [ref=f2e75]:
+            - generic [ref=f2e76]: HN
+            - text: Ủy viên Ban chấp hành
+            - heading "Lê Hoàng Nam" [level=3] [ref=f2e77]
+            - paragraph [ref=f2e78]: Công ty TNHH Hoàng Nam
+      - region "Khám phá hoạt động" [ref=f2e79]:
+        - generic [ref=f2e80]:
+          - generic [ref=f2e81]: KẾT NỐI CÙNG HỘI
+          - heading "Khám phá hoạt động" [level=2] [ref=f2e82]
+        - navigation "Chọn nhanh danh mục" [ref=f2e83]:
+          - button "Tin tức" [pressed] [ref=f2e84] [cursor=pointer]
+          - button "Sự kiện" [ref=f2e89] [cursor=pointer]
+          - button "Thăm hội viên" [ref=f2e94] [cursor=pointer]
+        - region "Tin tức" [ref=f2e98]:
+          - generic [ref=f2e99]:
+            - heading "Tin tức" [level=2] [ref=f2e100]
+            - button "Tất cả tin tức" [ref=f2e101] [cursor=pointer]: Tất cả
+          - generic [ref=f2e104]:
+            - button "Cộng đồng Doanh nghiệp Tân Sơn chung tay vì cộng đồng 08-11-2026 · 3 ngày trước Lan tỏa tinh thần sẻ chia và trách nhiệm xã hội trong cộng đồng doanh nghiệp." [ref=f2e105] [cursor=pointer]:
+              - generic [ref=f2e106]:
+                - generic [ref=f2e107]: Cộng đồng
+                - heading "Doanh nghiệp Tân Sơn chung tay vì cộng đồng" [level=3] [ref=f2e108]
+                - time [ref=f2e113]: 08-11-2026 · 3 ngày trước
+                - paragraph [ref=f2e114]: Lan tỏa tinh thần sẻ chia và trách nhiệm xã hội trong cộng đồng doanh nghiệp.
+            - button "Hoạt động hội Kết nối doanh nhân, mở rộng cơ hội hợp tác 03-11-2026 · 8 ngày trước Chia sẻ kinh nghiệm, giới thiệu sản phẩm và tìm kiếm đối tác trong cộng đồng hội viên." [ref=f2e117] [cursor=pointer]:
+              - generic [ref=f2e118]:
+                - generic [ref=f2e119]: Hoạt động hội
+                - heading "Kết nối doanh nhân, mở rộng cơ hội hợp tác" [level=3] [ref=f2e120]
+                - time [ref=f2e125]: 03-11-2026 · 8 ngày trước
+                - paragraph [ref=f2e126]: Chia sẻ kinh nghiệm, giới thiệu sản phẩm và tìm kiếm đối tác trong cộng đồng hội viên.
+            - button "Hội viên Cập nhật thông tin danh bạ hội viên năm 2026 28-10-2026 · 14 ngày trước Hoàn thiện thông tin doanh nghiệp để tăng cường kết nối hội viên." [ref=f2e129] [cursor=pointer]:
+              - generic [ref=f2e130]:
+                - generic [ref=f2e131]: Hội viên
+                - heading "Cập nhật thông tin danh bạ hội viên năm 2026" [level=3] [ref=f2e132]
+                - time [ref=f2e137]: 28-10-2026 · 14 ngày trước
+                - paragraph [ref=f2e138]: Hoàn thiện thông tin doanh nghiệp để tăng cường kết nối hội viên.
+      - paragraph [ref=f2e143]: Kết nối doanh nhân · Kiến tạo giá trị
+  - navigation "Điều hướng chính" [ref=f2e145]:
+    - button "Đăng kí" [ref=f2e146] [cursor=pointer]
+    - button "Hội viên" [ref=f2e152] [cursor=pointer]
+    - button "Trang chủ" [ref=f2e158] [cursor=pointer]
+    - button "Thông báo" [ref=f2e164] [cursor=pointer]
+    - button "Cá nhân" [ref=f2e169] [cursor=pointer]
