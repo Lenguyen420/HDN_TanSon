@@ -9,6 +9,11 @@ export default () => {
     root: ".",
     base: "",
     plugins: [zaloMiniApp(), react()],
+    css: {
+      preprocessorOptions: {
+        scss: { api: "modern" },
+      },
+    },
     server: {
       proxy: {
         "/api": { target: "http://localhost:4000", changeOrigin: true },
