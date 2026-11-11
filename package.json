@@ -15,6 +15,7 @@
     "Samsung >= 5"
   ],
   "scripts": {
+    "test": "node --test test/*.test.cjs",
     "login": "zmp login",
     "start": "zmp start",
     "build": "vite build . --outDir www --emptyOutDir",

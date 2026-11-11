@@ -1,0 +1,93 @@
+const { test } = require("node:test");
+const assert = require("node:assert/strict");
+const { buildSync } = require("esbuild");
+
+global.window = global;
+global.localStorage = { getItem: () => null };
+
+async function loadServices(mock = false) {
+  const { outputFiles } = buildSync({
+    stdin: { contents: 'export * from "./src/services/api"; export * from "./src/services/association"; export * from "./src/services/registration";', resolveDir: process.cwd() },
+    bundle: true, write: false, platform: "node", format: "esm",
+    loader: { ".jpg": "dataurl", ".png": "dataurl", ".jpeg": "dataurl", ".svg": "dataurl" },
+    define: { "import.meta.env": JSON.stringify({ VITE_API_BASE_URL: "http://localhost:4000/api/v1/", VITE_USE_MOCK_DATA: String(mock) }) },
+  });
+  return import(`data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`);
+}
+
+test("public API integration", async (t) => {
+  const originalFetch = global.fetch;
+  t.after(() => { global.fetch = originalFetch; });
+  const services = await loadServices();
+  const reply = (data, status = 200) => new Response(JSON.stringify(data), { status });
+
+  await t.test("resolves upload paths against backend host", () => {
+    assert.equal(services.resolveApiImage("uploads/news/photo.jpg"), "http://localhost:4000/uploads/news/photo.jpg");
+    assert.equal(services.resolveApiImage("/uploads/news/photo.jpg"), "http://localhost:4000/uploads/news/photo.jpg");
+    assert.equal(services.resolveApiImage("https://cdn.example.com/photo.jpg"), "https://cdn.example.com/photo.jpg");
+    assert.equal(services.resolveApiImage(""), null);
+  });
+
+  await t.test("loads every page", async () => {
+    const urls = [];
+    global.fetch = async (url) => {
+      urls.push(url);
+      return reply({ data: [{ id: String(urls.length) }], pagination: { total: 2 } });
+    };
+    assert.equal((await services.getAllPublicItems("news")).length, 2);
+    assert.match(urls[1], /page=2&limit=100$/);
+  });
+
+  await t.test("maps settings and published content without sample personal records", async () => {
+    global.fetch = async (url) => {
+      if (url.endsWith("settings")) return reply({ data: {
+        introduction: "Giới thiệu", mission: "Sứ mệnh", department: "Ban thư ký", address: "Tân Sơn", hours: "08:00", phone: "0901234567", email: "", zaloUrl: "",
+        assistantGreeting: "Xin chào", assistantQuestions: "Câu hỏi | Trả lời | chi tiết\n",
+      } });
+      const data = url.includes("/news?") ? [{ id: "news-real", image: "uploads/news/photo.jpg" }]
+        : url.includes("/notifications?") ? [{ id: "notice-real" }] : [];
+      return reply({ data, pagination: { total: data.length } });
+    };
+    const data = await services.getAppData();
+    assert.equal(data.isDemo, false);
+    assert.deepEqual(data.members, []);
+    assert.deepEqual(data.utilityPages.fees, []);
+    assert.deepEqual(data.registration.companies, []);
+    assert.equal(data.notifications[0].unread, true);
+    assert.equal(data.content.news.articles[0].image, "http://localhost:4000/uploads/news/photo.jpg");
+    assert.deepEqual(data.utilityPages.assistant.questions, [{ question: "Câu hỏi", answer: "Trả lời | chi tiết" }]);
+    assert.equal(data.utilityPages.contact.hotlines[0].number, "0901234567");
+  });
+
+  await t.test("submits only fields accepted by public registration DTO", async () => {
+    const draft = { ...services.readRegistrationDraft([]), fullName: " Nguyễn Văn A ", phone: "0901234567", birthDate: "1990-01-01", companyName: " Công ty A ", position: " Giám đốc ", taxCode: "123", companyAddress: "Tân Sơn" };
+    global.fetch = async (url, options) => {
+      assert.equal(url, "http://localhost:4000/api/v1/public/registrations");
+      assert.equal(options.method, "POST");
+      assert.deepEqual(JSON.parse(options.body), { fullName: "Nguyễn Văn A", phone: "0901234567", birthDate: "1990-01-01", email: "", company: "Công ty A", jobTitle: "Giám đốc", taxCode: "123", companyAddress: "Tân Sơn" });
+      return reply({ data: { id: "receipt-1", status: "pending" }, message: "Đã tiếp nhận" }, 201);
+    };
+    assert.equal((await services.submitRegistration(draft, [])).data.id, "receipt-1");
+  });
+
+  await t.test("surfaces validation, network and invalid response errors", async () => {
+    global.fetch = async () => reply({ message: ["phone: Sai định dạng", "company: Bắt buộc"] }, 400);
+    await assert.rejects(services.apiRequest("public/registrations"), (error) => error.status === 400 && error.message.includes("phone:"));
+    global.fetch = async () => { throw new TypeError("offline"); };
+    await assert.rejects(services.apiRequest("public/news"), (error) => error.status === 0);
+    global.fetch = async () => new Response("invalid json");
+    await assert.rejects(services.apiRequest("public/news"), /không hợp lệ/);
+  });
+
+  await t.test("never silently replaces API failure with mock data", async () => {
+    global.fetch = async () => reply({ message: "Máy chủ lỗi" }, 500);
+    await assert.rejects(services.getAppData(), /Máy chủ lỗi/);
+  });
+
+  await t.test("mock mode does not fetch or submit", async () => {
+    const mockServices = await loadServices(true);
+    global.fetch = async () => { throw new Error("Unexpected network call"); };
+    assert.equal((await mockServices.getAppData()).isDemo, true);
+    await assert.rejects(mockServices.submitRegistration({}, []), /dữ liệu mẫu/);
+  });
+});
