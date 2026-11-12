@@ -1,7 +1,8 @@
 import { apiRequest, useMockData, resolveApiImage } from "./api";
-import type { ContentArticle } from "@/datas/types";
+import type { ContentArticle, Notification } from "@/datas/types";
 
 export interface AttendanceReceipt { eventId: string; name: string; company: string; checkedAt: string; }
+export interface EventParticipation { eventId: string; name: string; company: string; registeredAt: string | null; checkedAt: string | null; status: "registered" | "attended" | "absent"; }
 const storageKey = "tanson-event-attendance-tokens";
 let tokens: Record<string, string> = Object.create(null);
 function readTokens() {
@@ -12,6 +13,40 @@ function readTokens() {
         if (typeof token === "string" && /^[a-f0-9]{64}$/.test(token)) tokens[id] = token;
   } catch { /* Keep receipts available in memory for this session. */ }
   return tokens;
+}
+function prepareToken(eventId: string) {
+  const existing = readTokens()[eventId];
+  const token = existing || Array.from(crypto.getRandomValues(new Uint8Array(32)), (value) => value.toString(16).padStart(2, "0")).join("");
+  tokens[eventId] = token;
+  let persisted = true;
+  try { localStorage.setItem(storageKey, JSON.stringify(tokens)); } catch { persisted = false; }
+  return { token, persisted };
+}
+export function announceEventUpdated() { if (typeof window.dispatchEvent === "function") window.dispatchEvent(new Event("tanson-event-updated")); }
+export function eventJoinWindow(article: ContentArticle) {
+  const match = article.event?.time?.trim().match(/^(\d{1,2})[:h](\d{2})\s*[-–—]\s*(\d{1,2})[:h](\d{2})$/);
+  if (!article.event?.date || !match) return null;
+  const start = new Date(`${article.event.date}T${match[1].padStart(2, "0")}:${match[2]}:00+07:00`);
+  const end = new Date(`${article.event.date}T${match[3].padStart(2, "0")}:${match[4]}:00+07:00`);
+  return Number.isFinite(start.getTime()) && end > start ? { start, end } : null;
+}
+export async function joinEvent(eventId: string, name: string, company: string) {
+  if (useMockData) throw new Error("Đăng ký chỉ khả dụng với sự kiện chính thức.");
+  const { token, persisted } = prepareToken(eventId);
+  const result = await apiRequest<{ data: EventParticipation }>(`public/events/${encodeURIComponent(eventId)}/join`, { method: "POST", body: JSON.stringify({ token, name: name.trim(), company: company.trim() }) });
+  announceEventUpdated();
+  return { participation: result.data, persisted };
+}
+export async function getEventUpdates(): Promise<{ data: Notification[]; participations: EventParticipation[] }> {
+  const owned = Object.entries(readTokens()).map(([eventId, token]) => ({ eventId, token }));
+  if (!owned.length || useMockData) return { data: [], participations: [] };
+  const combined: {data: Notification[]; participations: EventParticipation[]} = {data: [], participations: []};
+  for (let offset = 0; offset < owned.length; offset += 100) {
+    const result = await apiRequest<{ data: Notification[]; participations: EventParticipation[] }>("public/event-updates", { method: "POST", body: JSON.stringify({ tokens: owned.slice(offset, offset + 100) }) });
+    if (!Array.isArray(result.data) || !Array.isArray(result.participations)) throw new Error("Không đọc được thông báo sự kiện.");
+    combined.data.push(...result.data); combined.participations.push(...result.participations);
+  }
+  return combined;
 }
 export function eventToday(now = new Date()) {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Ho_Chi_Minh", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
@@ -49,12 +84,9 @@ export async function getEventAttendance(eventId: string): Promise<AttendanceRec
 }
 export async function checkInEvent(eventId: string, name: string, company: string) {
   if (useMockData) throw new Error("Điểm danh chỉ khả dụng với sự kiện chính thức.");
-  const existing = readTokens()[eventId];
-  const token = existing || Array.from(crypto.getRandomValues(new Uint8Array(32)), (value) => value.toString(16).padStart(2, "0")).join("");
-  tokens[eventId] = token;
-  let persisted = true;
-  try { localStorage.setItem(storageKey, JSON.stringify(tokens)); } catch { persisted = false; }
+  const { token, persisted } = prepareToken(eventId);
   const result = await apiRequest<{ data: AttendanceReceipt }>(`public/events/${encodeURIComponent(eventId)}/check-in`, { method: "POST", body: JSON.stringify({ token, name: name.trim(), company: company.trim() }) });
+  if (typeof window.dispatchEvent === "function") announceEventUpdated();
   return { receipt: result.data, persisted };
 }
 export async function openEventFile(url: string) {

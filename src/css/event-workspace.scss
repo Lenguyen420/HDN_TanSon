@@ -66,3 +66,13 @@
 .event-attendance-success h2 { font-size: 21px; }
 .event-attendance-success p { font-size: 13px; line-height: 1.7; }
 @media (max-width: 350px) { .event-workspace .event-workspace-body { padding: 16px 12px; } .event-hub-welcome { padding: 18px 12px; gap: 10px; } .event-hub-welcome h2 { font-size: 16px; } .event-shortcuts { gap: 4px; } .event-shortcuts strong { font-size: 10px; } }
+
+.event-participation-card { margin: 22px 0; padding: 20px; border: 1px solid #c9e3f7; border-radius: 18px; background: linear-gradient(135deg,#edf8ff,#f6faff); }
+.event-participation-card h2 { display:flex; align-items:center; gap:8px; margin:0 0 10px; font-size:18px; color:#136e98; }
+.event-participation-card h2 svg { width:20px; }
+.event-participation-card p { margin:8px 0; font-size:13px; line-height:1.65; color:#5c778e; }
+.event-participation-card form { display:grid; gap:13px; }
+.event-participation-card label { display:grid; gap:7px; font-size:13px; font-weight:600; }
+.event-participation-card input { width:100%; padding:12px; border:1px solid #d3e3ef; border-radius:10px; background:white; font-size:14px; }
+.event-participation-card small { font-size:11px; line-height:1.65; color:#738699; }
+.event-participation-card button:disabled { opacity:.65; }

@@ -1,6 +1,7 @@
 import type { AppData, ContentArticle, ContentCategory, Notification, ProfileEdits } from "@/datas/types";
 import type { EventSection, EventResourceSection } from "@/datas/event-workspace";
 import type { AttendanceReceipt } from "@/services/event-workspace";
+import type { EventParticipation } from "@/services/event-workspace";
 export interface EventWorkspacePageProps {
   data: AppData;
   onBack: () => void;
@@ -8,6 +9,7 @@ export interface EventWorkspacePageProps {
   attendance: Record<string, AttendanceReceipt>;
   attendanceLoading: boolean;
   attendanceError: string;
+  participations?: EventParticipation[];
 }
 export interface EventResourcePageProps extends EventWorkspacePageProps {
   article: ContentArticle;
@@ -37,6 +39,9 @@ export interface UtilityPageProps {
   onOpenEventSection?: (section: EventSection) => void;
 }
 export interface ArticlePageProps {
+  participation?: EventParticipation;
+  participationLoading?: boolean;
+  onJoinEvent?: (eventId: string, name: string, company: string) => Promise<{ persisted: boolean }>;
   data: AppData;
   article: ContentArticle;
   onBack: () => void;

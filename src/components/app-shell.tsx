@@ -1,3 +1,4 @@
+import useEventUpdates from "@/components/shared/use-event-updates";
 import EventCalendarPage from "@/pages/event-calendar/event-calendar";
 import EventAttendancePage from "@/pages/event-attendance/event-attendance";
 import EventDocumentsPage from "@/pages/event-documents/event-documents";
@@ -7,7 +8,7 @@ import EventDocumentListPage from "@/pages/event-document-list/event-document-li
 import EventMinuteListPage from "@/pages/event-minute-list/event-minute-list";
 import type { EventSection, EventResourceSection } from "@/datas/event-workspace";
 import type { EventWorkspacePageProps, EventResourcePageProps } from "@/components/shared/page-props";
-import { getEventAttendance, checkInEvent, openEventFile, type AttendanceReceipt } from "@/services/event-workspace";
+import { getEventAttendance, checkInEvent, joinEvent, openEventFile, type AttendanceReceipt } from "@/services/event-workspace";
 import { openTanSonMiniApp } from "@/services/mini-app";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, ComponentType } from "react";
 import { Page } from "zmp-ui";
@@ -73,6 +74,7 @@ const eventResourcePages: Record<EventResourceSection, ComponentType<EventResour
   attendance: EventCheckInPage, documents: EventDocumentListPage, minutes: EventMinuteListPage,
 };
 export default function AppShell() {
+  const {notifications: eventNotices, participations: eventParticipations, setParticipations: setEventParticipations, loading: eventUpdatesLoading, error: eventUpdatesError} = useEventUpdates();
   const { notifications: registrationNotices, profiles: registrationProfiles, setProfiles: setRegistrationProfiles, error: registrationNoticeError } = useRegistrationNotifications();
   const [sourceData, setData] = useState<AppData | null>(null);
   const [profileEdits, setProfileEdits] = useState(readProfileEdits);
@@ -272,9 +274,15 @@ export default function AppShell() {
     if (section === "calendar") openArticle("events", articleId);
     else openScreen({ kind: "event-resource", section, articleId });
   };
+  const submitJoin = async (eventId: string, name: string, company: string) => {
+    const { participation, persisted } = await joinEvent(eventId, name, company);
+    setEventParticipations(current => [...current.filter(item => item.eventId !== eventId), participation]);
+    return { persisted };
+  };
   const submitCheckIn = async (eventId: string, name: string, company: string) => {
     const { receipt, persisted } = await checkInEvent(eventId, name, company);
     setAttendance(current => ({ ...current, [eventId]: receipt }));
+    setEventParticipations(current => current.map(item => item.eventId === eventId ? { ...item, checkedAt: receipt.checkedAt, status: "attended" } : item));
     if (!persisted) setAttendanceError("Đã điểm danh trên hệ thống nhưng thiết bị không lưu được mã theo dõi. Hãy giữ màn hình xác nhận.");
     return { persisted };
   };
@@ -311,10 +319,10 @@ export default function AppShell() {
   };
   const markAllNotificationsRead = () => {
     const updates: NotificationReadState = {};
-    for (const notice of [...registrationNotices, ...(data?.notifications || [])]) updates[notice.id] = true;
+    for (const notice of [...eventNotices, ...registrationNotices, ...(data?.notifications || [])]) updates[notice.id] = true;
     updateReadState(updates);
   };
-  const notifications = [...registrationNotices, ...(data?.notifications || [])].map((notice) => ({
+  const notifications = [...eventNotices, ...registrationNotices, ...(data?.notifications || [])].map((notice) => ({
     ...notice,
     unread: notificationReadState[notice.id] === undefined ? notice.unread : !notificationReadState[notice.id],
   }));
@@ -326,7 +334,7 @@ export default function AppShell() {
       onOpenEventSection: (section: EventSection) => openScreen({ kind: "event-workspace", section }),
       onOpenEventResource: (articleId: string, section: EventResourceSection) => openEvent(articleId, section),
     };
-    const workspaceProps = { data, onBack: goBack, onOpenEvent: openEvent, attendance, attendanceLoading, attendanceError };
+    const workspaceProps = { data, onBack: goBack, onOpenEvent: openEvent, attendance, attendanceLoading, attendanceError, participations: eventParticipations };
     if (screen?.kind === "event-workspace") {
       const WorkspacePage = eventWorkspacePages[screen.section];
       return <WorkspacePage key={screen.section} {...workspaceProps} />;
@@ -356,7 +364,7 @@ export default function AppShell() {
       const article = data.content[screen.category].articles.find((item) => item.id === screen.articleId);
       if (!article) return <section className="surface-card empty-state"><h1>Bài viết đang được cập nhật</h1><button type="button" className="primary-button" onClick={goBack}>Quay lại</button></section>;
       const DetailPage = detailPages[screen.category];
-      return <DetailPage key={article.id} article={article} {...common} />;
+      return <DetailPage key={article.id} article={article} {...common} participation={eventParticipations.find(item => item.eventId === article.id)} participationLoading={eventUpdatesLoading} onJoinEvent={submitJoin} />;
     }
     switch (activeTab) {
       case "register": return <RegisterPage data={data} onBack={() => navigate("home")} />;
@@ -371,6 +379,7 @@ export default function AppShell() {
       <div className="app-shell" ref={content}>
         {miniAppError && <div className="data-status" role="alert"><p>{miniAppError}</p></div>}
         {miniAppOpening && <div className="data-status" role="status"><p>Đang mở Mini App UBND phường Tân Sơn…</p></div>}
+        {eventUpdatesError && <div className="data-status" role="status"><p>{eventUpdatesError}</p></div>}
         {registrationNoticeError && <div className="data-status" role="status"><p>{registrationNoticeError}</p></div>}
         {authPending && <div className="data-status" role="status"><p>Đang lưu tên và ảnh Zalo…</p></div>}
         {authError && <div className="data-status" role="alert"><p>{authError} Chọn lại Cá nhân hoặc Đăng kí để thử lại.</p></div>}

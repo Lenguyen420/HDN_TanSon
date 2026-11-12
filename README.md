@@ -148,3 +148,9 @@ Backend cần bản cập nhật event workspace trước khi deploy Mini App. D
 
 
 Tài liệu/biên bản tải từ máy trên Admin được lưu MongoDB GridFS. Mapper content.ts chuyển đường dẫn /api/v1/public/event-files/:id thành URL backend; Mini App mở bằng trình xem hiện tại. Documents/minutes không bắt buộc và có thể được quản trị viên bổ sung sau. URL HTTPS của file cũ vẫn mở bình thường. Cần triển khai backend trước bản frontend có tính năng chọn file.
+
+## Tham gia và nhắc lịch sự kiện
+
+Người dùng chọn Tham gia tại chi tiết sự kiện, nhập tên/đơn vị. Đăng ký và điểm danh dùng chung mã theo dõi trên thiết bị. Backend trả nhắc lịch trong mục Thông báo từ 30 phút trước giờ bắt đầu; đăng ký trong 30 phút cuối nhận nhắc ngay. Sau giờ kết thúc, đăng ký chưa điểm danh được đánh dấu Vắng mặt và xuất hiện trong thông báo admin. Lịch sự kiện phải có đủ giờ bắt đầu/kết thúc dạng HH:mm - HH:mm.
+
+Thông báo chỉ nằm trong ứng dụng, cập nhật khi đang mở hoặc khi mở lại; không gửi tin Zalo bên ngoài ứng dụng. Thời điểm được tính từ lịch hiện tại trên server, nên đổi lịch sẽ cập nhật lại nhắc lịch/trạng thái. Không cần cron cho hình thức thông báo trong ứng dụng này. Deploy backend, dashboard quản trị rồi Mini App để áp dụng.
