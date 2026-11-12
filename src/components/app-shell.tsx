@@ -79,7 +79,8 @@ export default function AppShell() {
     return () => window.clearTimeout(timer);
   }, [authExpiresAt]);
   const authenticate = async () => {
-    if (authentication.current) return;
+    if (zaloIdentity && authExpiresAt > Date.now()) return true;
+    if (authentication.current) return false;
     authentication.current = true;
     setAuthPending(true);
     setAuthError("");
@@ -88,9 +89,11 @@ export default function AppShell() {
       const { identity } = await authenticateZaloMember();
       setZaloIdentity(identity);
       setAuthExpiresAt(Date.now() + 15 * 60 * 1000);
-      setAuthMessage(identity.phoneNotice || "Đã xác nhận và lưu thông tin Zalo với Hội.");
+      setAuthMessage(identity.phoneNotice || "");
+      return true;
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : "Chưa thể xác nhận thông tin Zalo. Vui lòng thử lại.");
+      return false;
     } finally {
       authentication.current = false;
       setAuthPending(false);
@@ -137,7 +140,15 @@ export default function AppShell() {
     scroller()?.scrollTo(0, pendingScroll.current);
   }, [screens, activeTab]);
 
-  const navigate = (tab: NavigationTab) => {
+  const navigationAttempt = useRef(0);
+  const navigate = async (tab: NavigationTab) => {
+    const needsIdentity = (tab === "profile" || tab === "register") && !sourceData?.isDemo;
+    if (needsIdentity && authentication.current) return;
+    const attempt = ++navigationAttempt.current;
+    if (needsIdentity && !await authenticate()) return;
+    if (attempt !== navigationAttempt.current) return;
+    setAuthError("");
+    if (!needsIdentity) setAuthMessage("");
     setContactOpen(false);
     pendingScroll.current = 0;
     scrollHistory.current = [];
@@ -218,13 +229,16 @@ export default function AppShell() {
       case "register": return <RegisterPage data={data} onBack={() => navigate("home")} />;
       case "members": return <MembersPage data={data} onBack={() => navigate("home")} />;
       case "notifications": return <NotificationsPage data={{ ...data, notifications }} onBack={() => navigate("home")} onOpenNotification={openNotification} onMarkAllRead={markAllNotificationsRead} storageMessage={notificationStorageMessage} />;
-      case "profile": return <ProfilePage onAuthenticate={authenticate} authPending={authPending} authError={authError} authMessage={authMessage} data={data} onBack={() => navigate("home")} onEdit={() => { setProfileSaveMessage(""); openScreen({ kind: "profile-edit" }); }} saveMessage={profileSaveMessage} />;
+      case "profile": return <ProfilePage data={data} onBack={() => navigate("home")} onEdit={() => { setProfileSaveMessage(""); openScreen({ kind: "profile-edit" }); }} saveMessage={profileSaveMessage} />;
       case "home": return <HomePage data={data} onNavigate={navigate} onOpenContent={openContent} onOpenUtility={(id) => openScreen({ kind: "utility", id })} onOpenArticle={openArticle} contentCategory={homeCategory} onChangeCategory={setHomeCategory} />;
     }
   };
   return (
     <Page className="association-page">
       <div className="app-shell" ref={content}>
+        {authPending && <div className="data-status" role="status"><p>Đang xác thực và lưu thông tin Zalo…</p></div>}
+        {authError && <div className="data-status" role="alert"><p>{authError} Chọn lại Cá nhân hoặc Đăng kí để thử lại.</p></div>}
+        {authMessage && !authPending && <div className="data-status" role="status"><p>{authMessage}</p></div>}
         {data && (loading || error) && <div className="data-status" role="status"><p>{error || "Đang cập nhật dữ liệu…"}</p>{error && <button type="button" className="primary-button" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Thử lại</button>}</div>}
         {!data ? <div className="data-status" role="status"><p>{error || "Đang tải dữ liệu…"}</p>{error && <button type="button" className="primary-button" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Thử lại</button>}</div> : renderPage()}
       </div>

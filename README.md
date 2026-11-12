@@ -106,7 +106,7 @@ Bản build đo được: JS chính giảm từ khoảng 2.150 KB (gzip 1.470 KB
 
 ## Xác nhận thông tin Zalo
 
-Mở tab Cá nhân và bấm Xác nhận thông tin Zalo. Ứng dụng gọi getSetting rồi authorize cho các quyền còn thiếu: scope.userInfo và scope.userPhonenumber. Hộp thoại cấp quyền do Zalo hiển thị với tên/logo đã cấu hình cho Mini App. Quyền đã cấp được Zalo ghi nhớ; không tự hỏi lại mỗi lần mở trang.
+Chọn tab Cá nhân hoặc Đăng kí để gọi hộp thoại cấp quyền Zalo trực tiếp; không có nút hoặc màn hình xác nhận riêng. Chỉ mở tab sau khi backend xác minh và lưu thành công. Nếu từ chối hoặc lưu lỗi, giữ nguyên trang hiện tại; chọn lại tab để thử lại. Phiên đã xác minh còn hạn được dùng lại, không gọi thêm popup hoặc ghi trùng hồ sơ. Ứng dụng gọi getSetting rồi authorize cho các quyền còn thiếu: scope.userInfo và scope.userPhonenumber. Hộp thoại cấp quyền do Zalo hiển thị với tên/logo đã cấu hình cho Mini App. Quyền đã cấp được Zalo ghi nhớ; không tự hỏi lại mỗi lần mở trang.
 
 Sau khi cho phép tên/ảnh, SDK lấy access token và phone token nếu có quyền số điện thoại. Backend member/session xác minh token với Zalo, lưu hồ sơ vào zalo_users, chỉ trả số điện thoại sau khi xác minh qua ZALO_APP_SECRET. Từ chối số điện thoại vẫn lưu được tên/ảnh; từ chối thông tin tên/ảnh không gọi backend. Giao diện chỉ hiển thị xác nhận thành công sau khi backend lưu thành công. Thông tin phiên chỉ giữ trong bộ nhớ trong tối đa 15 phút.
 

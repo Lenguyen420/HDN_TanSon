@@ -3,15 +3,13 @@ import PageToolbar from "@/components/shared/page-toolbar";
 import ProfileDetails from "./profile-details";
 import MemberPhoto from "@/components/shared/member-photo";
 import AppIcon from "@/components/icons";
-import ZaloConsent from "@/components/shared/zalo-consent";
 
-export default function Profile({ data, onBack, onEdit, saveMessage, onAuthenticate, authPending, authError, authMessage }: ProfilePageProps) {
+export default function Profile({ data, onBack, onEdit, saveMessage }: ProfilePageProps) {
   const member = data.members.find((item) => item.id === data.profile.memberId);
   return (
     <main className="profile-page personal-workspace">
       <PageToolbar title="Cá nhân" subtitle={data.association.slogan} onBack={onBack} />
       <div className="personal-workspace-body">
-        {!data.isDemo && <ZaloConsent onConfirm={onAuthenticate} pending={authPending} confirmed={Boolean(data.zaloUser)} error={authError} message={authMessage} />}
         {saveMessage && <p className="profile-save-message" role="status">{saveMessage}</p>}
         {data.zaloUser && <section className="surface-card">
           <div className="personal-summary"><MemberPhoto member={{ id: data.zaloUser.id, name: data.zaloUser.name, avatar: data.zaloUser.avatar, initials: data.zaloUser.name.trim().split(/\s+/).slice(-2).map((part) => part[0]).join(""), company: "", position: "", isBoard: false }} /><div><h2>{data.zaloUser.name}</h2><p>Tài khoản Zalo</p></div></div>
