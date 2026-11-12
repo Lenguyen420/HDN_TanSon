@@ -75,6 +75,29 @@ test("public API integration", async (t) => {
     assert.equal(data.utilityPages.contact.hotlines[0].number, "0901234567");
   });
 
+  await t.test("scoped screens deduplicate requests and publish partial data before slow content", async () => {
+    let release;
+    let progress;
+    const gate = new Promise((resolve) => { release = resolve; });
+    const firstProgress = new Promise((resolve) => { progress = resolve; });
+    const urls = [];
+    global.fetch = async (url) => {
+      urls.push(url);
+      if (url.endsWith("settings")) return reply({ data: { introduction: "Ready early", assistantQuestions: "" } });
+      await gate;
+      return reply({ data: [], pagination: { total: 0 } });
+    };
+    const first = services.getAppData({ resources: ["settings", "news"], force: true, onUpdate: (data) => { if (data.utilityPages.about.introduction === "Ready early") progress(); } });
+    const second = services.getAppData({ resources: ["settings", "news"] });
+    await firstProgress;
+    assert.equal(urls.length, 2);
+    assert.ok(urls.every((url) => url.includes("settings") || url.includes("news")));
+    release();
+    await Promise.all([first, second]);
+    await services.getAppData({ resources: ["settings", "news"] });
+    assert.equal(urls.length, 2);
+  });
+
   await t.test("submits only fields accepted by public registration DTO", async () => {
     const draft = { ...services.readRegistrationDraft([]), fullName: " Nguyễn Văn A ", phone: "0901234567", birthDate: "1990-01-01", companyName: " Công ty A ", position: " Giám đốc ", taxCode: "123", companyAddress: "Tân Sơn" };
     global.fetch = async (url, options) => {
@@ -97,7 +120,7 @@ test("public API integration", async (t) => {
 
   await t.test("never silently replaces API failure with mock data", async () => {
     global.fetch = async () => reply({ message: "Máy chủ lỗi" }, 500);
-    await assert.rejects(services.getAppData(), /Máy chủ lỗi/);
+    await assert.rejects(services.getAppData({ force: true }), /Máy chủ lỗi/);
   });
 
   await t.test("mock mode does not fetch or submit", async () => {

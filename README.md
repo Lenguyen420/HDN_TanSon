@@ -23,7 +23,7 @@ Mini App mở tất cả các màn hình mà không yêu cầu xác thực hoặ
 
 Đăng ký hội viên gửi trực tiếp tới POST `/public/registrations`. API quản trị và API hồ sơ cá nhân vẫn yêu cầu xác thực riêng. Trạng thái đọc thông báo được lưu trên thiết bị. Khi triển khai thay đổi này, deploy backend có `/public/members` trước frontend.
 
-Logo và 6 icon tiện ích nhúng trực tiếp từ `src/assets/` vào bundle qua plugin `fixed-brand-assets`; không lấy từ backend hoặc phụ thuộc đường dẫn ảnh của khung xem trước Zalo.
+Logo và 6 icon tiện ích giữ nguyên file gốc trong `src/assets/`, được Vite build thành ảnh có tên hash để tải/cache riêng. Không nhúng base64 vào JavaScript và không phụ thuộc backend ảnh.
 
 Đặt `VITE_USE_MOCK_DATA=true` để xem lại giao diện mẫu; gửi đăng ký bị chặn ở chế độ này. Mặc định ứng dụng gọi backend thật.
 
@@ -92,6 +92,13 @@ Cấu hình hiện tại thay thế hướng dẫn chạy backend local ở trê
 
 .env.production đặt VITE_API_BASE_URL=https://behdntanson.vercel.app/api/v1 và VITE_USE_MOCK_DATA=false; npm run build dùng cấu hình này. Nếu hosting đã có các biến cùng tên, cập nhật tương ứng rồi build/deploy lại.
 
-Khi chạy Zalo thật, cho phép domain behdntanson.vercel.app trong cấu hình mạng Mini App; backend cần thêm origin thực tế của mini app vào CORS_ORIGINS. Không đưa secret Zalo hoặc MongoDB vào biến VITE_*. Ảnh uploads/... chưa được hỗ trợ trên Vercel; dùng URL ảnh từ dịch vụ lưu trữ ngoài.
+Khi chạy Zalo thật, cho phép domain behdntanson.vercel.app trong cấu hình mạng Mini App; backend cần thêm origin thực tế của mini app vào CORS_ORIGINS. Không đưa secret Zalo hoặc MongoDB vào biến VITE_*. Backend lưu ảnh mới trong MongoDB GridFS và phục vụ qua /uploads/....
 
-Ba ảnh banner cũ đã được sao chép nguyên file từ uploads local vào `src/assets/banner/legacy/` và ánh xạ theo đường dẫn cũ trong `src/datas/legacy-banner-images.ts`. Frontend phục vụ bản sao này qua asset build; thứ tự, nội dung và trạng thái banner vẫn lấy từ API. Banner mới cần dùng URL ảnh công khai từ dịch vụ lưu trữ ngoài. Ánh xạ chỉ áp dụng cho ba đường dẫn cũ, không thay ảnh mới bằng dữ liệu mẫu.
+Ba ảnh banner cũ đã được sao chép nguyên file từ uploads local vào `src/assets/banner/legacy/` và ánh xạ theo đường dẫn cũ trong `src/datas/legacy-banner-images.ts`. Frontend phục vụ bản sao này qua asset build; thứ tự, nội dung và trạng thái banner vẫn lấy từ API. Banner mới dùng đường dẫn uploads/... của backend GridFS hoặc URL ảnh công khai. Ánh xạ chỉ áp dụng cho ba đường dẫn cũ, không thay ảnh mới bằng dữ liệu mẫu.
+
+
+## Tối ưu tốc độ tải
+
+AppShell chọn resources theo màn hình: trang chủ tải cấu hình, banner, danh bạ Ban chấp hành, thông báo và danh mục đang chọn; sự kiện/thăm hội viên được tải khi mở. getAppData hỗ trợ resources, force và onUpdate để hiển thị từng phần mà không chờ API chậm nhất. Cache public trong RAM 30 giây và chia sẻ request đang chạy, không lưu dữ liệu cache vào localStorage; nút Thử lại bỏ cache của màn hình. Chuyển màn hình kiểm tra lại TTL. Không áp dụng cache này cho API xác thực Zalo hoặc đăng ký.
+
+Bản build đo được: JS chính giảm từ khoảng 2.150 KB (gzip 1.470 KB) xuống 345 KB (gzip 109 KB). Ảnh không bị thay đổi; được tải riêng qua assets. Đây là số đo JS, không phải tổng dung lượng ảnh.

@@ -20,7 +20,7 @@ import EventDetailPage from "@/pages/event-detail/event-detail";
 import MemberVisitDetailPage from "@/pages/member-visit-detail/member-visit-detail";
 import NotificationDetailPage from "@/pages/notification-detail/notification-detail";
 import BottomNavigation from "@/components/bottom-navigation";
-import { getAppData } from "@/services/association";
+import { getAppData, type AppResource } from "@/services/association";
 import { readNotificationState, saveNotificationState } from "@/services/notifications";
 import type { NotificationReadState } from "@/services/notifications";
 import { applyProfileEdits, readProfileEdits, saveProfileEdits } from "@/services/profile";
@@ -53,6 +53,7 @@ export default function AppShell() {
   const data = useMemo(() => sourceData ? applyProfileEdits(sourceData, profileEdits) : null, [sourceData, profileEdits]);
   const [error, setError] = useState("");
   const [loadAttempt, setLoadAttempt] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<NavigationTab>("home");
   const [screens, setScreens] = useState<Screen[]>([]);
   const [homeCategory, setHomeCategory] = useState<ContentCategory>("news");
@@ -63,17 +64,33 @@ export default function AppShell() {
   const pendingScroll = useRef(0);
   const scroller = () => content.current?.closest(".zaui-page");
 
+  const screen = screens[screens.length - 1];
+  const resources: AppResource[] = ["settings"];
+  if (!screen && activeTab === "home") resources.push("banners", "notifications", "members", homeCategory === "member-visits" ? "visits" : homeCategory);
+  if (!screen && ["members", "register"].includes(activeTab)) resources.push("members");
+  if (!screen && activeTab === "notifications" || screen?.kind === "notification") resources.push("notifications");
+  if (screen?.kind === "list" || screen?.kind === "article") resources.push(screen.category === "member-visits" ? "visits" : screen.category);
+  if (screen?.kind === "utility" && screen.id === "event-assistant") resources.push("events");
+  const resourceKey = [...new Set(resources)].sort().join(",");
+  const previousAttempt = useRef(loadAttempt);
   useEffect(() => {
     let mounted = true;
     setError("");
-    getAppData().then((result) => { if (mounted) setData(result); })
-      .catch((error) => { if (mounted) setError(error instanceof Error ? error.message : "Không thể tải dữ liệu."); });
+    setLoading(true);
+    const force = previousAttempt.current !== loadAttempt;
+    previousAttempt.current = loadAttempt;
+    getAppData({
+      resources: resourceKey.split(",") as AppResource[], force,
+      onUpdate: (result) => { if (mounted) setData(result); },
+    }).then((result) => { if (mounted) setData(result); })
+      .catch((error) => { if (mounted) setError(error instanceof Error ? error.message : "Không thể tải dữ liệu."); })
+      .then(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
-  }, [loadAttempt]);
+  }, [loadAttempt, resourceKey]);
 
   useLayoutEffect(() => {
     scroller()?.scrollTo(0, pendingScroll.current);
-  }, [screens, activeTab, data]);
+  }, [screens, activeTab]);
 
   const navigate = (tab: NavigationTab) => {
     setContactOpen(false);
@@ -163,6 +180,7 @@ export default function AppShell() {
   return (
     <Page className="association-page">
       <div className="app-shell" ref={content}>
+        {data && (loading || error) && <div className="data-status" role="status"><p>{error || "Đang cập nhật dữ liệu…"}</p>{error && <button type="button" className="primary-button" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Thử lại</button>}</div>}
         {!data ? <div className="data-status" role="status"><p>{error || "Đang tải dữ liệu…"}</p>{error && <button type="button" className="primary-button" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Thử lại</button>}</div> : renderPage()}
       </div>
       <BottomNavigation activeTab={activeTab} onChange={navigate} unreadCount={notifications.filter((notice) => notice.unread).length} />
