@@ -24,6 +24,7 @@ test("protected tab navigation waits for consent and database save", async (t) =
         else if (path.endsWith("shared/use-event-updates")) contents = 'export default () => ({notifications: [], participations: [], setParticipations: () => {}, loading: false, error: ""});';
         else if (path === "zmp-ui") contents = 'export const Page = "page";';
         else if (path === "@/datas/features") contents = 'export const features = {get zaloAuthentication() {return globalThis.navigationHarness.authEnabled !== false;}};';
+        else if (path.endsWith("services/event-history")) contents = 'export const buildEventHistory = () => [];';
         else if (path.endsWith("services/mini-app")) contents = 'export const openTanSonMiniApp = async () => {};';
         else if (path.endsWith("services/event-workspace")) contents = 'export const getEventAttendance = async () => null; export const checkInEvent = async () => ({}); export const joinEvent = async () => ({}); export const openEventFile = async () => {};';
         else if (path.endsWith("services/member-access")) contents = 'export const saveZaloSdkProfile = () => globalThis.navigationHarness.authenticate();';
@@ -38,7 +39,7 @@ test("protected tab navigation waits for consent and database save", async (t) =
   });
   const {default: AppShell} = await import('data:text/javascript;base64,' + Buffer.from(outputFiles[0].text).toString('base64'));
   const saved = () => ({identity: {user: {id: "123", name: "Tên đã lưu"}, member: null}});
-  const reset = () => { global.navigationHarness = {index: 0, values: [], data: {isDemo: false, members: [], profile: {}, notifications: [], association: {}}, authenticate: async () => saved()}; };
+  const reset = () => { global.navigationHarness = {index: 0, values: [], data: {isDemo: false, members: [], profile: {}, notifications: [], association: {}, content: {events: {articles: []}}, utilityPages: {}}, authenticate: async () => saved()}; };
   const render = () => { global.navigationHarness.index = 0; return AppShell(); };
   function find(node, predicate) {
     if (!node || typeof node !== "object") return null;
