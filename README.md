@@ -97,3 +97,5 @@ Cấu hình hiện tại thay thế hướng dẫn chạy backend local ở trê
 .env.production đặt VITE_API_BASE_URL=https://behdntanson.vercel.app/api/v1 và VITE_USE_MOCK_DATA=false; npm run build dùng cấu hình này. Nếu hosting đã có các biến cùng tên, cập nhật tương ứng rồi build/deploy lại.
 
 Khi chạy Zalo thật, cho phép domain behdntanson.vercel.app trong cấu hình mạng Mini App; backend cần thêm origin thực tế của mini app vào CORS_ORIGINS. Không đưa secret Zalo hoặc MongoDB vào biến VITE_*. Ảnh uploads/... chưa được hỗ trợ trên Vercel; dùng URL ảnh từ dịch vụ lưu trữ ngoài.
+
+Ba ảnh banner cũ đã được sao chép nguyên file từ uploads local vào `src/assets/banner/legacy/` và ánh xạ theo đường dẫn cũ trong `src/datas/legacy-banner-images.ts`. Frontend phục vụ bản sao này qua asset build; thứ tự, nội dung và trạng thái banner vẫn lấy từ API. Banner mới cần dùng URL ảnh công khai từ dịch vụ lưu trữ ngoài. Ánh xạ chỉ áp dụng cho ba đường dẫn cũ, không thay ảnh mới bằng dữ liệu mẫu.

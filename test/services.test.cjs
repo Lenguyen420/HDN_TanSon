@@ -7,9 +7,9 @@ global.localStorage = { getItem: () => null };
 
 async function loadServices(mock = false) {
   const { outputFiles } = buildSync({
-    stdin: { contents: 'export * from "./src/services/api"; export * from "./src/services/association"; export * from "./src/services/registration";', resolveDir: process.cwd() },
+    stdin: { contents: 'export * from "./src/services/api"; export * from "./src/services/content"; export * from "./src/services/association"; export * from "./src/services/registration";', resolveDir: process.cwd() },
     bundle: true, write: false, platform: "node", format: "esm",
-    loader: { ".jpg": "dataurl", ".png": "dataurl", ".jpeg": "dataurl", ".svg": "dataurl" },
+    loader: { ".jpg": "dataurl", ".png": "dataurl", ".jpeg": "dataurl", ".svg": "dataurl", ".webp": "dataurl" },
     define: { "import.meta.env": JSON.stringify({ VITE_API_BASE_URL: "http://localhost:4000/api/v1/", VITE_USE_MOCK_DATA: String(mock) }) },
   });
   return import(`data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`);
@@ -26,6 +26,17 @@ test("public API integration", async (t) => {
     assert.equal(services.resolveApiImage("/uploads/news/photo.jpg"), "http://localhost:4000/uploads/news/photo.jpg");
     assert.equal(services.resolveApiImage("https://cdn.example.com/photo.jpg"), "https://cdn.example.com/photo.jpg");
     assert.equal(services.resolveApiImage(""), null);
+  });
+
+  await t.test("serves migrated banner files and preserves new remote image URLs", async () => {
+    global.fetch = async () => reply({ data: [
+      { id: "old", image: "uploads/banners/c45fd865-8891-4c6c-8d4b-79a6150cc44a.webp", alt: "Old banner" },
+      { id: "new", image: "https://cdn.example.com/new.webp", alt: "New banner" },
+    ], pagination: { total: 2 } });
+    const banners = await services.getBanners();
+    assert.match(banners[0].image, /^data:image\/webp;base64,/);
+    assert.equal(banners[0].alt, "Old banner");
+    assert.equal(banners[1].image, "https://cdn.example.com/new.webp");
   });
 
   await t.test("loads every page", async () => {

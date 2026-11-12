@@ -1,4 +1,5 @@
 import type { BannerItem, ContentArticle, ContentCategory, Notification } from "@/datas/types";
+import { legacyBannerImages } from "@/datas/legacy-banner-images";
 import { apiRequest, getAllPublicItems, resolveApiImage } from "./api";
 import type { ApiData } from "./api";
 
@@ -16,7 +17,10 @@ export async function getArticle(category: ContentCategory, id: string): Promise
 }
 
 export async function getBanners(): Promise<BannerItem[]> {
-  return (await getAllPublicItems<BannerItem>("banners")).map((banner) => ({ ...banner, image: resolveApiImage(banner.image) || "" }));
+  return (await getAllPublicItems<BannerItem>("banners")).map((banner) => ({
+    ...banner,
+    image: legacyBannerImages[banner.image?.replace(/^\/+/, "")] || resolveApiImage(banner.image) || "",
+  }));
 }
 
 export async function getNotifications(): Promise<Notification[]> {
