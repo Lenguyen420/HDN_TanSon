@@ -7,7 +7,7 @@ export interface RegistrationReceipt {
   message: string;
 }
 
-export async function submitRegistration(draft: RegistrationDraft, companies: RegistrationCompany[]): Promise<RegistrationReceipt> {
+export async function submitRegistration(draft: RegistrationDraft, companies: RegistrationCompany[], avatar?: string): Promise<RegistrationReceipt> {
   if (useMockData) throw new Error("Đang dùng dữ liệu mẫu. Hãy tắt chế độ mẫu để gửi hồ sơ đến Hội.");
   if (!isRegistrationValid(draft, companies, registrationToday())) throw new Error("Vui lòng kiểm tra thông tin đăng ký.");
   const company = draft.unknownCompany ? draft.companyName.trim() : companies.find((item) => item.id === draft.companyId)?.name;
@@ -16,6 +16,7 @@ export async function submitRegistration(draft: RegistrationDraft, companies: Re
     method: "POST",
     body: JSON.stringify({
       notificationToken: tracking.token,
+      ...(avatar ? {avatar} : {}),
       fullName: draft.fullName.trim(), phone: draft.phone.trim(), birthDate: draft.birthDate,
       email: draft.email.trim(), company, jobTitle: draft.position.trim(),
       taxCode: draft.unknownCompany ? draft.taxCode.trim() : "",

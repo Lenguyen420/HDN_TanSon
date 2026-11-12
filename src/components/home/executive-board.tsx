@@ -1,4 +1,5 @@
 import AppIcon from "../icons";
+import MemberPhoto from "@/components/shared/member-photo";
 import type { Member } from "@/datas/types";
 
 interface ExecutiveBoardProps {
@@ -19,7 +20,7 @@ export default function ExecutiveBoard({ members, isDemo, onViewAll, accessRequi
       <div className="board-list">
         {members.map((member) => (
           <article className="board-member" key={member.id}>
-            <div className="member-avatar">{member.initials}</div>
+            <div className="member-avatar"><MemberPhoto member={member} /></div>
             <span className="board-position">{member.position}</span>
             <h3>{member.name}</h3>
             <p>{member.company}</p>

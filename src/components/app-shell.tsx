@@ -32,7 +32,7 @@ import { saveZaloSdkProfile, type MemberIdentity } from "@/services/member-acces
 import useRegistrationNotifications from "@/components/shared/use-registration-notifications";
 
 import PoliciesPage from "@/pages/policies/policies";
-import { updateRegistrationProfile } from "@/services/registration-notifications";
+import { updateRegistrationProfile, syncRegistrationAvatar } from "@/services/registration-notifications";
 
 type Screen =
   | { kind: "utility"; id: UtilityId }
@@ -65,6 +65,7 @@ export default function AppShell() {
   const [authError, setAuthError] = useState("");
   const [authMessage, setAuthMessage] = useState("");
   const authentication = useRef(false);
+  const avatarSyncAttempt = useRef("");
   const data = useMemo(() => {
     if (!sourceData) return null;
     const application = (registrationProfiles || []).find((item) => item.status === "approved" && item.member) || registrationProfiles?.[0];
@@ -72,12 +73,22 @@ export default function AppShell() {
     const personalized = zaloIdentity || application ? {
       ...sourceData,
       zaloUser: zaloIdentity?.user,
+      registration: {...sourceData.registration, avatar: zaloIdentity?.user?.avatar},
       registrationProfile: application,
       members: member ? [...sourceData.members.filter((item) => item.id !== member.id), member] : sourceData.members,
       profile: member ? { memberId: member.id, memberCode: member.id, joinedAt: member.joinedAt || "", status: "Đang hoạt động" } : sourceData.profile,
     } : sourceData;
     return application ? personalized : applyProfileEdits(personalized, profileEdits);
   }, [sourceData, profileEdits, zaloIdentity, registrationProfiles]);
+  useEffect(() => {
+    const target = (registrationProfiles || []).find((item) => item.status === "approved" && item.member) || registrationProfiles?.[0];
+    const avatar = zaloIdentity?.user?.avatar;
+    if (!target || !avatar || (target.avatar && (!target.member || target.member.avatar))) return;
+    const key = target.id + ":" + avatar;
+    if (avatarSyncAttempt.current === key) return;
+    avatarSyncAttempt.current = key;
+    void syncRegistrationAvatar(target.id, avatar).then(setRegistrationProfiles).catch(() => setAuthMessage("Chưa đồng bộ được ảnh hội viên. Vui lòng mở lại ứng dụng để thử lại."));
+  }, [zaloIdentity, registrationProfiles, setRegistrationProfiles]);
   useEffect(() => {
     if (!authExpiresAt) return;
     const timer = window.setTimeout(() => {
@@ -99,6 +110,7 @@ export default function AppShell() {
       setZaloIdentity(identity);
       setAuthExpiresAt(Date.now() + 15 * 60 * 1000);
       setAuthMessage(identity.phoneNotice || "");
+
       return true;
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : "Chưa thể lưu thông tin Zalo. Vui lòng thử lại.");

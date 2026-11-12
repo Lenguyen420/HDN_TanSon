@@ -32,7 +32,7 @@ export interface Notification {
 }
 export interface MemberProfile { memberId: string; memberCode: string; joinedAt: string; status: string; }
 export interface RegistrationCompany { id: string; name: string; }
-export interface RegistrationData { companies: RegistrationCompany[]; }
+export interface RegistrationData { companies: RegistrationCompany[]; avatar?: string; }
 export interface RegistrationDraft {
   fullName: string;
   phone: string;
@@ -87,7 +87,7 @@ export interface UtilityPageData {
   assistant: { greeting: string; questions: { question: string; answer: string }[] };
 }
 export interface RegistrationProfile {
-  id: string; fullName: string; company: string; phone: string; email?: string; birthDate?: string;
+  id: string; avatar?: string; fullName: string; company: string; phone: string; email?: string; birthDate?: string;
   jobTitle?: string; companyAddress?: string; taxCode?: string; date: string;
   status: "pending" | "approved" | "rejected"; createdAt: string; reviewedAt?: string; rejectionReason?: string;
   member: (Member & { status: "active" | "inactive"; updatedAt?: string }) | null;

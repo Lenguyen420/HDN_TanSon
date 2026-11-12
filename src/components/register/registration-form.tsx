@@ -35,7 +35,7 @@ export default function RegistrationForm({ registration }: RegistrationFormProps
           if (key !== "unknownCompany") normalized[key] = normalized[key].trim();
         }
         try {
-          const receipt = await submitRegistration(normalized, registration.companies);
+          const receipt = await submitRegistration(normalized, registration.companies, registration.avatar);
           // Lỗi bộ nhớ thiết bị không làm mất kết quả gửi thành công từ máy chủ.
           try { clearRegistrationDraft(); } catch { /* Có thể tiếp tục khi bộ nhớ bị chặn. */ }
           setHasError(false);

@@ -134,3 +134,6 @@ Các trường hệ thống chỉ đọc từ backend; không dùng sửa hồ s
 Trang Cá nhân hiện thay khối Thông tin hệ thống bằng Liên hệ hỗ trợ, Về chúng tôi, Điều khoản & chính sách. Liên hệ và giới thiệu dùng dữ liệu đã có từ cấu hình Hội; trang điều khoản mở được nhưng để trống theo yêu cầu. Chỉnh sửa thông tin cho phép thay tên, ngày sinh, số điện thoại, email, doanh nghiệp, chức vụ, địa chỉ và mã số thuế. Hồ sơ có mã theo dõi lưu trực tiếp lên MongoDB; với hồ sơ đã duyệt, backend cập nhật hồ sơ đăng ký và hội viên cùng transaction. Từ chối lưu thì giữ biểu mẫu và hiện lỗi; không báo lưu thành công trước khi API hoàn tất.
 
 Không chỉnh sửa mã hội viên, ngày gia nhập, trạng thái xét duyệt hoặc vai trò. Quyền sửa bằng mã theo dõi đã lưu trên thiết bị, không dùng ID Zalo tự khai báo. Deploy lại backend và Mini App trước khi dùng API mới.
+
+
+Ảnh Ban chấp hành và Hội viên dùng chung MemberPhoto, hỗ trợ URL ảnh tuyệt đối và uploads/... từ backend. SDK avatar được gửi cùng đăng ký mới và chép sang hội viên khi admin duyệt. Hồ sơ cũ thiếu ảnh có thể được đồng bộ khi chủ hồ sơ mở Cá nhân/Đăng kí với mã theo dõi đúng; không ghép theo tên hoặc dữ liệu Zalo chưa xác minh. Đồng bộ chỉ điền ảnh còn trống, không ghi đè ảnh đã có. Nếu hồ sơ cũ không có mã theo dõi, admin cần bổ sung URL ảnh đại diện.

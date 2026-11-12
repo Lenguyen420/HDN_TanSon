@@ -37,3 +37,9 @@ export async function updateRegistrationProfile(id: string, edits: import("@/dat
   announceRegistrationSubmitted();
   return result.profiles;
 }
+
+export async function syncRegistrationAvatar(id: string, avatar: string): Promise<RegistrationProfile[]> {
+  const result = await apiRequest<{profiles: RegistrationProfile[]}>("public/registration-avatar/"+encodeURIComponent(id),{method:"PUT",body:JSON.stringify({tokens:registrationTokens(),avatar})});
+  announceRegistrationSubmitted();
+  return result.profiles;
+}
