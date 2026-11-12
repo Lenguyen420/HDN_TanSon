@@ -27,9 +27,10 @@ export async function getMemberDirectory(token: string): Promise<Member[]> {
 
 export async function authenticateZaloMember() {
   // Token chỉ dùng trong lần xác thực này, không lưu vào localStorage.
-  const { getAccessToken, authorize, getPhoneNumber, getSetting } = await import("zmp-sdk/apis");
+  const { getAccessToken, authorize, getPhoneNumber, getSetting, getUserInfo } = await import("zmp-sdk/apis");
   let token: string;
   let phoneToken: string | undefined;
+  let phoneNotice = "";
   try {
     const { authSetting } = await getSetting({});
     const scopes: ("scope.userInfo" | "scope.userPhonenumber")[] = [];
@@ -37,8 +38,18 @@ export async function authenticateZaloMember() {
     if (!authSetting["scope.userPhonenumber"]) scopes.push("scope.userPhonenumber");
     const granted = scopes.length ? { ...authSetting, ...await authorize({ scopes }) } : authSetting;
     if (!granted["scope.userInfo"]) throw new Error("Bạn cần cho phép chia sẻ tên và ảnh đại diện Zalo để tiếp tục.");
+    await getUserInfo({ autoRequestPermission: false });
     token = await getAccessToken({});
-    if (granted["scope.userPhonenumber"]) phoneToken = (await getPhoneNumber({})).token;
+    if (granted["scope.userPhonenumber"]) {
+      try {
+        phoneToken = (await getPhoneNumber({})).token;
+        if (!phoneToken) throw new Error("Missing phone token");
+      } catch {
+        phoneNotice = "Đã xác nhận tên và ảnh. Chưa lấy được quyền chia sẻ số điện thoại; bạn có thể thử lại.";
+      }
+    } else {
+      phoneNotice = "Đã xác nhận tên và ảnh. Bạn chưa chia sẻ số điện thoại.";
+    }
   } catch (error) {
     if (error instanceof Error && error.message.startsWith("Bạn cần")) throw error;
     throw new Error("Chưa được cấp quyền Zalo. Vui lòng mở mini app trong Zalo và chọn Cho phép để tiếp tục.");
@@ -46,6 +57,9 @@ export async function authenticateZaloMember() {
   const identity = (await apiRequest<ApiData<MemberIdentity>>("member/session", {
     method: "POST", headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify({ phoneToken }),
   })).data;
-  const members = identity.linked ? await getMemberDirectory(token) : [];
+  if (!identity.user?.id || !identity.user.name) throw new Error("Backend chưa trả thông tin Zalo đã xác minh. Vui lòng thử lại.");
+  if (phoneNotice && !identity.phoneNotice) identity.phoneNotice = phoneNotice;
+  // Loading a private directory is independent of saving the consented profile.
+  const members = identity.member ? [identity.member] : [];
   return { identity, members };
 }

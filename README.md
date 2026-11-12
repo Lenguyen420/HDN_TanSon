@@ -102,3 +102,12 @@ Ba ảnh banner cũ đã được sao chép nguyên file từ uploads local vào
 AppShell chọn resources theo màn hình: trang chủ tải cấu hình, banner, danh bạ Ban chấp hành, thông báo và danh mục đang chọn; sự kiện/thăm hội viên được tải khi mở. getAppData hỗ trợ resources, force và onUpdate để hiển thị từng phần mà không chờ API chậm nhất. Cache public trong RAM 30 giây và chia sẻ request đang chạy, không lưu dữ liệu cache vào localStorage; nút Thử lại bỏ cache của màn hình. Chuyển màn hình kiểm tra lại TTL. Không áp dụng cache này cho API xác thực Zalo hoặc đăng ký.
 
 Bản build đo được: JS chính giảm từ khoảng 2.150 KB (gzip 1.470 KB) xuống 345 KB (gzip 109 KB). Ảnh không bị thay đổi; được tải riêng qua assets. Đây là số đo JS, không phải tổng dung lượng ảnh.
+
+
+## Xác nhận thông tin Zalo
+
+Mở tab Cá nhân và bấm Xác nhận thông tin Zalo. Ứng dụng gọi getSetting rồi authorize cho các quyền còn thiếu: scope.userInfo và scope.userPhonenumber. Hộp thoại cấp quyền do Zalo hiển thị với tên/logo đã cấu hình cho Mini App. Quyền đã cấp được Zalo ghi nhớ; không tự hỏi lại mỗi lần mở trang.
+
+Sau khi cho phép tên/ảnh, SDK lấy access token và phone token nếu có quyền số điện thoại. Backend member/session xác minh token với Zalo, lưu hồ sơ vào zalo_users, chỉ trả số điện thoại sau khi xác minh qua ZALO_APP_SECRET. Từ chối số điện thoại vẫn lưu được tên/ảnh; từ chối thông tin tên/ảnh không gọi backend. Giao diện chỉ hiển thị xác nhận thành công sau khi backend lưu thành công. Thông tin phiên chỉ giữ trong bộ nhớ trong tối đa 15 phút.
+
+Để thử popup thật, mở Mini App trong Zalo trên thiết bị, cấu hình tên/logo và quyền SDK trong trang quản lý Mini App, cho phép domain backend và origin tương ứng. Trình duyệt thông thường không hiển thị được hộp thoại Zalo. Không dùng OAuth web thay cho quyền SDK của Mini App.

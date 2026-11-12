@@ -27,6 +27,8 @@ import { applyProfileEdits, readProfileEdits, saveProfileEdits } from "@/service
 import type { AppData, ContentCategory, NavigationTab, ProfileEdits, UtilityId } from "@/datas/types";
 import type { ArticlePageProps, ContentListPageProps, UtilityPageProps } from "@/components/shared/page-props";
 
+import { authenticateZaloMember, type MemberIdentity } from "@/services/member-access";
+
 type Screen =
   | { kind: "utility"; id: UtilityId }
   | { kind: "list"; category: ContentCategory }
@@ -50,7 +52,50 @@ export default function AppShell() {
   const [profileEdits, setProfileEdits] = useState(readProfileEdits);
   const [profileSaveMessage, setProfileSaveMessage] = useState("");
   const [contactOpen, setContactOpen] = useState(false);
-  const data = useMemo(() => sourceData ? applyProfileEdits(sourceData, profileEdits) : null, [sourceData, profileEdits]);
+  const [zaloIdentity, setZaloIdentity] = useState<MemberIdentity | null>(null);
+  const [authExpiresAt, setAuthExpiresAt] = useState(0);
+  const [authPending, setAuthPending] = useState(false);
+  const [authError, setAuthError] = useState("");
+  const [authMessage, setAuthMessage] = useState("");
+  const authentication = useRef(false);
+  const data = useMemo(() => {
+    if (!sourceData) return null;
+    const member = zaloIdentity?.member;
+    const personalized = zaloIdentity ? {
+      ...sourceData,
+      zaloUser: zaloIdentity.user,
+      members: member ? [...sourceData.members.filter((item) => item.id !== member.id), member] : sourceData.members,
+      profile: member ? { memberId: member.id, memberCode: member.id, joinedAt: member.joinedAt || "", status: "Đang hoạt động" } : sourceData.profile,
+    } : sourceData;
+    return applyProfileEdits(personalized, profileEdits);
+  }, [sourceData, profileEdits, zaloIdentity]);
+  useEffect(() => {
+    if (!authExpiresAt) return;
+    const timer = window.setTimeout(() => {
+      setZaloIdentity(null);
+      setAuthExpiresAt(0);
+      setAuthMessage("Phiên xác nhận đã hết hạn. Vui lòng xác nhận lại thông tin Zalo.");
+    }, Math.max(0, authExpiresAt - Date.now()));
+    return () => window.clearTimeout(timer);
+  }, [authExpiresAt]);
+  const authenticate = async () => {
+    if (authentication.current) return;
+    authentication.current = true;
+    setAuthPending(true);
+    setAuthError("");
+    setAuthMessage("");
+    try {
+      const { identity } = await authenticateZaloMember();
+      setZaloIdentity(identity);
+      setAuthExpiresAt(Date.now() + 15 * 60 * 1000);
+      setAuthMessage(identity.phoneNotice || "Đã xác nhận và lưu thông tin Zalo với Hội.");
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : "Chưa thể xác nhận thông tin Zalo. Vui lòng thử lại.");
+    } finally {
+      authentication.current = false;
+      setAuthPending(false);
+    }
+  };
   const [error, setError] = useState("");
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -173,7 +218,7 @@ export default function AppShell() {
       case "register": return <RegisterPage data={data} onBack={() => navigate("home")} />;
       case "members": return <MembersPage data={data} onBack={() => navigate("home")} />;
       case "notifications": return <NotificationsPage data={{ ...data, notifications }} onBack={() => navigate("home")} onOpenNotification={openNotification} onMarkAllRead={markAllNotificationsRead} storageMessage={notificationStorageMessage} />;
-      case "profile": return <ProfilePage data={data} onBack={() => navigate("home")} onEdit={() => { setProfileSaveMessage(""); openScreen({ kind: "profile-edit" }); }} saveMessage={profileSaveMessage} />;
+      case "profile": return <ProfilePage onAuthenticate={authenticate} authPending={authPending} authError={authError} authMessage={authMessage} data={data} onBack={() => navigate("home")} onEdit={() => { setProfileSaveMessage(""); openScreen({ kind: "profile-edit" }); }} saveMessage={profileSaveMessage} />;
       case "home": return <HomePage data={data} onNavigate={navigate} onOpenContent={openContent} onOpenUtility={(id) => openScreen({ kind: "utility", id })} onOpenArticle={openArticle} contentCategory={homeCategory} onChangeCategory={setHomeCategory} />;
     }
   };
