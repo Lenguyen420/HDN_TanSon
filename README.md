@@ -137,3 +137,11 @@ Không chỉnh sửa mã hội viên, ngày gia nhập, trạng thái xét duy�
 
 
 Ảnh Ban chấp hành và Hội viên dùng chung MemberPhoto, hỗ trợ URL ảnh tuyệt đối và uploads/... từ backend. SDK avatar được gửi cùng đăng ký mới và chép sang hội viên khi admin duyệt. Hồ sơ cũ thiếu ảnh có thể được đồng bộ khi chủ hồ sơ mở Cá nhân/Đăng kí với mã theo dõi đúng; không ghép theo tên hoặc dữ liệu Zalo chưa xác minh. Đồng bộ chỉ điền ảnh còn trống, không ghi đè ảnh đã có. Nếu hồ sơ cũ không có mã theo dõi, admin cần bổ sung URL ảnh đại diện.
+
+## Luồng Sự kiện
+
+Mục Sự kiện trong Tiện ích mở màn tổng quan, có Lịch sự kiện, Tài liệu, Biên bản và Điểm danh. Mỗi trang có tìm kiếm và bộ lọc; chi tiết từng sự kiện có lối tắt riêng. Danh sách lấy từ API events, không tạo tài liệu hay trạng thái vắng mặt giả.
+
+Backend cần bản cập nhật event workspace trước khi deploy Mini App. Dữ liệu `event.documents` và `event.minutes` là danh sách `{ id, title, url, publishedAt? }`; URL dùng HTTPS công khai. `event.host` là người/đơn vị chủ trì. `event.checkInEnabled=true` mở điểm danh trong ngày `event.date` theo giờ Việt Nam. Các trường này được cấu hình qua API quản trị sự kiện; chưa bổ sung biểu mẫu nhập file vào dashboard quản trị.
+
+Điểm danh là thao tác tự xác nhận tên/đơn vị gửi lên MongoDB, không xác minh có mặt bằng QR/vị trí. Mã theo dõi được giữ trên thiết bị; đổi thiết bị hoặc xóa dữ liệu trình duyệt sẽ không xem được lịch sử bằng mã cũ. Các file chỉ hiển thị sau khi Ban tổ chức cung cấp URL.

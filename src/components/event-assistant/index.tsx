@@ -1,24 +1,17 @@
-import { useState } from "react";
-import UtilityLayout from "@/components/shared/utility-layout";
-import ContentCard from "@/components/shared/content-card";
 import type { UtilityPageProps } from "@/components/shared/page-props";
+import EventPageLayout from "@/components/shared/event-page-layout";
+import EventSummaryCard from "@/components/shared/event-summary-card";
 import AppIcon from "@/components/icons";
-
-export default function EventAssistant({ data, onBack, onOpenArticle }: UtilityPageProps) {
-  const [query, setQuery] = useState("");
-  const [answer, setAnswer] = useState("");
-  const assistant = data.utilityPages.assistant;
-  const events = data.content.events.articles.filter((event) => `${event.title} ${event.summary}`.toLocaleLowerCase("vi").includes(query.trim().toLocaleLowerCase("vi")));
-  return (
-    <UtilityLayout data={data} id="event-assistant" subtitle="Tìm chương trình phù hợp, kết nối dễ dàng hơn" onBack={onBack}>
-      <section className="surface-card assistant-welcome"><span className="record-icon"><AppIcon name="calendar" /></span><div><span className="overline">TRỢ LÝ SỰ KIỆN</span><h2>Tôi có thể giúp gì cho bạn?</h2></div><p>{assistant.greeting}</p></section>
-      <div className="assistant-questions">{assistant.questions.map((item) => <button type="button" key={item.question} aria-pressed={answer === item.answer} onClick={() => setAnswer(item.answer)}>{item.question}<AppIcon name="arrow" /></button>)}</div>
-      {answer && <div className="assistant-answer" role="status"><AppIcon name="info" /><p>{answer}</p></div>}
-      <label className="event-search">Tìm sự kiện<input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nhập tên chương trình hoặc chủ đề…" /></label>
-      <div className="history-toolbar"><h2>Sự kiện dành cho bạn</h2><span className="result-count">{events.length} chương trình</span></div>
-      <div className="assistant-events">{events.map((event) => <ContentCard key={event.id} article={event} onSelect={(article) => onOpenArticle("events", article.id)} />)}</div>
-      {events.length === 0 && <p className="surface-card empty-state">Không tìm thấy sự kiện. Hãy thử từ khóa khác.</p>}
-      <p className="page-footnote">Tra cứu và hướng dẫn dựa trên dữ liệu mẫu, chưa kết nối trợ lý AI hoặc đăng kí sự kiện trực tuyến.</p>
-    </UtilityLayout>
-  );
+import { eventToday, sortEvents } from "@/services/event-workspace";
+import EventShortcuts from "./shortcuts";
+export default function EventAssistant({ data, onBack, onOpenArticle, onOpenEventSection }: UtilityPageProps) {
+  const events = sortEvents(data.content.events.articles);
+  const upcoming = events.filter((article) => article.event?.date && article.event.date >= eventToday());
+  const nearest = upcoming[0] || events[0];
+  return <EventPageLayout title="Sự kiện" subtitle="Lịch chương trình, tài liệu và hoạt động của Hội" onBack={onBack}>
+    <section className="event-hub-welcome"><span><AppIcon name="calendar" /></span><div><small>HỘI DOANH NGHIỆP PHƯỜNG TÂN SƠN</small><h2>Cùng kết nối, cùng tham gia</h2><p>{data.association.slogan}</p></div></section>
+    <section className="event-hub-panel"><h2>Lối tắt</h2><EventShortcuts onSelect={(section) => onOpenEventSection?.(section)} /><p className="event-panel-caption">Thông tin và hồ sơ của từng sự kiện ở một nơi.</p></section>
+    <section className="event-hub-panel"><div className="event-section-heading"><h2>{upcoming.length ? "Sự kiện gần nhất" : "Sự kiện gần đây"}</h2><span>{events.length} sự kiện</span></div>{nearest ? <EventSummaryCard article={nearest} onSelect={(article) => onOpenArticle("events", article.id)} /> : <p className="empty-state">Chưa có sự kiện được công bố.</p>}</section>
+    <section className="event-hub-panel"><div className="event-section-heading"><h2>Sắp diễn ra</h2><button type="button" onClick={() => onOpenEventSection?.("calendar")}>Xem lịch <AppIcon name="arrow" /></button></div>{upcoming.slice(0, 3).map((article) => <EventSummaryCard key={article.id} article={article} onSelect={(item) => onOpenArticle("events", item.id)} />)}{!upcoming.length && <p className="empty-state">Lịch sự kiện mới sẽ được cập nhật tại đây.</p>}</section>
+  </EventPageLayout>;
 }

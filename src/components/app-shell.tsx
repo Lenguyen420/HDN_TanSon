@@ -1,3 +1,13 @@
+import EventCalendarPage from "@/pages/event-calendar/event-calendar";
+import EventAttendancePage from "@/pages/event-attendance/event-attendance";
+import EventDocumentsPage from "@/pages/event-documents/event-documents";
+import EventMinutesPage from "@/pages/event-minutes/event-minutes";
+import EventCheckInPage from "@/pages/event-check-in/event-check-in";
+import EventDocumentListPage from "@/pages/event-document-list/event-document-list";
+import EventMinuteListPage from "@/pages/event-minute-list/event-minute-list";
+import type { EventSection, EventResourceSection } from "@/datas/event-workspace";
+import type { EventWorkspacePageProps, EventResourcePageProps } from "@/components/shared/page-props";
+import { getEventAttendance, checkInEvent, openEventFile, type AttendanceReceipt } from "@/services/event-workspace";
 import { openTanSonMiniApp } from "@/services/mini-app";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, ComponentType } from "react";
 import { Page } from "zmp-ui";
@@ -36,6 +46,8 @@ import PoliciesPage from "@/pages/policies/policies";
 import { updateRegistrationProfile, syncRegistrationAvatar } from "@/services/registration-notifications";
 
 type Screen =
+  | { kind: "event-workspace"; section: EventSection }
+  | { kind: "event-resource"; section: EventResourceSection; articleId: string }
   | { kind: "utility"; id: UtilityId }
   | { kind: "list"; category: ContentCategory }
   | { kind: "article"; category: ContentCategory; articleId: string }
@@ -54,12 +66,21 @@ const detailPages: Record<ContentCategory, ComponentType<ArticlePageProps>> = {
   news: NewsDetailPage, events: EventDetailPage, "member-visits": MemberVisitDetailPage,
 };
 
+const eventWorkspacePages: Record<EventSection, ComponentType<EventWorkspacePageProps>> = {
+  calendar: EventCalendarPage, attendance: EventAttendancePage, documents: EventDocumentsPage, minutes: EventMinutesPage,
+};
+const eventResourcePages: Record<EventResourceSection, ComponentType<EventResourcePageProps>> = {
+  attendance: EventCheckInPage, documents: EventDocumentListPage, minutes: EventMinuteListPage,
+};
 export default function AppShell() {
   const { notifications: registrationNotices, profiles: registrationProfiles, setProfiles: setRegistrationProfiles, error: registrationNoticeError } = useRegistrationNotifications();
   const [sourceData, setData] = useState<AppData | null>(null);
   const [profileEdits, setProfileEdits] = useState(readProfileEdits);
   const [profileSaveMessage, setProfileSaveMessage] = useState("");
   const [contactOpen, setContactOpen] = useState(false);
+  const [attendance, setAttendance] = useState<Record<string, AttendanceReceipt>>({});
+  const [attendanceLoading, setAttendanceLoading] = useState(false);
+  const [attendanceError, setAttendanceError] = useState("");
   const [miniAppError, setMiniAppError] = useState("");
   const [miniAppOpening, setMiniAppOpening] = useState(false);
   const openWardMiniApp = async () => {
@@ -153,6 +174,7 @@ export default function AppShell() {
   if (!screen && activeTab === "notifications" || screen?.kind === "notification") resources.push("notifications");
   if (screen?.kind === "list" || screen?.kind === "article") resources.push(screen.category === "member-visits" ? "visits" : screen.category);
   if (screen?.kind === "utility" && screen.id === "event-assistant") resources.push("events");
+  if (screen?.kind === "event-workspace" || screen?.kind === "event-resource") resources.push("events");
   const resourceKey = [...new Set(resources)].sort().join(",");
   const previousAttempt = useRef(loadAttempt);
   useEffect(() => {
@@ -188,6 +210,31 @@ export default function AppShell() {
     return () => { active = false; window.clearInterval(timer); window.removeEventListener("focus", wake); document.removeEventListener("visibilitychange", wake); };
   }, [resourceKey]);
 
+  const attendanceScreen = (screen?.kind === "event-workspace" || screen?.kind === "event-resource") && screen.section === "attendance";
+  const attendanceIds = attendanceScreen ? (sourceData?.content.events.articles || []).map(article => article.id).join(",") : "";
+  useEffect(() => {
+    if (!attendanceScreen) return;
+    let active = true;
+    setAttendanceLoading(true); setAttendanceError("");
+    const ids = attendanceIds ? attendanceIds.split(",") : [];
+    void Promise.allSettled(ids.map(id => getEventAttendance(id))).then(results => {
+      if (!active) return;
+      setAttendance(current => {
+        const next = { ...current };
+        results.forEach((result, index) => {
+          if (result.status === "fulfilled") {
+            if (result.value) next[result.value.eventId] = result.value;
+            else delete next[ids[index]];
+          }
+        });
+        return next;
+      });
+      if (results.some(result => result.status === "rejected")) setAttendanceError("Chưa tải đủ lịch sử điểm danh. Vui lòng quay lại và thử lại.");
+      setAttendanceLoading(false);
+    });
+    return () => { active = false; };
+  }, [attendanceScreen, attendanceIds, loadAttempt]);
+
   useLayoutEffect(() => {
     scroller()?.scrollTo(0, pendingScroll.current);
   }, [screens, activeTab]);
@@ -221,6 +268,16 @@ export default function AppShell() {
     setScreens((current) => current.slice(0, -1));
   };
   const openArticle = (category: ContentCategory, articleId: string) => openScreen({ kind: "article", category, articleId });
+  const openEvent = (articleId: string, section: EventSection) => {
+    if (section === "calendar") openArticle("events", articleId);
+    else openScreen({ kind: "event-resource", section, articleId });
+  };
+  const submitCheckIn = async (eventId: string, name: string, company: string) => {
+    const { receipt, persisted } = await checkInEvent(eventId, name, company);
+    setAttendance(current => ({ ...current, [eventId]: receipt }));
+    if (!persisted) setAttendanceError("Đã điểm danh trên hệ thống nhưng thiết bị không lưu được mã theo dõi. Hãy giữ màn hình xác nhận.");
+    return { persisted };
+  };
   const savePersonalProfile = async (edits: ProfileEdits) => {
     if (data?.registrationProfile) {
       const expectedId = data.registrationProfile.member?.id || data.registrationProfile.id;
@@ -265,7 +322,21 @@ export default function AppShell() {
   const renderPage = () => {
     if (!data) return null;
     const screen = screens[screens.length - 1];
-    const common = { data, onBack: goBack, onOpenArticle: openArticle, onOpenContent: openContent };
+    const common = { data, onBack: goBack, onOpenArticle: openArticle, onOpenContent: openContent,
+      onOpenEventSection: (section: EventSection) => openScreen({ kind: "event-workspace", section }),
+      onOpenEventResource: (articleId: string, section: EventResourceSection) => openEvent(articleId, section),
+    };
+    const workspaceProps = { data, onBack: goBack, onOpenEvent: openEvent, attendance, attendanceLoading, attendanceError };
+    if (screen?.kind === "event-workspace") {
+      const WorkspacePage = eventWorkspacePages[screen.section];
+      return <WorkspacePage key={screen.section} {...workspaceProps} />;
+    }
+    if (screen?.kind === "event-resource") {
+      const article = data.content.events.articles.find(item => item.id === screen.articleId);
+      if (!article) return <section className="surface-card empty-state"><p>Thông tin sự kiện đang được tải.</p><button type="button" onClick={goBack}>Quay lại</button></section>;
+      const ResourcePage = eventResourcePages[screen.section];
+      return <ResourcePage key={screen.section + article.id} {...workspaceProps} article={article} onCheckIn={submitCheckIn} onOpenFile={openEventFile} />;
+    }
     if (screen?.kind === "policies") return <PoliciesPage onBack={goBack} />;
     if (screen?.kind === "profile-edit") return <ProfileEditPage data={data} onBack={goBack} onSave={savePersonalProfile} />;
     if (screen?.kind === "notification") {

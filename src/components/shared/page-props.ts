@@ -1,4 +1,19 @@
 import type { AppData, ContentArticle, ContentCategory, Notification, ProfileEdits } from "@/datas/types";
+import type { EventSection, EventResourceSection } from "@/datas/event-workspace";
+import type { AttendanceReceipt } from "@/services/event-workspace";
+export interface EventWorkspacePageProps {
+  data: AppData;
+  onBack: () => void;
+  onOpenEvent: (articleId: string, section: EventSection) => void;
+  attendance: Record<string, AttendanceReceipt>;
+  attendanceLoading: boolean;
+  attendanceError: string;
+}
+export interface EventResourcePageProps extends EventWorkspacePageProps {
+  article: ContentArticle;
+  onCheckIn: (eventId: string, name: string, company: string) => Promise<{ persisted: boolean }>;
+  onOpenFile: (url: string) => Promise<void>;
+}
 export interface TabPageProps { data: AppData; onBack: () => void; }
 export interface MembersPageProps extends TabPageProps {}
 export interface ProfilePageProps extends TabPageProps { onEdit: () => void; onSupport: (action: "contact" | "about" | "policies") => void; saveMessage?: string; }
@@ -19,6 +34,7 @@ export interface UtilityPageProps {
   data: AppData;
   onBack: () => void;
   onOpenArticle: (category: ContentCategory, articleId: string) => void;
+  onOpenEventSection?: (section: EventSection) => void;
 }
 export interface ArticlePageProps {
   data: AppData;
@@ -26,6 +42,7 @@ export interface ArticlePageProps {
   onBack: () => void;
   onOpenArticle: (category: ContentCategory, articleId: string) => void;
   onOpenContent: (category: ContentCategory) => void;
+  onOpenEventResource?: (articleId: string, section: EventResourceSection) => void;
 }
 export interface ContentListPageProps extends UtilityPageProps {
   onChangeCategory: (category: ContentCategory) => void;

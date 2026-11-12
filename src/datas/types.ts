@@ -1,3 +1,4 @@
+export interface EventFile { id: string; title: string; url: string; publishedAt?: string; }
 export type NavigationTab = "register" | "members" | "home" | "notifications" | "profile";
 export interface Association {
   name: string;
@@ -55,7 +56,7 @@ export interface ContentArticle {
   summary: string;
   paragraphs: string[];
   author?: string;
-  event?: { date: string; time: string; venue: string; address: string; agenda: { time: string; title: string }[] };
+  event?: { date: string; time: string; venue: string; address: string; host?: string; checkInEnabled?: boolean; documents?: EventFile[]; minutes?: EventFile[]; agenda: { time: string; title: string }[] };
   visit?: { company: string; representative: string; date: string; address: string; field: string };
 }
 export interface ContentCollection {
