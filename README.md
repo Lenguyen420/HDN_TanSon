@@ -120,3 +120,10 @@ Khi gửi hồ sơ, Mini App tạo mã theo dõi ngẫu nhiên 256 bit và lưu 
 Ứng dụng kiểm tra kết quả mỗi 5 giây khi đang hiển thị và ngay sau khi gửi hồ sơ/quay lại ứng dụng. Khi mất mạng giữ thông báo cũ và tự thử lại. Không có push khi Zalo đã đóng. Chỉ giữ mã theo dõi của 20 lần gửi gần nhất trên thiết bị này; xóa bộ nhớ, đổi thiết bị hoặc đổi origin sẽ mất quyền đọc kết quả cũ. Nếu bộ nhớ bị chặn thì vẫn gửi hồ sơ được và có cảnh báo chỉ theo dõi trong phiên đang mở. Không dùng ID Zalo chưa xác minh để truy cập kết quả người khác.
 
 Deploy backend, admin và Mini App để sử dụng các API mới. Hồ sơ cũ trước thay đổi này không có mã theo dõi nên không tự xuất hiện trong thông báo cá nhân.
+
+
+## Hồ sơ Cá nhân sau xét duyệt
+
+API kết quả theo mã theo dõi trả thêm profiles của đúng hồ sơ sở hữu mã. Trang Cá nhân hiển thị thông tin cá nhân, doanh nghiệp và thông tin hệ thống; sau khi duyệt hiển thị thêm mã hội viên, ngày gia nhập, vai trò và trạng thái hiện tại từ collection members. Dữ liệu này cập nhật cùng chu kỳ thông báo 5 giây. Nếu bị từ chối, hiển thị lý do đã lưu. Trạng thái pending vẫn hiển thị hồ sơ đã gửi. Không tự liên kết tài khoản Zalo hoặc mở quyền admin/danh bạ riêng chỉ vì có tên/ảnh SDK.
+
+Các trường hệ thống chỉ đọc từ backend; không dùng sửa hồ sơ cục bộ cho hồ sơ được theo dõi bằng mã. Mã theo dõi lưu trên thiết bị gửi hồ sơ, nên xóa bộ nhớ hoặc đổi thiết bị không tự tìm lại được hồ sơ.

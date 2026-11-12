@@ -40,7 +40,7 @@ test("notification polling pauses while hidden, prevents overlaps and cleans up 
   t.after(()=>{global.window=oldWindow;global.document=oldDocument;delete global.pollStates;delete global.pollRequest;delete global.pollEffect;});
   const hook=await load({entryPoints:["src/components/shared/use-registration-notifications.ts"],plugins:[{name:"poll-harness",setup(build){
     build.onResolve({filter:/^(react|@\/services\/registration-notifications)$/},args=>({path:args.path,namespace:"mock"}));
-    build.onLoad({filter:/.*/,namespace:"mock"},({path})=>({contents:path==="react" ? 'export const useEffect=fn=>{globalThis.pollEffect=fn;}; export const useState=initial=>{const i=globalThis.pollStates.length;globalThis.pollStates.push(initial);return [initial,v=>{globalThis.pollStates[i]=v;}];};' : 'export const getRegistrationNotifications=()=>globalThis.pollRequest();'}));
+    build.onLoad({filter:/.*/,namespace:"mock"},({path})=>({contents:path==="react" ? 'export const useEffect=fn=>{globalThis.pollEffect=fn;}; export const useState=initial=>{const i=globalThis.pollStates.length;globalThis.pollStates.push(initial);return [initial,v=>{globalThis.pollStates[i]=v;}];};' : 'export const getRegistrationUpdates=async()=>({data: await globalThis.pollRequest(),profiles: []});'}));
   }}]});
   hook.default();const cleanup=global.pollEffect();
   const flush=()=>new Promise(resolve=>setImmediate(resolve));

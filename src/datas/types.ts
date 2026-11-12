@@ -85,7 +85,14 @@ export interface UtilityPageData {
   contact: { department: string; address: string; hours: string; phone: string | null; email: string | null; topics: string[]; hotlines: { id: string; label: string; number: string }[]; zaloUrl: string | null };
   assistant: { greeting: string; questions: { question: string; answer: string }[] };
 }
+export interface RegistrationProfile {
+  id: string; fullName: string; company: string; phone: string; email?: string; birthDate?: string;
+  jobTitle?: string; companyAddress?: string; taxCode?: string; date: string;
+  status: "pending" | "approved" | "rejected"; createdAt: string; reviewedAt?: string; rejectionReason?: string;
+  member: (Member & { status: "active" | "inactive"; updatedAt?: string }) | null;
+}
 export interface AppData {
+  registrationProfile?: RegistrationProfile;
   zaloUser?: { id: string; name: string; avatar: string; phone: string | null };
   memberAccess?: "required" | "granted";
   isDemo: boolean;

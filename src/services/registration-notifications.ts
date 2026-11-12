@@ -1,5 +1,5 @@
 import { apiRequest } from "./api";
-import type { Notification } from "@/datas/types";
+import type { Notification, RegistrationProfile } from "@/datas/types";
 const key = "tanson-registration-receipts";
 let memory: string[] = [];
 export function registrationTokens(): string[] {
@@ -19,10 +19,12 @@ export function prepareRegistrationTracking() {
 export function announceRegistrationSubmitted() {
   if (typeof window.dispatchEvent === "function") window.dispatchEvent(new Event("tanson-registration-updated"));
 }
-export async function getRegistrationNotifications(): Promise<Notification[]> {
+export async function getRegistrationUpdates(): Promise<{data: Notification[]; profiles: RegistrationProfile[]}> {
   const tokens = registrationTokens();
-  if (!tokens.length) return [];
-  const result = await apiRequest<{ data: Notification[] }>("public/registration-notifications", { method: "POST", body: JSON.stringify({ tokens }) });
+  if (!tokens.length) return {data: [], profiles: []};
+  const result = await apiRequest<{ data: Notification[]; profiles?: RegistrationProfile[] }>("public/registration-notifications", { method: "POST", body: JSON.stringify({ tokens }) });
   if (!Array.isArray(result.data)) throw new Error("Không đọc được kết quả đăng ký.");
-  return result.data;
+  return { data: result.data, profiles: Array.isArray(result.profiles) ? result.profiles : [] };
 }
+
+export async function getRegistrationNotifications(): Promise<Notification[]> { return (await getRegistrationUpdates()).data; }

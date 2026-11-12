@@ -50,7 +50,7 @@ const detailPages: Record<ContentCategory, ComponentType<ArticlePageProps>> = {
 };
 
 export default function AppShell() {
-  const { notifications: registrationNotices, error: registrationNoticeError } = useRegistrationNotifications();
+  const { notifications: registrationNotices, profiles: registrationProfiles, error: registrationNoticeError } = useRegistrationNotifications();
   const [sourceData, setData] = useState<AppData | null>(null);
   const [profileEdits, setProfileEdits] = useState(readProfileEdits);
   const [profileSaveMessage, setProfileSaveMessage] = useState("");
@@ -63,15 +63,17 @@ export default function AppShell() {
   const authentication = useRef(false);
   const data = useMemo(() => {
     if (!sourceData) return null;
-    const member = zaloIdentity?.member;
-    const personalized = zaloIdentity ? {
+    const application = (registrationProfiles || []).find((item) => item.status === "approved" && item.member) || registrationProfiles?.[0];
+    const member = application?.member || zaloIdentity?.member;
+    const personalized = zaloIdentity || application ? {
       ...sourceData,
-      zaloUser: zaloIdentity.user,
+      zaloUser: zaloIdentity?.user,
+      registrationProfile: application,
       members: member ? [...sourceData.members.filter((item) => item.id !== member.id), member] : sourceData.members,
       profile: member ? { memberId: member.id, memberCode: member.id, joinedAt: member.joinedAt || "", status: "Đang hoạt động" } : sourceData.profile,
     } : sourceData;
-    return applyProfileEdits(personalized, profileEdits);
-  }, [sourceData, profileEdits, zaloIdentity]);
+    return application ? personalized : applyProfileEdits(personalized, profileEdits);
+  }, [sourceData, profileEdits, zaloIdentity, registrationProfiles]);
   useEffect(() => {
     if (!authExpiresAt) return;
     const timer = window.setTimeout(() => {
