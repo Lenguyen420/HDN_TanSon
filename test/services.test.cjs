@@ -49,6 +49,9 @@ test("public API integration", async (t) => {
       assert.equal(services.introductionVideoSource(url).url, "https://www.youtube-nocookie.com/embed/M7lc1UVf-VE");
     }
     assert.equal(services.introductionVideoSource("https://cdn.example.com/video.mp4").kind, "video");
+    const managed = "/api/v1/public/introduction-videos/00000000-0000-4000-8000-000000000000";
+    assert.equal(services.introductionVideoSource(managed).url, "http://localhost:4000" + managed);
+    assert.equal(services.introductionVideoSource("/api/v1/public/introduction-videos/bad-id"), null);
   });
 
   await t.test("loads every page", async () => {
