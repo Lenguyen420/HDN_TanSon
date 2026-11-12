@@ -217,7 +217,7 @@ export default function AppShell() {
     let active = true;
     setAttendanceLoading(true); setAttendanceError("");
     const ids = attendanceIds ? attendanceIds.split(",") : [];
-    void Promise.allSettled(ids.map(id => getEventAttendance(id))).then(results => {
+    void Promise.all(ids.map(id => getEventAttendance(id).then(value => ({ status: "fulfilled" as const, value }), reason => ({ status: "rejected" as const, reason })))).then(results => {
       if (!active) return;
       setAttendance(current => {
         const next = { ...current };

@@ -1,4 +1,4 @@
-import { apiRequest, useMockData } from "./api";
+import { apiRequest, useMockData, resolveApiImage } from "./api";
 import type { ContentArticle } from "@/datas/types";
 
 export interface AttendanceReceipt { eventId: string; name: string; company: string; checkedAt: string; }
@@ -58,8 +58,9 @@ export async function checkInEvent(eventId: string, name: string, company: strin
   return { receipt: result.data, persisted };
 }
 export async function openEventFile(url: string) {
-  const parsed = new URL(url);
-  if (parsed.protocol !== "https:" || parsed.username || parsed.password) throw new Error("Tài liệu cần có đường dẫn HTTPS hợp lệ.");
+  const parsed = new URL(resolveApiImage(url) || url);
+  const localPreview = import.meta.env.DEV && parsed.protocol === "http:" && ["localhost", "127.0.0.1"].includes(parsed.hostname);
+  if ((parsed.protocol !== "https:" && !localPreview) || parsed.username || parsed.password) throw new Error("Tài liệu cần có đường dẫn HTTPS hợp lệ.");
   if (window.location.hostname === "h5.zdn.vn" || /Zalo/i.test(navigator.userAgent)) {
     const { openWebview } = await import("zmp-sdk/apis");
     await openWebview({ url: parsed.href });

@@ -145,3 +145,6 @@ Mục Sự kiện trong Tiện ích mở màn tổng quan, có Lịch sự kiệ
 Backend cần bản cập nhật event workspace trước khi deploy Mini App. Dữ liệu `event.documents` và `event.minutes` là danh sách `{ id, title, url, publishedAt? }`; URL dùng HTTPS công khai. `event.host` là người/đơn vị chủ trì. `event.checkInEnabled=true` mở điểm danh trong ngày `event.date` theo giờ Việt Nam. Các trường này được cấu hình qua API quản trị sự kiện; chưa bổ sung biểu mẫu nhập file vào dashboard quản trị.
 
 Điểm danh là thao tác tự xác nhận tên/đơn vị gửi lên MongoDB, không xác minh có mặt bằng QR/vị trí. Mã theo dõi được giữ trên thiết bị; đổi thiết bị hoặc xóa dữ liệu trình duyệt sẽ không xem được lịch sử bằng mã cũ. Các file chỉ hiển thị sau khi Ban tổ chức cung cấp URL.
+
+
+Tài liệu/biên bản tải từ máy trên Admin được lưu MongoDB GridFS. Mapper content.ts chuyển đường dẫn /api/v1/public/event-files/:id thành URL backend; Mini App mở bằng trình xem hiện tại. Documents/minutes không bắt buộc và có thể được quản trị viên bổ sung sau. URL HTTPS của file cũ vẫn mở bình thường. Cần triển khai backend trước bản frontend có tính năng chọn file.

@@ -98,6 +98,13 @@ test("public API integration", async (t) => {
     assert.equal(urls.length, 2);
   });
 
+  await t.test("uploaded event documents resolve against backend and retain optional lists", async () => {
+    global.fetch = async () => reply({ data: [{ id: "event", event: { date: "2026-12-01", time: "08:00 - 10:00", agenda: [], documents: [{ id: "doc", title: "Document", url: "/api/v1/public/event-files/00000000-0000-4000-8000-000000000000" }] } }], pagination: { total: 1 } });
+    const events = await services.getArticles("events");
+    assert.equal(events[0].event.documents[0].url, "http://localhost:4000/api/v1/public/event-files/00000000-0000-4000-8000-000000000000");
+    assert.equal(events[0].event.minutes, undefined);
+  });
+
   await t.test("submits only fields accepted by public registration DTO", async () => {
     const draft = { ...services.readRegistrationDraft([]), fullName: " Nguyễn Văn A ", phone: "0901234567", birthDate: "1990-01-01", companyName: " Công ty A ", position: " Giám đốc ", taxCode: "123", companyAddress: "Tân Sơn" };
     global.fetch = async (url, options) => {

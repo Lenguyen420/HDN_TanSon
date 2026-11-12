@@ -4,7 +4,15 @@ import { apiRequest, getAllPublicItems, resolveApiImage } from "./api";
 import type { ApiData } from "./api";
 
 function mapArticle(article: ContentArticle): ContentArticle {
-  return { ...article, image: resolveApiImage(article.image) };
+  const event = article.event;
+  return {
+    ...article, image: resolveApiImage(article.image),
+    ...(event ? { event: {
+      ...event,
+      documents: event.documents?.map((file) => ({ ...file, url: resolveApiImage(file.url) || file.url })),
+      minutes: event.minutes?.map((file) => ({ ...file, url: resolveApiImage(file.url) || file.url })),
+    } } : {}),
+  };
 }
 
 export async function getArticles(category: ContentCategory): Promise<ContentArticle[]> {
