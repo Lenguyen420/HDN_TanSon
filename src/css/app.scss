@@ -769,5 +769,7 @@ textarea:focus-visible, select:focus-visible { outline: 3px solid #7cabff; outli
 .home-member-card p { margin: 0 0 4px; font-size: 14px; line-height: 1.6; color: #57708d; overflow-wrap: anywhere; }
 .home-member-card span { font-size: 13px; line-height: 1.5; color: #7c8da4; }
 .header-eyebrow { font-size: 13px; line-height: 1.65; }
-.community-note p, .browser-heading .overline, .article-actions > span, .about-intro > .overline { font-size: 12px; line-height: 1.7; }
+.community-note p, .browser-heading .overline, .article-actions > span { font-size: 12px; line-height: 1.7; }
+.about-page .page-toolbar-copy > p, .about-page .section-page-header > p { font-size: 16px; line-height: 1.7; font-weight: 600; }
+.about-intro > .overline { font-size: 18px; line-height: 1.7; font-weight: 700; letter-spacing: .2px; color: #315c97; }
 @media (min-width: 480px) { .header-eyebrow { font-size: 15px; } }

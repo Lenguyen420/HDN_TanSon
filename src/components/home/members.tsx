@@ -19,7 +19,7 @@ export default function HomeMembers({
         </button>
       </div>
       <div className="home-member-list">
-        {members.slice(0, 6).map((member) => (
+        {members.slice(0, 3).map((member) => (
           <article key={member.id} className="home-member-card">
             <MemberPhoto member={member} />
             <div>
