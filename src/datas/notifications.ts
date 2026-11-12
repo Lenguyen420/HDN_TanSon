@@ -1,5 +1,5 @@
-import eventImage from "@/assets/banner/2.png";
-import communityImage from "@/assets/banner/1.jpeg";
+import eventImage from "@/assets/banner/optimized/2.jpg";
+import communityImage from "@/assets/banner/optimized/1.jpg";
 import type { Notification } from "./types";
 
 export const notifications: Notification[] = [

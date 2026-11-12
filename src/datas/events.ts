@@ -1,5 +1,5 @@
-import eventImage from "@/assets/banner/2.png";
-import connectionImage from "@/assets/banner/3.jpg";
+import eventImage from "@/assets/banner/optimized/2.jpg";
+import connectionImage from "@/assets/banner/optimized/3.jpg";
 import type { ContentCollection } from "./types";
 import { eventDetails } from "./article-details";
 

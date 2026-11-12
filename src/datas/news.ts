@@ -1,5 +1,5 @@
-import communityImage from "@/assets/banner/1.jpeg";
-import activityImage from "@/assets/banner/3.jpg";
+import communityImage from "@/assets/banner/optimized/1.jpg";
+import activityImage from "@/assets/banner/optimized/3.jpg";
 import type { ContentCollection } from "./types";
 
 export const news: ContentCollection = {

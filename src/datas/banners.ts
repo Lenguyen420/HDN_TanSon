@@ -1,6 +1,6 @@
-import first from "@/assets/banner/1.jpeg";
-import second from "@/assets/banner/2.png";
-import third from "@/assets/banner/3.jpg";
+import first from "@/assets/banner/optimized/1.jpg";
+import second from "@/assets/banner/optimized/2.jpg";
+import third from "@/assets/banner/optimized/3.jpg";
 import type { BannerItem } from "./types";
 
 export const banners: BannerItem[] = [
