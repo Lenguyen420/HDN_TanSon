@@ -10,7 +10,7 @@ export default function RegistrationProfileDetails({ application, avatar, onEdit
     ["Họ và tên", name], ["Ngày sinh", formatDate((member ? member.birthDate : application.birthDate) || "")],
     ["Số điện thoại", member ? member.phone : application.phone], ["Email", member ? member.email : application.email],
   ];
-  const business = [["Doanh nghiệp", member?.company || application.company], ["Chức vụ", member ? member.jobTitle : application.jobTitle],
+  const business = [["Doanh nghiệp", member?.company || application.company], ["Ngày thành lập", formatDate((member?.companyFoundedAt ?? application.companyFoundedAt) || "")], ["Chức vụ", member ? member.jobTitle : application.jobTitle],
     ["Địa chỉ doanh nghiệp", member ? member.companyAddress : application.companyAddress], ["Mã số thuế đã đăng ký", application.taxCode]];
   return <>
     <section className="personal-summary"><MemberPhoto member={{ id: application.id, name, avatar, initials: name.trim().split(/\s+/).slice(-2).map((part) => part[0]).join(""), company: application.company, position: member?.position || "", isBoard: member?.isBoard || false }}/><div><span className="overline">{member ? "HỒ SƠ HỘI VIÊN" : "HỒ SƠ ĐĂNG KÝ"}</span><h2>{name}</h2><p>{member?.company || application.company}</p><span className={"status-pill" + (application.status === "approved" ? " success" : "")}>{states[application.status]}</span></div></section>

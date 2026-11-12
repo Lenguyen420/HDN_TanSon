@@ -5,6 +5,7 @@ import Banner from "./banner";
 import FollowCard from "./follow-card";
 import Utilities from "./utilities";
 import ExecutiveBoard from "./executive-board";
+import HomeMembers from "./members";
 import ContentBrowser from "./content-browser";
 import type { AppData, ContentCategory, UtilityId } from "@/datas/types";
 
@@ -37,6 +38,7 @@ export default function Home({ data, onNavigate, onOpenContent, onOpenUtility, o
           else if (id !== "giao-thuong") onOpenUtility(id);
         }} />
         <ExecutiveBoard members={data.members.filter((member) => member.isBoard)} isDemo={data.isDemo} accessRequired={data.memberAccess === "required"} onViewAll={() => onNavigate("members")} />
+        <HomeMembers members={data.memberAccess === "required" ? [] : data.members} onViewAll={() => onNavigate("members")} />
         <ContentBrowser data={data} category={contentCategory} onChangeCategory={onChangeCategory} onOpenContent={onOpenContent} onOpenArticle={onOpenArticle} />
         <div className="community-note">
           <span /><p>{data.association.slogan}</p><span />

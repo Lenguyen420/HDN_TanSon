@@ -5,6 +5,6 @@ import AppIcon from "@/components/icons";
 
 export default function ActivityRecord({ record, onOpen }: { record: Record; onOpen: (id: string) => void }) {
   return (
-    <article className="surface-card activity-record"><span className={`activity-record-status ${record.status}`}>{activityStatuses.find((status) => status.value === record.status)?.label}</span><h3>{record.title}</h3><p><AppIcon name="calendar" />{formatDate(record.date)}</p><p><AppIcon name="building" />{record.venue}</p><button className="text-button" type="button" onClick={() => onOpen(record.eventId)}>Xem sự kiện <AppIcon name="arrow" /></button></article>
+    <article className="surface-card activity-record"><span className={`activity-record-status ${record.status}`}>{activityStatuses.find((status) => status.value === record.status)?.label}</span><h3>{record.title}</h3><p><AppIcon name="calendar" />{record.date ? formatDate(record.date) : "Chưa cập nhật ngày sự kiện"}</p><p><AppIcon name="building" />{record.venue}</p>{record.eventAvailable !== false && <button className="text-button" type="button" onClick={() => onOpen(record.eventId)}>Xem sự kiện <AppIcon name="arrow" /></button>}</article>
   );
 }

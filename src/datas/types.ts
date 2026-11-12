@@ -22,6 +22,7 @@ export interface Member {
   email?: string | null;
   joinedAt?: string | null;
   companyAddress?: string | null;
+  companyFoundedAt?: string | null;
 }
 export interface Notification {
   id: string; title: string; description: string; date: string; unread: boolean;
@@ -32,7 +33,7 @@ export interface Notification {
   related?: { category: ContentCategory; articleId: string };
 }
 export interface MemberProfile { memberId: string; memberCode: string; joinedAt: string; status: string; }
-export interface RegistrationCompany { id: string; name: string; }
+export interface RegistrationCompany { id: string; name: string; companyFoundedAt?: string | null; }
 export interface RegistrationData { companies: RegistrationCompany[]; avatar?: string; }
 export interface RegistrationDraft {
   fullName: string;
@@ -42,6 +43,7 @@ export interface RegistrationDraft {
   companyId: string;
   unknownCompany: boolean;
   companyName: string;
+  companyFoundedAt: string;
   taxCode: string;
   companyAddress: string;
   position: string;
@@ -66,7 +68,7 @@ export interface ContentCollection {
 }
 export interface FeeRecord { id: string; year: number; title: string; amount: number; date: string; status: "paid" | "pending"; reference: string; }
 export type ActivityStatus = "registered" | "attended" | "absent" | "cancelled";
-export interface ActivityRecord { id: string; title: string; date: string; venue: string; status: ActivityStatus; eventId: string; }
+export interface ActivityRecord { id: string; title: string; date: string; venue: string; status: ActivityStatus; eventId: string; eventAvailable?: boolean; }
 export interface ProfileEdits {
   memberId: string;
   fullName: string;
@@ -89,7 +91,7 @@ export interface UtilityPageData {
 }
 export interface RegistrationProfile {
   id: string; avatar?: string; fullName: string; company: string; phone: string; email?: string; birthDate?: string;
-  jobTitle?: string; companyAddress?: string; taxCode?: string; date: string;
+  jobTitle?: string; companyAddress?: string; companyFoundedAt?: string; taxCode?: string; date: string;
   status: "pending" | "approved" | "rejected"; createdAt: string; reviewedAt?: string; rejectionReason?: string;
   member: (Member & { status: "active" | "inactive"; updatedAt?: string }) | null;
 }

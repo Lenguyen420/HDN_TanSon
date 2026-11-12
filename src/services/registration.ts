@@ -19,6 +19,7 @@ export async function submitRegistration(draft: RegistrationDraft, companies: Re
       ...(avatar ? {avatar} : {}),
       fullName: draft.fullName.trim(), phone: draft.phone.trim(), birthDate: draft.birthDate,
       email: draft.email.trim(), company, jobTitle: draft.position.trim(),
+      ...(draft.companyFoundedAt ? { companyFoundedAt: draft.companyFoundedAt } : {}),
       taxCode: draft.unknownCompany ? draft.taxCode.trim() : "",
       companyAddress: draft.unknownCompany ? draft.companyAddress.trim() : "",
     }),
@@ -35,7 +36,7 @@ export function clearRegistrationDraft() {
 const draftKey = "tanson-registration-draft";
 const emptyDraft: RegistrationDraft = {
   fullName: "", phone: "", birthDate: "", email: "", companyId: "", unknownCompany: false,
-  companyName: "", taxCode: "", companyAddress: "", position: "",
+  companyName: "", companyFoundedAt: "", taxCode: "", companyAddress: "", position: "",
 };
 
 export function readRegistrationDraft(companies: RegistrationCompany[]): RegistrationDraft {
@@ -79,5 +80,8 @@ export function isRegistrationValid(draft: RegistrationDraft, companies: Registr
     && date.toISOString().slice(0, 10) === draft.birthDate && draft.birthDate <= today;
   const validEmail = !draft.email.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email.trim());
   const validCompany = draft.unknownCompany ? Boolean(draft.companyName.trim()) : companies.some((company) => company.id === draft.companyId);
-  return Boolean(draft.fullName.trim() && validPhone && validDate && validEmail && validCompany);
+  const founded = draft.companyFoundedAt || "";
+  const foundedDate = new Date(`${founded}T00:00:00Z`);
+  const validFounded = !founded || /^\d{4}-\d{2}-\d{2}$/.test(founded) && Number.isFinite(foundedDate.getTime()) && foundedDate.toISOString().slice(0, 10) === founded && founded <= today;
+  return Boolean(validFounded && draft.fullName.trim() && validPhone && validDate && validEmail && validCompany);
 }

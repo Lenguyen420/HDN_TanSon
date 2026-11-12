@@ -162,3 +162,6 @@ Mặc định bước xác thực Zalo đang tắt (VITE_ENABLE_ZALO_AUTH=false)
 ## Video giới thiệu
 
 Video xuất hiện dưới tên Hội tại trang Giới thiệu khi backend trả introductionVideoUrl. Admin cập nhật ở Thông tin Hội → Giới thiệu Hội → Video giới thiệu: chọn file MP4/WebM từ máy tính (tối đa 100 MB) hoặc dán link YouTube, rồi bấm Lưu thông tin Hội. File tải lên được lưu trong MongoDB theo từng phần 2 MB và hỗ trợ phát/tua qua HTTP Range. Video không tự phát; xóa video để ẩn. Các URL HTTPS cũ vẫn dùng được. Không đưa video vào bundle Mini App. Deploy backend trước admin và Mini App.
+
+
+Ngày thành lập doanh nghiệp (companyFoundedAt) là trường tùy chọn dưới tên đơn vị trong form đăng ký; ngày hợp lệ không được ở tương lai. Backend và admin cần deploy bản hỗ trợ trường này trước Mini App. Trang chủ hiển thị tối đa 6 hội viên dưới Ban chấp hành và nút Xem tất cả mở danh bạ. Lịch sử tham gia lấy đăng ký/điểm danh sự kiện theo mã theo dõi trên thiết bị, hiển thị trạng thái server và mở sự kiện tương ứng. Đổi thiết bị/xóa dữ liệu trình duyệt có thể mất khả năng truy xuất lịch sử cũ.

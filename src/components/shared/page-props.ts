@@ -33,6 +33,8 @@ export interface NotificationDetailPageProps {
   onOpenArticle: (category: ContentCategory, articleId: string) => void;
 }
 export interface UtilityPageProps {
+  eventHistoryLoading?: boolean;
+  eventHistoryError?: string;
   data: AppData;
   onBack: () => void;
   onOpenArticle: (category: ContentCategory, articleId: string) => void;

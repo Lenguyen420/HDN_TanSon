@@ -21,6 +21,7 @@ export default function MemberDetail({ member, isDemo, onClose }: MemberDetailPr
 
   const rows = [
     { label: "Doanh nghiệp", value: member.company },
+    { label: "Ngày thành lập", value: member.companyFoundedAt ? formatDate(member.companyFoundedAt) : "Chưa có" },
     { label: "Ngày sinh", value: member.birthDate ? formatDate(member.birthDate) : "Chưa có" },
     { label: "Số điện thoại", value: member.phone || "Chưa có" },
     { label: "Email", value: member.email || "Chưa có" },

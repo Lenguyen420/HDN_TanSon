@@ -11,7 +11,7 @@ import giaoThuongIcon from "@/assets/icon/giao-thuong.png";
 export const utilities: Utility[] = [
   { id: "about", title: "Giới thiệu", icon: aboutIcon, description: "Hội Doanh nghiệp Phường Tân Sơn là nơi kết nối cộng đồng doanh nghiệp, chia sẻ cơ hội hợp tác và đồng hành phát triển." },
   { id: "event-assistant", title: "Sự kiện", icon: eventAssistantIcon, description: "Hỗ trợ tìm hiểu chương trình, lịch trình và thông tin tham dự sự kiện của Hội.\nTính năng trợ lý đang được cập nhật." },
-  { id: "activities", title: "Lịch sử tham gia", icon: participationIcon, description: "Dữ liệu mẫu\n20/10/2026 · Giao lưu kết nối doanh nghiệp\n05/10/2026 · Cà phê doanh nhân\n15/09/2026 · Hội thảo chuyển đổi số" },
+  { id: "activities", title: "Lịch sử tham gia", icon: participationIcon, description: "Theo dõi các sự kiện đã đăng ký, điểm danh và trạng thái tham gia." },
   { id: "giao-thuong", title: "Giao thương", icon: giaoThuongIcon, description: "Kết nối giao thương giữa các doanh nghiệp.", comingSoon: true },
   { id: "tan-son-ward", title: "UBND phường Tân Sơn", icon: tanSonWardIcon, description: "Mở Mini App UBND phường Tân Sơn." },
   { id: "fees", title: "Hội phí", icon: membershipFeeIcon, description: "Theo dõi khoản hội phí cần đóng và lịch sử đóng hội phí." },

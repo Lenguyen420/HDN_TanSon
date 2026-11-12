@@ -122,16 +122,19 @@ test("public API integration", async (t) => {
   });
 
   await t.test("submits only fields accepted by public registration DTO", async () => {
-    const draft = { ...services.readRegistrationDraft([]), fullName: " Nguyễn Văn A ", phone: "0901234567", birthDate: "1990-01-01", companyName: " Công ty A ", position: " Giám đốc ", taxCode: "123", companyAddress: "Tân Sơn" };
+    const draft = { ...services.readRegistrationDraft([]), fullName: " Nguyễn Văn A ", phone: "0901234567", birthDate: "1990-01-01", companyName: " Công ty A ", position: " Giám đốc ", taxCode: "123", companyAddress: "Tân Sơn", companyFoundedAt: "2010-05-20" };
     global.fetch = async (url, options) => {
       assert.equal(url, "http://localhost:4000/api/v1/public/registrations");
       assert.equal(options.method, "POST");
       const { notificationToken, ...submitted } = JSON.parse(options.body);
       assert.match(notificationToken, /^[a-f0-9]{64}$/);
-      assert.deepEqual(submitted, { fullName: "Nguyễn Văn A", phone: "0901234567", birthDate: "1990-01-01", email: "", company: "Công ty A", jobTitle: "Giám đốc", taxCode: "123", companyAddress: "Tân Sơn" });
+      assert.deepEqual(submitted, { fullName: "Nguyễn Văn A", phone: "0901234567", birthDate: "1990-01-01", email: "", company: "Công ty A", jobTitle: "Giám đốc", taxCode: "123", companyAddress: "Tân Sơn", companyFoundedAt: "2010-05-20" });
       return reply({ data: { id: "receipt-1", status: "pending" }, message: "Đã tiếp nhận" }, 201);
     };
     assert.equal((await services.submitRegistration(draft, [])).data.id, "receipt-1");
+    assert.equal(services.isRegistrationValid({ ...draft, companyFoundedAt: "2099-01-01" }, [], "2026-11-12"), false);
+    assert.equal(services.isRegistrationValid({ ...draft, companyFoundedAt: "2026-02-30" }, [], "2026-11-12"), false);
+    assert.equal(services.isRegistrationValid({ ...draft, companyFoundedAt: "" }, [], "2026-11-12"), true);
   });
 
   await t.test("surfaces validation, network and invalid response errors", async () => {

@@ -98,7 +98,7 @@ function buildAppData(): AppData {
             members.findIndex((item) => item.company === member.company) ===
             index,
         )
-        .map((member) => ({ id: member.id, name: member.company })),
+        .map((member) => ({ id: member.id, name: member.company, ...(member.companyFoundedAt ? { companyFoundedAt: member.companyFoundedAt } : {}) })),
     },
     utilityPages: {
       about: {

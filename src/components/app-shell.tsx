@@ -1,3 +1,4 @@
+import { buildEventHistory } from "@/services/event-history";
 import useEventUpdates from "@/components/shared/use-event-updates";
 import { features } from "@/datas/features";
 import EventCalendarPage from "@/pages/event-calendar/event-calendar";
@@ -115,8 +116,9 @@ export default function AppShell() {
       members: member ? [...sourceData.members.filter((item) => item.id !== member.id), member] : sourceData.members,
       profile: member ? { memberId: member.id, memberCode: member.id, joinedAt: member.joinedAt || "", status: "Đang hoạt động" } : sourceData.profile,
     } : sourceData;
-    return application ? personalized : applyProfileEdits(personalized, profileEdits);
-  }, [sourceData, profileEdits, zaloIdentity, registrationProfiles]);
+    const result = application ? personalized : applyProfileEdits(personalized, profileEdits);
+    return { ...result, utilityPages: { ...result.utilityPages, activities: buildEventHistory(result.content.events.articles, eventParticipations) } };
+  }, [sourceData, profileEdits, zaloIdentity, registrationProfiles, eventParticipations]);
   useEffect(() => {
     const target = (registrationProfiles || []).find((item) => item.status === "approved" && item.member) || registrationProfiles?.[0];
     const avatar = zaloIdentity?.user?.avatar;
@@ -176,7 +178,7 @@ export default function AppShell() {
   if (!screen && ["members", "register"].includes(activeTab)) resources.push("members");
   if (!screen && activeTab === "notifications" || screen?.kind === "notification") resources.push("notifications");
   if (screen?.kind === "list" || screen?.kind === "article") resources.push(screen.category === "member-visits" ? "visits" : screen.category);
-  if (screen?.kind === "utility" && screen.id === "event-assistant") resources.push("events");
+  if (screen?.kind === "utility" && ["event-assistant", "activities"].includes(screen.id)) resources.push("events");
   if (screen?.kind === "event-workspace" || screen?.kind === "event-resource") resources.push("events");
   const resourceKey = [...new Set(resources)].sort().join(",");
   const previousAttempt = useRef(loadAttempt);
@@ -331,7 +333,7 @@ export default function AppShell() {
   const renderPage = () => {
     if (!data) return null;
     const screen = screens[screens.length - 1];
-    const common = { data, onBack: goBack, onOpenArticle: openArticle, onOpenContent: openContent,
+    const common = { data, eventHistoryLoading: eventUpdatesLoading || (screen?.kind === "utility" && screen.id === "activities" && loading), eventHistoryError: eventUpdatesError, onBack: goBack, onOpenArticle: openArticle, onOpenContent: openContent,
       onOpenEventSection: (section: EventSection) => openScreen({ kind: "event-workspace", section }),
       onOpenEventResource: (articleId: string, section: EventResourceSection) => openEvent(articleId, section),
     };
