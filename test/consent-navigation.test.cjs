@@ -23,6 +23,7 @@ test("protected tab navigation waits for consent and database save", async (t) =
         else if (path.endsWith("shared/use-registration-notifications")) contents = 'export default () => ({notifications: [], profiles: globalThis.navigationHarness.registrationProfiles || [], setProfiles: () => {}, error: ""});';
         else if (path.endsWith("shared/use-event-updates")) contents = 'export default () => ({notifications: [], participations: [], setParticipations: () => {}, loading: false, error: ""});';
         else if (path === "zmp-ui") contents = 'export const Page = "page";';
+        else if (path === "@/datas/features") contents = 'export const features = {get zaloAuthentication() {return globalThis.navigationHarness.authEnabled !== false;}};';
         else if (path.endsWith("services/mini-app")) contents = 'export const openTanSonMiniApp = async () => {};';
         else if (path.endsWith("services/event-workspace")) contents = 'export const getEventAttendance = async () => null; export const checkInEvent = async () => ({}); export const joinEvent = async () => ({}); export const openEventFile = async () => {};';
         else if (path.endsWith("services/member-access")) contents = 'export const saveZaloSdkProfile = () => globalThis.navigationHarness.authenticate();';
@@ -47,6 +48,17 @@ test("protected tab navigation waits for consent and database save", async (t) =
   }
   const nav = () => find(render(), node => node.type === "@/components/bottom-navigation").props;
   t.after(() => { delete global.navigationHarness; });
+  await t.test("web preview opens profile and registration without invoking Zalo", async () => {
+    reset();
+    global.navigationHarness.authEnabled = false;
+    let calls = 0;
+    global.navigationHarness.authenticate = async () => { calls++; throw Error("Zalo unavailable on web"); };
+    await nav().onChange("profile");
+    assert.equal(nav().activeTab, "profile");
+    await nav().onChange("register");
+    assert.equal(nav().activeTab, "register");
+    assert.equal(calls, 0);
+  });
   await t.test("deduplicates requests and reuses the saved profile for either tab", async () => {
     reset(); let resolve, calls = 0;
     global.navigationHarness.authenticate = () => { calls++; return new Promise(r => {resolve = r;}); };

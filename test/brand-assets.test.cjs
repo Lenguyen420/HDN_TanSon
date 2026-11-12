@@ -17,20 +17,11 @@ test("branding keeps the original image bytes and loads them as cacheable files"
     const { utilities } = await server.ssrLoadModule("/src/datas/utilities.ts");
     const assets = [
       [association.logo, "src/assets/logo/logo.jpg"],
-      ...utilities.map((utility, index) => [
-        utility.icon,
-        "src/assets/icon/" +
-          [
-            "about",
-            "membership-fee",
-            "participation",
-            "sponsorship",
-            "contact",
-            "event-assistant",
-            "tan-son-ward",
-          ][index] +
-          ".png",
-      ]),
+      ...utilities.map((utility) => {
+        const names = { about: "about", fees: "membership-fee", activities: "participation", sponsorships: "sponsorship", contact: "contact", "event-assistant": "event-assistant", "tan-son-ward": "tan-son-ward", "giao-thuong": "giao-thuong" };
+        assert.ok(names[utility.id], "Missing icon mapping for " + utility.id);
+        return [utility.icon, "src/assets/icon/" + names[utility.id] + ".png"];
+      }),
     ];
     for (const [url, file] of assets) {
       assert.ok(

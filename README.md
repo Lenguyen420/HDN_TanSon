@@ -154,3 +154,7 @@ Tài liệu/biên bản tải từ máy trên Admin được lưu MongoDB GridFS
 Người dùng chọn Tham gia tại chi tiết sự kiện, nhập tên/đơn vị. Đăng ký và điểm danh dùng chung mã theo dõi trên thiết bị. Backend trả nhắc lịch trong mục Thông báo từ 30 phút trước giờ bắt đầu; đăng ký trong 30 phút cuối nhận nhắc ngay. Sau giờ kết thúc, đăng ký chưa điểm danh được đánh dấu Vắng mặt và xuất hiện trong thông báo admin. Lịch sự kiện phải có đủ giờ bắt đầu/kết thúc dạng HH:mm - HH:mm.
 
 Thông báo chỉ nằm trong ứng dụng, cập nhật khi đang mở hoặc khi mở lại; không gửi tin Zalo bên ngoài ứng dụng. Thời điểm được tính từ lịch hiện tại trên server, nên đổi lịch sẽ cập nhật lại nhắc lịch/trạng thái. Không cần cron cho hình thức thông báo trong ứng dụng này. Deploy backend, dashboard quản trị rồi Mini App để áp dụng.
+
+## Tạm kiểm tra giao diện web
+
+Mặc định bước xác thực Zalo đang tắt (VITE_ENABLE_ZALO_AUTH=false). Các tab Cá nhân và Đăng ký mở trực tiếp trên trình duyệt; hồ sơ đã lưu vẫn lấy qua mã theo dõi trên thiết bị, không tạo danh tính Zalo giả. Khi cần khôi phục luồng xác thực, đặt VITE_ENABLE_ZALO_AUTH=true trong môi trường chạy/build rồi khởi động lại hoặc build/deploy lại.

@@ -1,4 +1,5 @@
 import useEventUpdates from "@/components/shared/use-event-updates";
+import { features } from "@/datas/features";
 import EventCalendarPage from "@/pages/event-calendar/event-calendar";
 import EventAttendancePage from "@/pages/event-attendance/event-attendance";
 import EventDocumentsPage from "@/pages/event-documents/event-documents";
@@ -243,7 +244,7 @@ export default function AppShell() {
 
   const navigationAttempt = useRef(0);
   const navigate = async (tab: NavigationTab) => {
-    const needsIdentity = (tab === "profile" || tab === "register") && !sourceData?.isDemo;
+    const needsIdentity = features.zaloAuthentication && (tab === "profile" || tab === "register") && !sourceData?.isDemo;
     if (needsIdentity && authentication.current) return;
     const attempt = ++navigationAttempt.current;
     if (needsIdentity && !await authenticate()) return;

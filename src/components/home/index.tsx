@@ -34,7 +34,7 @@ export default function Home({ data, onNavigate, onOpenContent, onOpenUtility, o
         <Utilities utilities={data.utilities} onSelect={(index) => {
           const { id } = data.utilities[index];
           if (id === "tan-son-ward") onOpenWardMiniApp();
-          else onOpenUtility(id);
+          else if (id !== "giao-thuong") onOpenUtility(id);
         }} />
         <ExecutiveBoard members={data.members.filter((member) => member.isBoard)} isDemo={data.isDemo} accessRequired={data.memberAccess === "required"} onViewAll={() => onNavigate("members")} />
         <ContentBrowser data={data} category={contentCategory} onChangeCategory={onChangeCategory} onOpenContent={onOpenContent} onOpenArticle={onOpenArticle} />

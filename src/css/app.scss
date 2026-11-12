@@ -19,9 +19,9 @@ button:focus-visible, input:focus-visible { outline: 3px solid #7cabff; outline-
 }
 .home-header { position: relative; display: flex; align-items: center; gap: 13px; margin: 0 4px 29px; min-height: 72px; }
 .association-logo { flex-shrink: 0; width: 76px; height: 76px; object-fit: contain; border-radius: 50%; background: white; image-rendering: auto; }
-.header-copy { min-width: 0; }
-.header-eyebrow { font-size: 8px; line-height: 1.5; font-weight: 700; letter-spacing: 1.1px; margin: 0 0 5px; color: #285789; }
-.home-header h1 { font-size: clamp(17px, 4.7vw, 25px); line-height: 1.35; font-weight: 750; letter-spacing: -.5px; margin: 0; color: #102e51; }
+.header-copy { min-width: 0; flex: 1; }
+.header-eyebrow { font-size: 11px; line-height: 1.5; font-weight: 700; letter-spacing: .25px; margin: 0 0 6px; color: #285789; }
+.home-header h1 { font-size: clamp(12px, 3.5vw, 21px); line-height: 1.35; font-weight: 750; letter-spacing: -.35px; white-space: nowrap; margin: 0; color: #102e51; }
 .header-greeting { margin: 5px 0 0; font-size: 12px; font-style: italic; color: #456b91; }
 .banner { position: relative; overflow: hidden; border: 5px solid white; border-radius: 24px; box-shadow: 0 9px 16px #1f365a20; isolation: isolate; touch-action: pan-y; }
 .banner-track { display: flex; transition: transform .5s ease; }
@@ -111,9 +111,9 @@ button:focus-visible, input:focus-visible { outline: 3px solid #7cabff; outline-
   .home-hero { padding-left: 23px; padding-right: 23px; }
   .home-content { padding-left: 23px; padding-right: 23px; }
   .home-header { gap: 17px; }
-  .home-header h1 { font-size: 25px; }
+  .home-header h1 { font-size: clamp(16px, 3.5vw, 21px); }
   .header-greeting { font-size: 14px; }
-  .header-eyebrow { font-size: 9px; }
+  .header-eyebrow { font-size: 13px; }
   .association-logo { width: 88px; height: 88px; }
   .follow-card { padding: 24px 22px; }
   .follow-card h2 { font-size: 19px; }
@@ -128,8 +128,8 @@ button:focus-visible, input:focus-visible { outline: 3px solid #7cabff; outline-
 @media (max-width: 350px) {
   .home-header { gap: 9px; margin-left: 0; margin-right: 0; }
   .association-logo { width: 62px; height: 62px; }
-  .header-eyebrow { font-size: 6px; }
-  .home-header h1 { font-size: 16px; }
+  .header-eyebrow { font-size: 10px; }
+  .home-header h1 { font-size: clamp(11px, 3.8vw, 13px); }
   .header-greeting { font-size: 10px; }
   .follow-card { padding: 16px 12px; gap: 8px; }
   .follow-card h2 { font-size: 13px; }
@@ -750,3 +750,6 @@ textarea:focus-visible, select:focus-visible { outline: 3px solid #7cabff; outli
 .profile-editor-form fieldset{margin:0;padding:0;border:0;min-width:0}.profile-editor-form fieldset:disabled{opacity:.65}
 
 .member-avatar>.directory-photo{width:100%;height:100%;border-radius:inherit;border:0;background:transparent}.member-avatar>.directory-photo>span{font-size:inherit;color:inherit}
+
+.utility:disabled { cursor: default; }
+.utility-icon--giao-thuong img { object-fit: cover; transform: scale(1.38); }
