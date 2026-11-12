@@ -75,6 +75,7 @@ export interface ProfileEdits {
   company: string;
   jobTitle: string;
   companyAddress: string;
+  taxCode?: string;
 }
 export interface SponsorshipRecord { id: string; title: string; date: string; amount: number; kind: "cash" | "in-kind"; description: string; status: string; }
 export interface UtilityPageData {

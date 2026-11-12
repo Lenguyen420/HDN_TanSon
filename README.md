@@ -127,3 +127,10 @@ Deploy backend, admin và Mini App để sử dụng các API mới. Hồ sơ c�
 API kết quả theo mã theo dõi trả thêm profiles của đúng hồ sơ sở hữu mã. Trang Cá nhân hiển thị thông tin cá nhân, doanh nghiệp và thông tin hệ thống; sau khi duyệt hiển thị thêm mã hội viên, ngày gia nhập, vai trò và trạng thái hiện tại từ collection members. Dữ liệu này cập nhật cùng chu kỳ thông báo 5 giây. Nếu bị từ chối, hiển thị lý do đã lưu. Trạng thái pending vẫn hiển thị hồ sơ đã gửi. Không tự liên kết tài khoản Zalo hoặc mở quyền admin/danh bạ riêng chỉ vì có tên/ảnh SDK.
 
 Các trường hệ thống chỉ đọc từ backend; không dùng sửa hồ sơ cục bộ cho hồ sơ được theo dõi bằng mã. Mã theo dõi lưu trên thiết bị gửi hồ sơ, nên xóa bộ nhớ hoặc đổi thiết bị không tự tìm lại được hồ sơ.
+
+
+## Chỉnh sửa Cá nhân và Hỗ trợ
+
+Trang Cá nhân hiện thay khối Thông tin hệ thống bằng Liên hệ hỗ trợ, Về chúng tôi, Điều khoản & chính sách. Liên hệ và giới thiệu dùng dữ liệu đã có từ cấu hình Hội; trang điều khoản mở được nhưng để trống theo yêu cầu. Chỉnh sửa thông tin cho phép thay tên, ngày sinh, số điện thoại, email, doanh nghiệp, chức vụ, địa chỉ và mã số thuế. Hồ sơ có mã theo dõi lưu trực tiếp lên MongoDB; với hồ sơ đã duyệt, backend cập nhật hồ sơ đăng ký và hội viên cùng transaction. Từ chối lưu thì giữ biểu mẫu và hiện lỗi; không báo lưu thành công trước khi API hoàn tất.
+
+Không chỉnh sửa mã hội viên, ngày gia nhập, trạng thái xét duyệt hoặc vai trò. Quyền sửa bằng mã theo dõi đã lưu trên thiết bị, không dùng ID Zalo tự khai báo. Deploy lại backend và Mini App trước khi dùng API mới.

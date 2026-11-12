@@ -28,3 +28,12 @@ export async function getRegistrationUpdates(): Promise<{data: Notification[]; p
 }
 
 export async function getRegistrationNotifications(): Promise<Notification[]> { return (await getRegistrationUpdates()).data; }
+
+export async function updateRegistrationProfile(id: string, edits: import("@/datas/types").ProfileEdits) {
+  const tokens = registrationTokens();
+  if (!tokens.length) throw new Error("Không còn mã theo dõi hồ sơ trên thiết bị này.");
+  const { memberId, ...fields } = edits;
+  const result = await apiRequest<{data: Notification[]; profiles: RegistrationProfile[]}>("public/registration-profile/" + encodeURIComponent(id), {method:"PUT",body:JSON.stringify({...fields,tokens})});
+  announceRegistrationSubmitted();
+  return result.profiles;
+}

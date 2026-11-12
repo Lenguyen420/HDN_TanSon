@@ -23,6 +23,7 @@ test("protected tab navigation waits for consent and database save", async (t) =
         else if (path.endsWith("shared/use-registration-notifications")) contents = 'export default () => ({notifications: [], error: ""});';
         else if (path === "zmp-ui") contents = 'export const Page = "page";';
         else if (path.endsWith("services/member-access")) contents = 'export const saveZaloSdkProfile = () => globalThis.navigationHarness.authenticate();';
+        else if (path.endsWith("services/registration-notifications")) contents = 'export const updateRegistrationProfile = async () => [];';
         else if (path.endsWith("services/profile")) contents = 'export const readProfileEdits = () => null; export const applyProfileEdits = data => data; export const saveProfileEdits = () => {};';
         else if (path.endsWith("services/association")) contents = 'export const getAppData = async () => globalThis.navigationHarness.data;';
         else if (path.endsWith("services/notifications")) contents = 'export const readNotificationState = () => ({}); export const saveNotificationState = () => true;';

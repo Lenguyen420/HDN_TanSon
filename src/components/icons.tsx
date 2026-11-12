@@ -1,6 +1,8 @@
 import { ReactNode, SVGProps } from "react";
-export type IconName = "home" | "register" | "members" | "bell" | "user" | "info" | "wallet" | "calendar" | "handshake" | "phone" | "arrow" | "check" | "close" | "building";
+export type IconName = "home" | "register" | "members" | "bell" | "user" | "info" | "wallet" | "calendar" | "handshake" | "phone" | "arrow" | "check" | "close" | "building" | "chat" | "document";
 const paths: Record<IconName, ReactNode> = {
+  chat: <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 9 9 0 0 1-4-.9L3 21l1.8-5.3a8.5 8.5 0 1 1 16.2-4.2Z" />,
+  document: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 12h8M8 16h8"/></>,
   home: <><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z" /><path d="M9 21V12h6v9" /></>,
   register: <><path d="M14 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-9" /><path d="m10 14 1-4 8-8 3 3-8 8-4 1Z" /></>,
   members: <><circle cx="9" cy="7" r="3" /><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 4v3" /></>,

@@ -24,5 +24,5 @@ export default function useRegistrationNotifications() {
     document.addEventListener("visibilitychange", wake);
     return () => { active = false; window.clearInterval(timer); window.removeEventListener("focus", wake); window.removeEventListener("storage", wake); window.removeEventListener("tanson-registration-updated", wake); document.removeEventListener("visibilitychange", wake); };
   }, []);
-  return { notifications, profiles, error };
+  return { notifications, profiles, setProfiles, error };
 }

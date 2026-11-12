@@ -738,3 +738,12 @@ textarea:focus-visible, select:focus-visible { outline: 3px solid #7cabff; outli
   .support-contact-dialog > h2 { font-size: 25px; }
   .support-contact-link { min-height: 53px; font-size: 16px; }
 }
+
+.profile-support{margin:22px 0}.profile-support>h2{margin:0 0 14px;font-size:18px;color:#475569;font-weight:750}
+.profile-support-list{overflow:hidden;background:white;border:1px solid #e1e7f0;border-radius:22px;box-shadow:0 5px 16px #1e3a5f08}
+.profile-support-list>button{display:flex;align-items:center;gap:15px;width:100%;padding:19px 16px;text-align:left;border:0;background:white;cursor:pointer}
+.profile-support-list>button+button{border-top:1px solid #edf1f7}.profile-support-list>button:active{background:#f5f9ff}.profile-support-list>button:focus-visible{outline:3px solid #93c5fd;outline-offset:-4px}
+.profile-support-icon{display:grid;place-items:center;flex-shrink:0;width:48px;height:48px;border:1px solid #d5e3f8;border-radius:16px;background:#edf7ff;color:#2861d7;box-shadow:0 5px 12px #1e3a5f0d}
+.profile-support-copy{min-width:0;flex:1;display:grid;gap:5px}.profile-support-copy strong{font-size:15px;color:#17364b;font-weight:750}.profile-support-copy>span{font-size:12px;color:#6b7a8e;line-height:1.5}.profile-support-arrow{color:#9ba7b5;width:18px;flex-shrink:0}
+
+.profile-editor-form fieldset{margin:0;padding:0;border:0;min-width:0}.profile-editor-form fieldset:disabled{opacity:.65}

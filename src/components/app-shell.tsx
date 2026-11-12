@@ -31,12 +31,16 @@ import { saveZaloSdkProfile, type MemberIdentity } from "@/services/member-acces
 
 import useRegistrationNotifications from "@/components/shared/use-registration-notifications";
 
+import PoliciesPage from "@/pages/policies/policies";
+import { updateRegistrationProfile } from "@/services/registration-notifications";
+
 type Screen =
   | { kind: "utility"; id: UtilityId }
   | { kind: "list"; category: ContentCategory }
   | { kind: "article"; category: ContentCategory; articleId: string }
   | { kind: "notification"; notificationId: string }
-  | { kind: "profile-edit" };
+  | { kind: "profile-edit" }
+  | { kind: "policies" };
 
 const utilityPages: Record<UtilityId, ComponentType<UtilityPageProps>> = {
   about: AboutPage, fees: FeesPage, activities: ActivitiesPage,
@@ -50,7 +54,7 @@ const detailPages: Record<ContentCategory, ComponentType<ArticlePageProps>> = {
 };
 
 export default function AppShell() {
-  const { notifications: registrationNotices, profiles: registrationProfiles, error: registrationNoticeError } = useRegistrationNotifications();
+  const { notifications: registrationNotices, profiles: registrationProfiles, setProfiles: setRegistrationProfiles, error: registrationNoticeError } = useRegistrationNotifications();
   const [sourceData, setData] = useState<AppData | null>(null);
   const [profileEdits, setProfileEdits] = useState(readProfileEdits);
   const [profileSaveMessage, setProfileSaveMessage] = useState("");
@@ -174,7 +178,16 @@ export default function AppShell() {
     setScreens((current) => current.slice(0, -1));
   };
   const openArticle = (category: ContentCategory, articleId: string) => openScreen({ kind: "article", category, articleId });
-  const savePersonalProfile = (edits: ProfileEdits) => {
+  const savePersonalProfile = async (edits: ProfileEdits) => {
+    if (data?.registrationProfile) {
+      const expectedId = data.registrationProfile.member?.id || data.registrationProfile.id;
+      if (edits.memberId !== expectedId) throw new Error("Hồ sơ không khớp. Vui lòng mở lại trang Cá nhân.");
+      const profiles = await updateRegistrationProfile(data.registrationProfile.id, edits);
+      setRegistrationProfiles(profiles);
+      setProfileSaveMessage("Đã lưu thông tin của bạn lên hệ thống Hội.");
+      goBack();
+      return;
+    }
     if (!data || edits.memberId !== data.profile.memberId) throw new Error("Không tìm thấy hồ sơ hội viên.");
     saveProfileEdits(edits);
     setProfileEdits(edits);
@@ -210,6 +223,7 @@ export default function AppShell() {
     if (!data) return null;
     const screen = screens[screens.length - 1];
     const common = { data, onBack: goBack, onOpenArticle: openArticle, onOpenContent: openContent };
+    if (screen?.kind === "policies") return <PoliciesPage onBack={goBack} />;
     if (screen?.kind === "profile-edit") return <ProfileEditPage data={data} onBack={goBack} onSave={savePersonalProfile} />;
     if (screen?.kind === "notification") {
       const notification = notifications.find((notice) => notice.id === screen.notificationId);
@@ -234,7 +248,7 @@ export default function AppShell() {
       case "register": return <RegisterPage data={data} onBack={() => navigate("home")} />;
       case "members": return <MembersPage data={data} onBack={() => navigate("home")} />;
       case "notifications": return <NotificationsPage data={{ ...data, notifications }} onBack={() => navigate("home")} onOpenNotification={openNotification} onMarkAllRead={markAllNotificationsRead} storageMessage={notificationStorageMessage} />;
-      case "profile": return <ProfilePage data={data} onBack={() => navigate("home")} onEdit={() => { setProfileSaveMessage(""); openScreen({ kind: "profile-edit" }); }} saveMessage={profileSaveMessage} />;
+      case "profile": return <ProfilePage onSupport={(action) => action === "policies" ? openScreen({kind:"policies"}) : openScreen({kind:"utility",id:action})} data={data} onBack={() => navigate("home")} onEdit={() => { setProfileSaveMessage(""); openScreen({ kind: "profile-edit" }); }} saveMessage={profileSaveMessage} />;
       case "home": return <HomePage data={data} onNavigate={navigate} onOpenContent={openContent} onOpenUtility={(id) => openScreen({ kind: "utility", id })} onOpenArticle={openArticle} contentCategory={homeCategory} onChangeCategory={setHomeCategory} />;
     }
   };
