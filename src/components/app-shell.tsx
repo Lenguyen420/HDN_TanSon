@@ -24,6 +24,7 @@ import NewsPage from "@/pages/news/news";
 import EventsPage from "@/pages/events/events";
 import MemberVisitsPage from "@/pages/member-visits/member-visits";
 import AboutPage from "@/pages/about/about";
+import MapPage from "@/pages/map/map";
 import TradePage from "@/pages/trade/trade";
 import FeesPage from "@/pages/fees/fees";
 import ActivitiesPage from "@/pages/activities/activities";
@@ -60,6 +61,7 @@ type Screen =
   | { kind: "policies" };
 
 const utilityPages: Record<UtilityId, ComponentType<UtilityPageProps>> = {
+  "ban-do": MapPage,
   "giao-thuong": TradePage, about: AboutPage, fees: FeesPage, activities: ActivitiesPage,
   sponsorships: SponsorshipsPage, contact: ContactPage, "event-assistant": EventAssistantPage,
 };

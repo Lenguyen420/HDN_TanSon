@@ -11,8 +11,8 @@ export interface Association {
   memberSlogan?: string;
 }
 export interface BannerItem { id: string; image: string; alt: string; }
-export type UtilityId = "giao-thuong" | "about" | "fees" | "activities" | "sponsorships" | "contact" | "event-assistant";
-export interface Utility { id: UtilityId | "tan-son-ward" | "giao-thuong"; title: string; icon: string; description: string; comingSoon?: boolean; }
+export type UtilityId = "giao-thuong" | "about" | "fees" | "activities" | "sponsorships" | "contact" | "event-assistant" | "ban-do";
+export interface Utility { id: UtilityId | "tan-son-ward"; title: string; icon: string; description: string; comingSoon?: boolean; }
 export interface Member {
   id: string; name: string; position: string; company: string; initials: string; isBoard: boolean;
   jobTitle?: string;

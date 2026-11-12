@@ -200,6 +200,9 @@ button:focus-visible, input:focus-visible { outline: 3px solid #7cabff; outline-
 .surface-card h2, .utility-section-title { font-size: 19px; font-weight: 700; line-height: 1.5; color: #234681; margin: 0 0 12px; letter-spacing: -.3px; }
 .surface-card h3 { font-size: 15px; font-weight: 650; line-height: 1.6; margin: 0; color: #223d66; }
 .surface-card p { font-size: 14px; line-height: 1.85; color: #728098; margin: 8px 0 0; }
+.map-notice { text-align: center; padding: 32px 22px; }
+.map-notice > img { display: block; object-fit: contain; margin: 0 auto 22px; }
+.map-notice > .primary-button { margin-top: 26px; }
 .utility-section-title { margin-top: 24px; margin-bottom: 14px; }
 .overline { display: block; color: #7193bd; font-size: 10px; line-height: 1.6; font-weight: 700; letter-spacing: 1.3px; text-decoration: none; }
 .about-intro { text-align: center; padding-top: 26px; }

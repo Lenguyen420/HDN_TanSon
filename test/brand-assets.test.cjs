@@ -18,7 +18,7 @@ test("branding keeps the original image bytes and loads them as cacheable files"
     const assets = [
       [association.logo, "src/assets/logo/logo.jpg"],
       ...utilities.map((utility) => {
-        const names = { about: "about", fees: "membership-fee", activities: "participation", sponsorships: "sponsorship", contact: "contact", "event-assistant": "event-assistant", "tan-son-ward": "tan-son-ward", "giao-thuong": "giao-thuong" };
+        const names = { about: "about", fees: "membership-fee", activities: "participation", sponsorships: "sponsorship", contact: "contact", "event-assistant": "event-assistant", "tan-son-ward": "tan-son-ward", "giao-thuong": "giao-thuong", "ban-do": "ban-do" };
         assert.ok(names[utility.id], "Missing icon mapping for " + utility.id);
         return [utility.icon, "src/assets/icon/" + names[utility.id] + ".png"];
       }),
