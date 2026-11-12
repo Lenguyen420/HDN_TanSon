@@ -20,7 +20,7 @@ test("protected tab navigation waits for consent and database save", async (t) =
           export const useLayoutEffect = () => {};
         `;
         else if (path === "react/jsx-runtime") contents = 'export const jsx = (type, props) => ({type, props}); export const jsxs = jsx; export const Fragment = "fragment";';
-        else if (path.endsWith("shared/use-registration-notifications")) contents = 'export default () => ({notifications: [], error: ""});';
+        else if (path.endsWith("shared/use-registration-notifications")) contents = 'export default () => ({notifications: [], profiles: globalThis.navigationHarness.registrationProfiles || [], setProfiles: () => {}, error: ""});';
         else if (path === "zmp-ui") contents = 'export const Page = "page";';
         else if (path.endsWith("services/member-access")) contents = 'export const saveZaloSdkProfile = () => globalThis.navigationHarness.authenticate();';
         else if (path.endsWith("services/registration-notifications")) contents = 'export const updateRegistrationProfile = async () => []; export const syncRegistrationAvatar = async () => [];';
@@ -68,6 +68,14 @@ test("protected tab navigation waits for consent and database save", async (t) =
       await nav().onChange(tab); assert.equal(nav().activeTab, tab);
     }
   });
+  await t.test("private profile without avatar preserves the public directory portrait", async () => {
+    reset();
+    global.navigationHarness.data.members = [{id:"m1",name:"Hội viên",avatar:"https://example.com/member.jpg"}];
+    global.navigationHarness.registrationProfiles = [{id:"r1",status:"approved",member:{id:"m1",name:"Hội viên",company:"Công ty"}}];
+    const home = find(render(), node => node.type === "@/pages/home/home");
+    assert.equal(home.props.data.members.find(member => member.id === "m1").avatar, "https://example.com/member.jpg");
+  });
+
   await t.test("a late consent result does not override a newer navigation", async () => {
     reset(); let resolve;
     global.navigationHarness.authenticate = () => new Promise(r => {resolve = r;});

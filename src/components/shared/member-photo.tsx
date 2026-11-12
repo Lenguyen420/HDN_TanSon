@@ -7,7 +7,7 @@ export default function MemberPhoto({ member }: { member: Member }) {
   return (
     <span className="directory-photo" aria-hidden="true">
       <span>{initials}</span>
-      {source && <img key={source} src={source} alt="" loading="lazy" onError={(event) => { event.currentTarget.style.display = "none"; }} />}
+      {source && <img key={source} src={source} alt="" referrerPolicy="no-referrer" loading="lazy" onError={(event) => { event.currentTarget.style.display = "none"; }} />}
     </span>
   );
 }

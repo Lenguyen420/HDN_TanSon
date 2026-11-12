@@ -69,7 +69,9 @@ export default function AppShell() {
   const data = useMemo(() => {
     if (!sourceData) return null;
     const application = (registrationProfiles || []).find((item) => item.status === "approved" && item.member) || registrationProfiles?.[0];
-    const member = application?.member || zaloIdentity?.member;
+    const ownMember = application?.member || zaloIdentity?.member;
+    const directoryMember = ownMember ? sourceData.members.find((item) => item.id === ownMember.id) : undefined;
+    const member = ownMember ? { ...directoryMember, ...ownMember, avatar: ownMember.avatar || directoryMember?.avatar || application?.avatar || "" } : null;
     const personalized = zaloIdentity || application ? {
       ...sourceData,
       zaloUser: zaloIdentity?.user,
@@ -156,6 +158,24 @@ export default function AppShell() {
       .then(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
   }, [loadAttempt, resourceKey]);
+
+  useEffect(() => {
+    if (!resourceKey.split(",").includes("members")) return;
+    let active = true, busy = false;
+    const refreshMembers = async () => {
+      if (document.visibilityState === "hidden" || busy) return;
+      busy = true;
+      try {
+        const latest = await getAppData({resources:["members"],force:true});
+        if (active) setData(latest);
+      } catch { /* Preserve the last loaded directory while offline. */ }
+      finally { busy = false; }
+    };
+    const timer = window.setInterval(() => { void refreshMembers(); }, 30000);
+    const wake = () => { void refreshMembers(); };
+    window.addEventListener("focus", wake); document.addEventListener("visibilitychange", wake);
+    return () => { active = false; window.clearInterval(timer); window.removeEventListener("focus", wake); document.removeEventListener("visibilitychange", wake); };
+  }, [resourceKey]);
 
   useLayoutEffect(() => {
     scroller()?.scrollTo(0, pendingScroll.current);
