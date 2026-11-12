@@ -6,6 +6,7 @@ export interface AssociationSettings {
   name: string;
   slogan: string;
   introduction: string;
+  introductionVideoUrl?: string;
   mission: string;
   department: string;
   address: string;

@@ -80,7 +80,7 @@ export interface ProfileEdits {
 }
 export interface SponsorshipRecord { id: string; title: string; date: string; amount: number; kind: "cash" | "in-kind"; description: string; status: string; }
 export interface UtilityPageData {
-  about: { introduction: string; mission: string; values: { title: string; description: string }[]; fields: string[] };
+  about: { introduction: string; introductionVideoUrl?: string; mission: string; values: { title: string; description: string }[]; fields: string[] };
   fees: FeeRecord[];
   activities: ActivityRecord[];
   sponsorships: SponsorshipRecord[];

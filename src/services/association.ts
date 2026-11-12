@@ -104,6 +104,7 @@ function buildAppData(): AppData {
       about: {
         ...mockAppData.utilityPages.about,
         introduction: settings.introduction,
+        introductionVideoUrl: settings.introductionVideoUrl || "",
         mission: settings.mission,
       },
       fees: [],

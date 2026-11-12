@@ -7,7 +7,7 @@ global.localStorage = { getItem: () => null };
 
 async function loadServices(mock = false) {
   const { outputFiles } = buildSync({
-    stdin: { contents: 'export * from "./src/services/api"; export * from "./src/services/content"; export * from "./src/services/association"; export * from "./src/services/registration";', resolveDir: process.cwd() },
+    stdin: { contents: 'export * from "./src/services/introduction-video"; export * from "./src/services/api"; export * from "./src/services/content"; export * from "./src/services/association"; export * from "./src/services/registration";', resolveDir: process.cwd() },
     bundle: true, write: false, platform: "node", format: "esm",
     loader: { ".jpg": "dataurl", ".png": "dataurl", ".jpeg": "dataurl", ".svg": "dataurl", ".webp": "dataurl" },
     define: { "import.meta.env": JSON.stringify({ VITE_API_BASE_URL: "http://localhost:4000/api/v1/", VITE_USE_MOCK_DATA: String(mock) }) },
@@ -39,6 +39,18 @@ test("public API integration", async (t) => {
     assert.equal(banners[1].image, "https://cdn.example.com/new.webp");
   });
 
+  await t.test("introduction videos accept HTTPS and normalize YouTube embeds", () => {
+    assert.equal(services.introductionVideoSource(""), null);
+    assert.equal(services.introductionVideoSource("javascript:alert(1)"), null);
+    assert.equal(services.introductionVideoSource("http://cdn.example.com/video.mp4"), null);
+    assert.equal(services.introductionVideoSource("https://user:secret@example.com/video.mp4"), null);
+    assert.equal(services.introductionVideoSource("https://youtu.be/invalid"), null);
+    for(const url of ["https://youtu.be/M7lc1UVf-VE", "https://www.youtube.com/watch?v=M7lc1UVf-VE", "https://www.youtube.com/shorts/M7lc1UVf-VE"]) {
+      assert.equal(services.introductionVideoSource(url).url, "https://www.youtube-nocookie.com/embed/M7lc1UVf-VE");
+    }
+    assert.equal(services.introductionVideoSource("https://cdn.example.com/video.mp4").kind, "video");
+  });
+
   await t.test("loads every page", async () => {
     const urls = [];
     global.fetch = async (url) => {
@@ -54,7 +66,7 @@ test("public API integration", async (t) => {
       assert.ok(!options?.headers?.Authorization);
       assert.ok(!url.includes("/member/"));
       if (url.endsWith("settings")) return reply({ data: {
-        introduction: "Giới thiệu", mission: "Sứ mệnh", department: "Ban thư ký", address: "Tân Sơn", hours: "08:00", phone: "0901234567", email: "", zaloUrl: "",
+        introduction: "Giới thiệu", introductionVideoUrl: "https://cdn.example.com/intro.mp4", mission: "Sứ mệnh", department: "Ban thư ký", address: "Tân Sơn", hours: "08:00", phone: "0901234567", email: "", zaloUrl: "",
         assistantGreeting: "Xin chào", assistantQuestions: "Câu hỏi | Trả lời | chi tiết\n",
       } });
       const data = url.includes("/news?") ? [{ id: "news-real", image: "uploads/news/photo.jpg" }]
@@ -64,6 +76,7 @@ test("public API integration", async (t) => {
     };
     const data = await services.getAppData();
     assert.equal(data.isDemo, false);
+    assert.equal(data.utilityPages.about.introductionVideoUrl, "https://cdn.example.com/intro.mp4");
     assert.equal(data.members[0].id, "public-member");
     assert.equal(data.memberAccess, "granted");
     assert.equal(data.profile.memberId, "");

@@ -2,6 +2,7 @@ import UtilityLayout from "@/components/shared/utility-layout";
 import type { UtilityPageProps } from "@/components/shared/page-props";
 import AppIcon from "@/components/icons";
 import { introductionParagraphs } from "./introduction-paragraphs";
+import IntroductionVideo from "./introduction-video";
 
 export default function About({ data, onBack }: UtilityPageProps) {
   const about = data.utilityPages.about;
@@ -11,6 +12,7 @@ export default function About({ data, onBack }: UtilityPageProps) {
         <img src={data.association.logo} alt="Logo Hội Doanh nghiệp Phường Tân Sơn" />
         <span className="overline">{data.association.slogan}</span>
         <h2>{data.association.name}<br />{data.association.locality}</h2>
+        <IntroductionVideo key={about.introductionVideoUrl} url={about.introductionVideoUrl} />
         <div className="about-introduction">
           {introductionParagraphs(about.introduction).map((paragraph, index) => <p key={index}>{paragraph}</p>)}
         </div>

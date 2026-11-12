@@ -158,3 +158,7 @@ Thông báo chỉ nằm trong ứng dụng, cập nhật khi đang mở hoặc k
 ## Tạm kiểm tra giao diện web
 
 Mặc định bước xác thực Zalo đang tắt (VITE_ENABLE_ZALO_AUTH=false). Các tab Cá nhân và Đăng ký mở trực tiếp trên trình duyệt; hồ sơ đã lưu vẫn lấy qua mã theo dõi trên thiết bị, không tạo danh tính Zalo giả. Khi cần khôi phục luồng xác thực, đặt VITE_ENABLE_ZALO_AUTH=true trong môi trường chạy/build rồi khởi động lại hoặc build/deploy lại.
+
+## Video giới thiệu
+
+Video xuất hiện dưới tên Hội tại trang Giới thiệu khi backend trả introductionVideoUrl. Admin cập nhật ở Thông tin Hội → Giới thiệu Hội → Video giới thiệu. Hỗ trợ link YouTube hoặc MP4/WebM HTTPS, không tự phát. Để trống URL để ẩn. URL được lưu trong MongoDB; file video dùng nguồn bên ngoài, không đưa vào bundle Mini App. Deploy backend trước admin và Mini App.
