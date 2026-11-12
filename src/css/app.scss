@@ -756,6 +756,7 @@ textarea:focus-visible, select:focus-visible { outline: 3px solid #7cabff; outli
 
 .utility:disabled { cursor: default; }
 .utility-icon--giao-thuong img { object-fit: cover; transform: scale(1.38); }
+.utility-icon--map img { transform: translate(.8%, 3%) scale(1.76); }
 
 .about-video { margin: 20px 0; text-align: left; }
 .about-video-player { width: 100%; aspect-ratio: 16 / 9; background: #102337; border-radius: 14px; overflow: hidden; }

@@ -7,7 +7,7 @@ export default function Utilities({ utilities, onSelect }: { utilities: Utility[
       <div className="utilities-grid">
         {utilities.map((item, index) => (
           <button type="button" className="utility" key={item.id} disabled={item.comingSoon} onClick={() => onSelect(index)}>
-            <span className={`utility-icon${item.id === "giao-thuong" ? " utility-icon--giao-thuong" : ""}`}>
+            <span className={`utility-icon${item.id === "giao-thuong" ? " utility-icon--giao-thuong" : item.id === "ban-do" ? " utility-icon--map" : ""}`}>
               <img src={item.icon} alt="" width="80" height="80" draggable={false} />
             </span>
             <span>{item.title}</span>
