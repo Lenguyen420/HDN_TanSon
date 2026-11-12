@@ -165,3 +165,8 @@ Trang Giới thiệu hiển thị cố định video `src/assets/video/gioi-thie
 
 
 Ngày thành lập doanh nghiệp (companyFoundedAt) là trường tùy chọn dưới tên đơn vị trong form đăng ký; ngày hợp lệ không được ở tương lai. Backend và admin cần deploy bản hỗ trợ trường này trước Mini App. Trang chủ hiển thị tối đa 3 hội viên dưới Ban chấp hành và nút Xem tất cả mở danh bạ. Lịch sử tham gia lấy đăng ký/điểm danh sự kiện theo mã theo dõi trên thiết bị, hiển thị trạng thái server và mở sự kiện tương ứng. Đổi thiết bị/xóa dữ liệu trình duyệt có thể mất khả năng truy xuất lịch sử cũ.
+
+
+## Giao thương doanh nghiệp
+
+Tiện ích Giao thương đã mở: tìm/lọc tin, chi tiết, liên hệ/chia sẻ, lưu tin, đánh giá và phản hồi, hội thoại, thông báo, đăng tin của doanh nghiệp và thống kê. Công khai chỉ thấy tin đã duyệt trong danh mục hoạt động, còn hiệu lực. JWT Giao thương được cấp sau khi kiểm tra mã receipt bí mật của hồ sơ trên thiết bị hoặc access token Zalo đã xác minh; profile SDK chưa xác minh không cấp quyền. Hội viên doanh nghiệp đang hoạt động được đăng/gửi duyệt. Ảnh được thu nhỏ trước khi upload riêng, tối đa 10 ảnh/tin và 3 ảnh/đánh giá. Hội thoại cập nhật qua SSE có xác thực và đọc lại lịch sử khi mất kết nối. Liên kết chia sẻ ?tradePost=id-hoac-slug mở thẳng tin. Deploy backend trước; xem docs/trade-module.md ở repo backend.

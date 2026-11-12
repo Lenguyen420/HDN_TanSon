@@ -12,7 +12,7 @@ export const utilities: Utility[] = [
   { id: "about", title: "Giới thiệu", icon: aboutIcon, description: "Hội Doanh nghiệp Phường Tân Sơn là nơi kết nối cộng đồng doanh nghiệp, chia sẻ cơ hội hợp tác và đồng hành phát triển." },
   { id: "event-assistant", title: "Sự kiện", icon: eventAssistantIcon, description: "Hỗ trợ tìm hiểu chương trình, lịch trình và thông tin tham dự sự kiện của Hội.\nTính năng trợ lý đang được cập nhật." },
   { id: "activities", title: "Lịch sử tham gia", icon: participationIcon, description: "Theo dõi các sự kiện đã đăng ký, điểm danh và trạng thái tham gia." },
-  { id: "giao-thuong", title: "Giao thương", icon: giaoThuongIcon, description: "Kết nối giao thương giữa các doanh nghiệp.", comingSoon: true },
+  { id: "giao-thuong", title: "Giao thương", icon: giaoThuongIcon, description: "Kết nối sản phẩm, dịch vụ và cơ hội hợp tác giữa doanh nghiệp hội viên." },
   { id: "tan-son-ward", title: "UBND phường Tân Sơn", icon: tanSonWardIcon, description: "Mở Mini App UBND phường Tân Sơn." },
   { id: "fees", title: "Hội phí", icon: membershipFeeIcon, description: "Theo dõi khoản hội phí cần đóng và lịch sử đóng hội phí." },
   { id: "sponsorships", title: "Lịch sử tài trợ", icon: sponsorshipIcon, description: "Dữ liệu mẫu\nChương trình đồng hành cùng cộng đồng\nGiá trị tài trợ: 5.000.000 đ\nNgày ghi nhận: 25/10/2026" },

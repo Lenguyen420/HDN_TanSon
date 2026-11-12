@@ -35,7 +35,7 @@ export default function Home({ data, onNavigate, onOpenContent, onOpenUtility, o
         <Utilities utilities={data.utilities} onSelect={(index) => {
           const { id } = data.utilities[index];
           if (id === "tan-son-ward") onOpenWardMiniApp();
-          else if (id !== "giao-thuong") onOpenUtility(id);
+          else onOpenUtility(id);
         }} />
         <ExecutiveBoard members={data.members.filter((member) => member.isBoard)} isDemo={data.isDemo} accessRequired={data.memberAccess === "required"} onViewAll={() => onNavigate("members")} />
         <HomeMembers members={data.memberAccess === "required" ? [] : data.members} onViewAll={() => onNavigate("members")} />

@@ -1,0 +1,324 @@
+import { useEffect, useState, type FormEvent } from "react";
+import { tradeRequest, tradeImage } from "@/services/trade";
+import type {
+  TradeActor,
+  TradeReview,
+  TradeImage,
+} from "@/services/trade-types";
+import { useTradeAction, useTradeList } from "./use-trade";
+import TradeImages from "./trade-images";
+function Composer({
+  postId,
+  own,
+  onDone,
+}: {
+  postId: string;
+  own?: TradeReview;
+  onDone: () => void;
+}) {
+  const [images, setImages] = useState<TradeImage[]>(own?.images || []),
+    [imagesBusy, setImagesBusy] = useState(false),
+    task = useTradeAction();
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    await task.run(async () => {
+      await tradeRequest(
+        own ? "reviews/" + own.id : "trade-posts/" + postId + "/reviews",
+        own ? "PATCH" : "POST",
+        {
+          rating: Number(data.get("rating")),
+          content: String(data.get("content") || ""),
+          imageIds: images.map((i) => i.id),
+        },
+        true,
+      );
+      onDone();
+    });
+  }
+  return (
+    <form className="trade-form" onSubmit={submit}>
+      <h4>{own ? "Đánh giá của bạn" : "Chia sẻ trải nghiệm kết nối"}</h4>
+      {own?.status === "HIDDEN" && (
+        <p>
+          Đánh giá đang được Hội ẩn. Chỉnh sửa sẽ giữ nguyên trạng thái này.
+        </p>
+      )}
+      <label>
+        Mức đánh giá
+        <select
+          name="rating"
+          aria-label="Mức đánh giá"
+          defaultValue={own?.rating || 5}
+        >
+          {[5, 4, 3, 2, 1].map((v) => (
+            <option key={v} value={v}>
+              {v} sao
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        Nội dung
+        <textarea
+          name="content"
+          required
+          maxLength={500}
+          defaultValue={own?.content || ""}
+          placeholder="Chia sẻ trung thực về thông tin hoặc trải nghiệm hợp tác."
+        />
+      </label>
+      <TradeImages
+        value={images}
+        onChange={setImages}
+        onBusyChange={setImagesBusy}
+        max={3}
+      />
+      {task.error && <p role="alert">{task.error}</p>}
+      <div className="trade-actions">
+        <button className="primary-button" disabled={task.busy || imagesBusy}>
+          {own ? "Cập nhật đánh giá" : "Gửi đánh giá"}
+        </button>
+        {own && (
+          <button
+            type="button"
+            disabled={task.busy}
+            onClick={() => {
+              if (confirm("Xóa đánh giá của bạn?"))
+                void task.run(async () => {
+                  await tradeRequest(
+                    "reviews/" + own.id,
+                    "DELETE",
+                    undefined,
+                    true,
+                  );
+                  onDone();
+                });
+            }}
+          >
+            Xóa đánh giá
+          </button>
+        )}
+      </div>
+    </form>
+  );
+}
+export default function TradeReviews({
+  postId,
+  actor,
+  ownerId,
+  onLogin,
+}: {
+  postId: string;
+  actor: TradeActor | null;
+  ownerId: string;
+  onLogin: () => Promise<TradeActor>;
+}) {
+  const [page, setPage] = useState(1),
+    [own, setOwn] = useState<TradeReview>(),
+    [revision, setRevision] = useState(0),
+    [summary, setSummary] = useState<{
+      count: number;
+      averageRating: number;
+      counts: Record<string, number>;
+    } | null>(null),
+    task = useTradeAction();
+  const list = useTradeList<TradeReview>(
+    "trade-posts/" + postId + "/reviews?page=" + page + "&limit=20",
+  );
+  useEffect(() => {
+    let cancelled = false;
+    void tradeRequest<{
+      count: number;
+      averageRating: number;
+      counts: Record<string, number>;
+    }>("trade-posts/" + postId + "/reviews/summary")
+      .then((result) => {
+        if (!cancelled) setSummary(result.data);
+      })
+      .catch(() => {});
+    if (actor)
+      void tradeRequest<TradeReview[]>(
+        "reviews/me?tradePostId=" + postId,
+        "GET",
+        undefined,
+        true,
+      )
+        .then((result) => {
+          if (!cancelled) setOwn(result.data[0]);
+        })
+        .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [postId, actor?.id, revision]);
+  const refresh = () => {
+    list.refresh();
+    setRevision((v) => v + 1);
+  };
+  async function reply(
+    event: FormEvent<HTMLFormElement>,
+    review: TradeReview,
+    owner: boolean,
+  ) {
+    event.preventDefault();
+    const form = event.currentTarget,
+      content = String(new FormData(form).get("content") || "");
+    await task.run(async () => {
+      await tradeRequest(
+        owner
+          ? "trade-management/reviews/" + review.id + "/reply"
+          : "trade-posts/" + postId + "/reviews/" + review.id + "/replies",
+        owner ? "PUT" : "POST",
+        { content },
+        true,
+      );
+      form.reset();
+      refresh();
+    });
+  }
+  return (
+    <article className="surface-card">
+      <h3>Đánh giá từ cộng đồng</h3>
+      {summary && (
+        <>
+          <p>
+            <strong>{summary.averageRating}/5</strong> · {summary.count} đánh
+            giá
+          </p>
+          <div className="trade-rating-bars">
+            {[5, 4, 3, 2, 1].map((r) => (
+              <p key={r}>
+                <span>{r} sao</span>
+                <progress
+                  max={summary.count || 1}
+                  value={summary.counts[r] || 0}
+                />
+                <small>{summary.counts[r] || 0}</small>
+              </p>
+            ))}
+          </div>
+        </>
+      )}
+      {(task.error || list.error) && (
+        <p role="alert">{task.error || list.error}</p>
+      )}
+      {list.loading ? (
+        <p>Đang tải đánh giá…</p>
+      ) : list.data.length ? (
+        list.data.map((review) => (
+          <section className="trade-review" key={review.id}>
+            <strong>
+              {review.user?.displayName || "Người quan tâm"} · {review.rating}/5
+            </strong>
+            <p>{review.content}</p>
+            <div className="trade-gallery">
+              {review.images.map((i) => (
+                <img
+                  key={i.id}
+                  src={tradeImage(i.url)}
+                  alt="Ảnh đánh giá"
+                  loading="lazy"
+                />
+              ))}
+            </div>
+            {review.replyContent && (
+              <blockquote>
+                <strong>Doanh nghiệp phản hồi</strong>
+                <p>{review.replyContent}</p>
+              </blockquote>
+            )}
+            {review.replies?.map((r) => (
+              <blockquote key={r.id}>{r.content}</blockquote>
+            ))}
+            {actor?.id === ownerId ? (
+              <>
+                <form
+                  onSubmit={(e) => void reply(e, review, true)}
+                  className="trade-form"
+                >
+                  <label>
+                    Phản hồi của doanh nghiệp
+                    <textarea
+                      name="content"
+                      required
+                      maxLength={500}
+                      defaultValue={review.replyContent || ""}
+                    />
+                  </label>
+                  <button disabled={task.busy}>Gửi phản hồi</button>
+                </form>
+                {review.replyContent && (
+                  <button
+                    disabled={task.busy}
+                    onClick={() =>
+                      void task.run(async () => {
+                        await tradeRequest(
+                          "trade-management/reviews/" + review.id + "/reply",
+                          "DELETE",
+                          undefined,
+                          true,
+                        );
+                        refresh();
+                      })
+                    }
+                  >
+                    Xóa phản hồi
+                  </button>
+                )}
+              </>
+            ) : (
+              actor &&
+              review.replyContent && (
+                <form
+                  onSubmit={(e) => void reply(e, review, false)}
+                  className="trade-form"
+                >
+                  <label>
+                    Trao đổi thêm
+                    <textarea name="content" maxLength={500} required />
+                  </label>
+                  <button disabled={task.busy}>Trả lời doanh nghiệp</button>
+                </form>
+              )
+            )}
+          </section>
+        ))
+      ) : (
+        <p>Chưa có đánh giá. Hãy chia sẻ trải nghiệm kết nối đầu tiên.</p>
+      )}
+      <div className="trade-actions">
+        <button disabled={page === 1} onClick={() => setPage((p) => p - 1)}>
+          Trước
+        </button>
+        <button
+          disabled={page >= (list.meta?.totalPages || 1)}
+          onClick={() => setPage((p) => p + 1)}
+        >
+          Sau
+        </button>
+      </div>
+      {actor ? (
+        actor.id !== ownerId && (
+          <Composer
+            key={(own?.id || "new") + revision}
+            postId={postId}
+            own={own}
+            onDone={refresh}
+          />
+        )
+      ) : (
+        <button
+          disabled={task.busy}
+          onClick={() =>
+            void task.run(async () => {
+              await onLogin();
+            })
+          }
+        >
+          Xác thực hồ sơ để đánh giá
+        </button>
+      )}
+    </article>
+  );
+}

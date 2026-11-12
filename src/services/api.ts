@@ -18,6 +18,7 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
       headers: { Accept: "application/json", ...(options.body ? { "Content-Type": "application/json" } : {}), ...options.headers },
       signal: controller.signal,
     });
+    if (response.status === 204) return undefined as T;
     const payload = await response.json().catch(() => null);
     if (!response.ok) {
       const message = payload?.message;

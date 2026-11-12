@@ -24,6 +24,7 @@ import NewsPage from "@/pages/news/news";
 import EventsPage from "@/pages/events/events";
 import MemberVisitsPage from "@/pages/member-visits/member-visits";
 import AboutPage from "@/pages/about/about";
+import TradePage from "@/pages/trade/trade";
 import FeesPage from "@/pages/fees/fees";
 import ActivitiesPage from "@/pages/activities/activities";
 import SponsorshipsPage from "@/pages/sponsorships/sponsorships";
@@ -59,7 +60,7 @@ type Screen =
   | { kind: "policies" };
 
 const utilityPages: Record<UtilityId, ComponentType<UtilityPageProps>> = {
-  about: AboutPage, fees: FeesPage, activities: ActivitiesPage,
+  "giao-thuong": TradePage, about: AboutPage, fees: FeesPage, activities: ActivitiesPage,
   sponsorships: SponsorshipsPage, contact: ContactPage, "event-assistant": EventAssistantPage,
 };
 const listPages: Record<ContentCategory, ComponentType<ContentListPageProps>> = {
@@ -163,7 +164,7 @@ export default function AppShell() {
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<NavigationTab>("home");
-  const [screens, setScreens] = useState<Screen[]>([]);
+  const [screens, setScreens] = useState<Screen[]>(() => typeof window !== "undefined" && new URLSearchParams(window.location?.search || "").has("tradePost") ? [{kind:"utility",id:"giao-thuong"}] : []);
   const [homeCategory, setHomeCategory] = useState<ContentCategory>("news");
   const [notificationReadState, setNotificationReadState] = useState(readNotificationState);
   const [notificationStorageMessage, setNotificationStorageMessage] = useState("");
