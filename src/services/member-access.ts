@@ -5,6 +5,7 @@ import type { ApiData, ApiList } from "./api";
 export interface MemberIdentity {
   zaloUserId: string;
   linked: boolean;
+  verificationStatus?: "unverified";
   member: Member | null;
   user?: { id: string; name: string; avatar: string; phone: string | null };
   phoneNotice?: string;
@@ -25,41 +26,25 @@ export async function getMemberDirectory(token: string): Promise<Member[]> {
   }
 }
 
-export async function authenticateZaloMember() {
-  // Token chỉ dùng trong lần xác thực này, không lưu vào localStorage.
-  const { getAccessToken, authorize, getPhoneNumber, getSetting, getUserInfo } = await import("zmp-sdk/apis");
-  let token: string;
-  let phoneToken: string | undefined;
-  let phoneNotice = "";
+export async function saveZaloSdkProfile() {
+  const { authorize, getSetting, getUserInfo } = await import("zmp-sdk/apis");
+  let profile: { id: string; name: string; avatar?: string };
   try {
     const { authSetting } = await getSetting({});
-    const scopes: ("scope.userInfo" | "scope.userPhonenumber")[] = [];
-    if (!authSetting["scope.userInfo"]) scopes.push("scope.userInfo");
-    if (!authSetting["scope.userPhonenumber"]) scopes.push("scope.userPhonenumber");
-    const granted = scopes.length ? { ...authSetting, ...await authorize({ scopes }) } : authSetting;
+    const granted = authSetting["scope.userInfo"] ? authSetting : await authorize({ scopes: ["scope.userInfo"] });
     if (!granted["scope.userInfo"]) throw new Error("Bạn cần cho phép chia sẻ tên và ảnh đại diện Zalo để tiếp tục.");
-    await getUserInfo({ autoRequestPermission: false });
-    token = await getAccessToken({});
-    if (granted["scope.userPhonenumber"]) {
-      try {
-        phoneToken = (await getPhoneNumber({})).token;
-        if (!phoneToken) throw new Error("Missing phone token");
-      } catch {
-        phoneNotice = "Đã xác nhận tên và ảnh. Chưa lấy được quyền chia sẻ số điện thoại; bạn có thể thử lại.";
-      }
-    } else {
-      phoneNotice = "Đã xác nhận tên và ảnh. Bạn chưa chia sẻ số điện thoại.";
-    }
+    profile = (await getUserInfo({ autoRequestPermission: false })).userInfo;
+    if (!profile.id || !profile.name?.trim()) throw new Error("Zalo chưa trả tên và ảnh đại diện. Vui lòng thử lại.");
   } catch (error) {
-    if (error instanceof Error && error.message.startsWith("Bạn cần")) throw error;
+    if (error instanceof Error && /^(Bạn cần|Zalo chưa)/.test(error.message)) throw error;
     throw new Error("Chưa được cấp quyền Zalo. Vui lòng mở mini app trong Zalo và chọn Cho phép để tiếp tục.");
   }
-  const identity = (await apiRequest<ApiData<MemberIdentity>>("member/session", {
-    method: "POST", headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify({ phoneToken }),
+  const identity = (await apiRequest<ApiData<MemberIdentity>>("public/zalo-profiles", {
+    method: "POST",
+    body: JSON.stringify({ zaloUserId: profile.id, name: profile.name.trim(), avatar: profile.avatar || "" }),
   })).data;
-  if (!identity.user?.id || !identity.user.name) throw new Error("Backend chưa trả thông tin Zalo đã xác minh. Vui lòng thử lại.");
-  if (phoneNotice && !identity.phoneNotice) identity.phoneNotice = phoneNotice;
-  // Loading a private directory is independent of saving the consented profile.
-  const members = identity.member ? [identity.member] : [];
-  return { identity, members };
+  if (identity.verificationStatus !== "unverified" || !identity.user?.id || !identity.user.name)
+    throw new Error("Chưa lưu được thông tin Zalo. Vui lòng thử lại.");
+  // This is a saved SDK profile, not an authenticated member session.
+  return { identity: { ...identity, linked: false, member: null }, members: [] as Member[] };
 }

@@ -27,7 +27,7 @@ import { applyProfileEdits, readProfileEdits, saveProfileEdits } from "@/service
 import type { AppData, ContentCategory, NavigationTab, ProfileEdits, UtilityId } from "@/datas/types";
 import type { ArticlePageProps, ContentListPageProps, UtilityPageProps } from "@/components/shared/page-props";
 
-import { authenticateZaloMember, type MemberIdentity } from "@/services/member-access";
+import { saveZaloSdkProfile, type MemberIdentity } from "@/services/member-access";
 
 type Screen =
   | { kind: "utility"; id: UtilityId }
@@ -86,13 +86,13 @@ export default function AppShell() {
     setAuthError("");
     setAuthMessage("");
     try {
-      const { identity } = await authenticateZaloMember();
+      const { identity } = await saveZaloSdkProfile();
       setZaloIdentity(identity);
       setAuthExpiresAt(Date.now() + 15 * 60 * 1000);
       setAuthMessage(identity.phoneNotice || "");
       return true;
     } catch (error) {
-      setAuthError(error instanceof Error ? error.message : "Chưa thể xác nhận thông tin Zalo. Vui lòng thử lại.");
+      setAuthError(error instanceof Error ? error.message : "Chưa thể lưu thông tin Zalo. Vui lòng thử lại.");
       return false;
     } finally {
       authentication.current = false;
@@ -236,7 +236,7 @@ export default function AppShell() {
   return (
     <Page className="association-page">
       <div className="app-shell" ref={content}>
-        {authPending && <div className="data-status" role="status"><p>Đang xác thực và lưu thông tin Zalo…</p></div>}
+        {authPending && <div className="data-status" role="status"><p>Đang lưu tên và ảnh Zalo…</p></div>}
         {authError && <div className="data-status" role="alert"><p>{authError} Chọn lại Cá nhân hoặc Đăng kí để thử lại.</p></div>}
         {authMessage && !authPending && <div className="data-status" role="status"><p>{authMessage}</p></div>}
         {data && (loading || error) && <div className="data-status" role="status"><p>{error || "Đang cập nhật dữ liệu…"}</p>{error && <button type="button" className="primary-button" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Thử lại</button>}</div>}

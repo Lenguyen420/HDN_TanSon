@@ -21,7 +21,7 @@ test("protected tab navigation waits for consent and database save", async (t) =
         `;
         else if (path === "react/jsx-runtime") contents = 'export const jsx = (type, props) => ({type, props}); export const jsxs = jsx; export const Fragment = "fragment";';
         else if (path === "zmp-ui") contents = 'export const Page = "page";';
-        else if (path.endsWith("services/member-access")) contents = 'export const authenticateZaloMember = () => globalThis.navigationHarness.authenticate();';
+        else if (path.endsWith("services/member-access")) contents = 'export const saveZaloSdkProfile = () => globalThis.navigationHarness.authenticate();';
         else if (path.endsWith("services/profile")) contents = 'export const readProfileEdits = () => null; export const applyProfileEdits = data => data; export const saveProfileEdits = () => {};';
         else if (path.endsWith("services/association")) contents = 'export const getAppData = async () => globalThis.navigationHarness.data;';
         else if (path.endsWith("services/notifications")) contents = 'export const readNotificationState = () => ({}); export const saveNotificationState = () => true;';
@@ -42,7 +42,7 @@ test("protected tab navigation waits for consent and database save", async (t) =
   }
   const nav = () => find(render(), node => node.type === "@/components/bottom-navigation").props;
   t.after(() => { delete global.navigationHarness; });
-  await t.test("deduplicates requests and reuses the verified session for either tab", async () => {
+  await t.test("deduplicates requests and reuses the saved profile for either tab", async () => {
     reset(); let resolve, calls = 0;
     global.navigationHarness.authenticate = () => { calls++; return new Promise(r => {resolve = r;}); };
     const pending = nav().onChange("profile");
