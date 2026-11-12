@@ -89,3 +89,11 @@ redeploy để đưa giá trị mới vào bundle.
 - [DevTools Documentation](https://mini.zalo.me/docs/dev-tools/)
 - [Ready-made Mini App Templates](https://mini.zalo.me/zaui-templates)
 - [Community Support](https://mini.zalo.me/community)
+
+## Backend Vercel
+
+Cấu hình hiện tại thay thế hướng dẫn chạy backend local ở trên: .env dùng VITE_API_BASE_URL=/api/v1 qua proxy Vite tới https://behdntanson.vercel.app, không cần chạy backend cổng 4000. Khởi động lại dev server sau khi đổi cấu hình.
+
+.env.production đặt VITE_API_BASE_URL=https://behdntanson.vercel.app/api/v1 và VITE_USE_MOCK_DATA=false; npm run build dùng cấu hình này. Nếu hosting đã có các biến cùng tên, cập nhật tương ứng rồi build/deploy lại.
+
+Khi chạy Zalo thật, cho phép domain behdntanson.vercel.app trong cấu hình mạng Mini App; backend cần thêm origin thực tế của mini app vào CORS_ORIGINS. Không đưa secret Zalo hoặc MongoDB vào biến VITE_*. Ảnh uploads/... chưa được hỗ trợ trên Vercel; dùng URL ảnh từ dịch vụ lưu trữ ngoài.

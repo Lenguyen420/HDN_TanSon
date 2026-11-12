@@ -21,14 +21,14 @@ function fixedBrandAssets(): Plugin {
 }
 
 const backendProxy: ProxyOptions = {
-  // Backend mặc định chỉ lắng nghe IPv4; localhost có thể được phân giải thành ::1.
-  target: "http://127.0.0.1:4000",
+  // Local development forwards API requests to the deployed backend.
+  target: "https://behdntanson.vercel.app",
   changeOrigin: true,
   configure(proxy) {
     proxy.on("error", (_error, _request, response) => {
       if ("writeHead" in response && !response.headersSent) {
         response.writeHead(503, { "Content-Type": "application/json; charset=utf-8" });
-        response.end(JSON.stringify({ message: "Không thể kết nối backend. Vui lòng khởi động backend ở cổng 4000 rồi thử lại." }));
+        response.end(JSON.stringify({ message: "Không thể kết nối backend Vercel. Vui lòng kiểm tra kết nối mạng rồi thử lại." }));
       }
     });
   },
