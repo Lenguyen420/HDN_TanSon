@@ -27,6 +27,7 @@ test("branding keeps the original image bytes and loads them as cacheable files"
             "sponsorship",
             "contact",
             "event-assistant",
+            "tan-son-ward",
           ][index] +
           ".png",
       ]),

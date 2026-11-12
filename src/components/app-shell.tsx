@@ -1,3 +1,4 @@
+import { openTanSonMiniApp } from "@/services/mini-app";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, ComponentType } from "react";
 import { Page } from "zmp-ui";
 import HomePage from "@/pages/home/home";
@@ -59,6 +60,16 @@ export default function AppShell() {
   const [profileEdits, setProfileEdits] = useState(readProfileEdits);
   const [profileSaveMessage, setProfileSaveMessage] = useState("");
   const [contactOpen, setContactOpen] = useState(false);
+  const [miniAppError, setMiniAppError] = useState("");
+  const [miniAppOpening, setMiniAppOpening] = useState(false);
+  const openWardMiniApp = async () => {
+    if (miniAppOpening) return;
+    setMiniAppError("");
+    setMiniAppOpening(true);
+    try { await openTanSonMiniApp(); }
+    catch { setMiniAppError("Chưa mở được Mini App UBND phường Tân Sơn. Vui lòng thử lại."); }
+    finally { setMiniAppOpening(false); }
+  };
   const [zaloIdentity, setZaloIdentity] = useState<MemberIdentity | null>(null);
   const [authExpiresAt, setAuthExpiresAt] = useState(0);
   const [authPending, setAuthPending] = useState(false);
@@ -281,12 +292,14 @@ export default function AppShell() {
       case "members": return <MembersPage data={data} onBack={() => navigate("home")} />;
       case "notifications": return <NotificationsPage data={{ ...data, notifications }} onBack={() => navigate("home")} onOpenNotification={openNotification} onMarkAllRead={markAllNotificationsRead} storageMessage={notificationStorageMessage} />;
       case "profile": return <ProfilePage onSupport={(action) => action === "policies" ? openScreen({kind:"policies"}) : openScreen({kind:"utility",id:action})} data={data} onBack={() => navigate("home")} onEdit={() => { setProfileSaveMessage(""); openScreen({ kind: "profile-edit" }); }} saveMessage={profileSaveMessage} />;
-      case "home": return <HomePage data={data} onNavigate={navigate} onOpenContent={openContent} onOpenUtility={(id) => openScreen({ kind: "utility", id })} onOpenArticle={openArticle} contentCategory={homeCategory} onChangeCategory={setHomeCategory} />;
+      case "home": return <HomePage onOpenWardMiniApp={() => void openWardMiniApp()} data={data} onNavigate={navigate} onOpenContent={openContent} onOpenUtility={(id) => openScreen({ kind: "utility", id })} onOpenArticle={openArticle} contentCategory={homeCategory} onChangeCategory={setHomeCategory} />;
     }
   };
   return (
     <Page className="association-page">
       <div className="app-shell" ref={content}>
+        {miniAppError && <div className="data-status" role="alert"><p>{miniAppError}</p></div>}
+        {miniAppOpening && <div className="data-status" role="status"><p>Đang mở Mini App UBND phường Tân Sơn…</p></div>}
         {registrationNoticeError && <div className="data-status" role="status"><p>{registrationNoticeError}</p></div>}
         {authPending && <div className="data-status" role="status"><p>Đang lưu tên và ảnh Zalo…</p></div>}
         {authError && <div className="data-status" role="alert"><p>{authError} Chọn lại Cá nhân hoặc Đăng kí để thử lại.</p></div>}

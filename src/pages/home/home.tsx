@@ -6,6 +6,7 @@ interface HomePageProps {
   onNavigate: (tab: NavigationTab) => void;
   onOpenContent: (category: ContentCategory) => void;
   onOpenUtility: (id: UtilityId) => void;
+  onOpenWardMiniApp: () => void;
   onOpenArticle: (category: ContentCategory, articleId: string) => void;
   contentCategory: ContentCategory;
   onChangeCategory: (category: ContentCategory) => void;
