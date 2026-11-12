@@ -57,6 +57,17 @@ Nếu toàn bộ API báo lỗi khi chạy local, kiểm tra backend đang chạ
 
 ## Deployment
 
+### Vercel
+
+Repo có `vercel.json` cấu hình chạy `npm run build` và phục vụ thư mục `www`.
+Trên Vercel, đặt Root Directory vào thư mục chứa `package.json` và khai báo
+`VITE_API_BASE_URL=https://<backend-domain>/api/v1` trong Environment Variables
+trước khi deploy. Backend cần cho phép domain frontend trong `CORS_ORIGINS`;
+proxy phát triển trong Vite không chạy trên Vercel. Sau khi thay biến môi trường,
+redeploy để đưa giá trị mới vào bundle.
+
+### Zalo Mini App
+
 1. **Create** a mini program. For instructions on how to create a mini program, please refer to the [Coffee Shop Tutorial](https://mini.zalo.me/tutorial/coffee-shop/step-1/)
 
 1. **Deploy** your mini program to Zalo using the mini app ID created.
