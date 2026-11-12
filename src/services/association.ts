@@ -1,17 +1,19 @@
 import { mockAppData } from "@/datas";
 import type { AppData } from "@/datas/types";
+import { getAllPublicItems } from "./api";
+import type { Member } from "@/datas/types";
 import { useMockData } from "./api";
 import { getArticles, getBanners, getNotifications } from "./content";
 import { getAssociationSettings, parseAssistantQuestions } from "./settings";
 
 export async function getAppData(): Promise<AppData> {
   if (useMockData) return mockAppData;
-  const [settings, banners, news, events, visits, notifications] = await Promise.all([
-    getAssociationSettings(), getBanners(), getArticles("news"), getArticles("events"), getArticles("member-visits"), getNotifications(),
+  const [settings, banners, news, events, visits, notifications, members] = await Promise.all([
+    getAssociationSettings(), getBanners(), getArticles("news"), getArticles("events"), getArticles("member-visits"), getNotifications(), getAllPublicItems<Member>("members"),
   ]);
   return {
     isDemo: false,
-    memberAccess: "required",
+    memberAccess: "granted",
     // Giữ thương hiệu, slogan và logo thống nhất theo cấu hình của mini app.
     association: mockAppData.association,
     utilities: mockAppData.utilities,
@@ -22,10 +24,10 @@ export async function getAppData(): Promise<AppData> {
       events: { ...mockAppData.content.events, articles: events },
       "member-visits": { ...mockAppData.content["member-visits"], articles: visits },
     },
-    // Danh bạ và hồ sơ được tải riêng sau khi xác thực Zalo trong AppShell.
-    members: [],
+    // Danh bạ công khai; không gán danh tính cá nhân khi chưa có tài khoản.
+    members,
     profile: { memberId: "", memberCode: "", joinedAt: "", status: "" },
-    registration: { companies: [] },
+    registration: { companies: members.filter((member, index) => members.findIndex((item) => item.company === member.company) === index).map((member) => ({ id: member.id, name: member.company })) },
     utilityPages: {
       about: { ...mockAppData.utilityPages.about, introduction: settings.introduction, mission: settings.mission },
       fees: [], activities: [], sponsorships: [],

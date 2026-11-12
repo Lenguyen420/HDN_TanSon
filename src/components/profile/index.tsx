@@ -21,7 +21,7 @@ export default function Profile({ data, onBack, onEdit, saveMessage }: ProfilePa
           {data.isDemo && <span className="demo-badge">Dữ liệu mẫu</span>}
           <ProfileDetails member={member} profile={data.profile} />
           <p className="page-footnote">Thông tin chỉnh sửa được lưu trên thiết bị và đồng bộ với danh bạ trong giao diện này. Chưa gửi đến hệ thống của Hội.</p>
-        </> : <p className="surface-card empty-state">Chưa có thông tin hồ sơ hội viên.</p>}
+        </> : <p className="surface-card empty-state">Bạn đang xem ứng dụng ở chế độ khách. Chưa có hồ sơ cá nhân để hiển thị.</p>}
       </div>
     </main>
   );

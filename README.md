@@ -14,18 +14,14 @@ Các lời gọi API nằm trong `src/services/`; `AppShell` tải dữ liệu q
 | `content.ts` | GET `/public/news`, `/public/events`, `/public/member-visits`, `/public/banners`, `/public/notifications`; có hàm lấy chi tiết bài viết |
 | `settings.ts` | GET `/public/settings`: giới thiệu, sứ mệnh, liên hệ, trợ lý và câu hỏi |
 | `registration.ts` | POST `/public/registrations`: ánh xạ tên công ty và `position` sang `jobTitle`, nhận kết quả chờ duyệt |
-| `member-access.ts` | Xin quyền Zalo, POST `/member/session` để xác minh/lưu tài khoản; GET `/member/members` chỉ sau khi backend xác nhận là hội viên |
+| `association.ts` | Tải danh bạ công khai GET `/public/members`, không yêu cầu xác thực Zalo |
 | `api.ts` | Base URL, timeout 15 giây, lỗi API, phân trang tối đa 100 mục/lần và URL ảnh `uploads/...` |
 
 Tên Hội, logo và slogan giữ theo cấu hình thương hiệu trong `src/datas/association.ts`. Danh sách rỗng từ backend được hiển thị rỗng; lỗi kết nối có nút thử lại, không tự thay bằng dữ liệu mẫu.
 
-Khi người dùng bấm một chức năng, mini app kiểm tra phiên xác thực. Nếu chưa có phiên, Zalo SDK xin quyền `scope.userInfo` và `scope.userPhonenumber` bằng popup của Zalo. Quyền đã cấp được Zalo ghi nhớ; không dựng popup giả hoặc ép hỏi lại mỗi lần bấm. Từ chối tên/ảnh thì giữ nguyên trang và cho phép thử lại; số điện thoại là tùy chọn. Sau khi xác thực và lưu thành công, mở tiếp đúng chức năng vừa chọn. Phiên giao diện có thời hạn 15 phút, token không lưu trên thiết bị.
+Mini App mở tất cả các màn hình mà không yêu cầu xác thực hoặc cấp quyền Zalo. Danh bạ và Ban chấp hành lấy từ GET `/public/members`, gồm các hội viên đang hoạt động và thông tin tên, doanh nghiệp, chức danh, vai trò. Không tự chọn một hội viên làm người đang sử dụng; tab Cá nhân hiển thị trạng thái khách khi chưa có hồ sơ. Các màn hình hội phí, lịch sử tham gia và tài trợ vẫn mở được, nhưng chưa có dữ liệu thật từ backend.
 
-Backend lấy ID/tên/ảnh từ máy chủ Zalo rồi upsert vào collection `zalo_users` theo ID, cập nhật lần đăng nhập/cấp quyền, không lưu access token. Số điện thoại chỉ được lưu sau khi backend đổi `phoneToken` thành số thật bằng Zalo API; cấu hình `ZALO_APP_SECRET` trong `.env` **của backend**, không đưa secret vào biến `VITE_*`. Thiếu secret vẫn lưu tên/ảnh và cho dùng chức năng chung, đồng thời thông báo chưa xác minh được số điện thoại.
-
-Không có bước gửi hoặc nhập mã Zalo. Số điện thoại được Zalo xác minh tự đối chiếu hồ sơ hội viên đang hoạt động (hỗ trợ đầu 0/+84 và dấu cách). Chỉ tự liên kết khi có đúng một hồ sơ khớp, chưa thuộc tài khoản Zalo khác. Số trùng nhiều hồ sơ, chưa có hồ sơ hoặc chưa chia sẻ số không tự được cấp tư cách hội viên; tài khoản vẫn được lưu và có thể đăng ký hội viên bình thường. Danh bạ tiếp tục yêu cầu hội viên hợp lệ và không có API công khai.
-
-Danh bạ trả tên, doanh nghiệp và vai trò; thông tin cá nhân chi tiết chỉ được tải cho chính hồ sơ đang đăng nhập. Token chỉ dùng trong lần xác thực, không lưu localStorage. Luồng Zalo thật cần thử trong ứng dụng Zalo trên thiết bị; không giả lập đăng nhập thành công trên trình duyệt. Backend chưa có dữ liệu thật cho hội phí, lịch sử tham gia và tài trợ. Không đưa tài khoản/token quản trị vào mini app. Trạng thái đọc thông báo vẫn lưu trên thiết bị.
+Đăng ký hội viên gửi trực tiếp tới POST `/public/registrations`. API quản trị và API hồ sơ cá nhân vẫn yêu cầu xác thực riêng. Trạng thái đọc thông báo được lưu trên thiết bị. Khi triển khai thay đổi này, deploy backend có `/public/members` trước frontend.
 
 Logo và 6 icon tiện ích nhúng trực tiếp từ `src/assets/` vào bundle qua plugin `fixed-brand-assets`; không lấy từ backend hoặc phụ thuộc đường dẫn ảnh của khung xem trước Zalo.
 

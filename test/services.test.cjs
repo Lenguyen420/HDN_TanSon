@@ -50,20 +50,25 @@ test("public API integration", async (t) => {
   });
 
   await t.test("maps settings and published content without sample personal records", async () => {
-    global.fetch = async (url) => {
+    global.fetch = async (url, options) => {
+      assert.ok(!options?.headers?.Authorization);
+      assert.ok(!url.includes("/member/"));
       if (url.endsWith("settings")) return reply({ data: {
         introduction: "Giới thiệu", mission: "Sứ mệnh", department: "Ban thư ký", address: "Tân Sơn", hours: "08:00", phone: "0901234567", email: "", zaloUrl: "",
         assistantGreeting: "Xin chào", assistantQuestions: "Câu hỏi | Trả lời | chi tiết\n",
       } });
       const data = url.includes("/news?") ? [{ id: "news-real", image: "uploads/news/photo.jpg" }]
-        : url.includes("/notifications?") ? [{ id: "notice-real" }] : [];
+        : url.includes("/notifications?") ? [{ id: "notice-real" }]
+        : url.includes("/public/members?") ? [{ id: "public-member", name: "Hội viên", company: "Công ty", isBoard: true }] : [];
       return reply({ data, pagination: { total: data.length } });
     };
     const data = await services.getAppData();
     assert.equal(data.isDemo, false);
-    assert.deepEqual(data.members, []);
+    assert.equal(data.members[0].id, "public-member");
+    assert.equal(data.memberAccess, "granted");
+    assert.equal(data.profile.memberId, "");
     assert.deepEqual(data.utilityPages.fees, []);
-    assert.deepEqual(data.registration.companies, []);
+    assert.deepEqual(data.registration.companies, [{ id: "public-member", name: "Công ty" }]);
     assert.equal(data.notifications[0].unread, true);
     assert.equal(data.content.news.articles[0].image, "http://localhost:4000/uploads/news/photo.jpg");
     assert.deepEqual(data.utilityPages.assistant.questions, [{ question: "Câu hỏi", answer: "Trả lời | chi tiết" }]);

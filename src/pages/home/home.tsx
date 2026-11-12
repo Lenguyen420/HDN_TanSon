@@ -9,7 +9,6 @@ interface HomePageProps {
   onOpenArticle: (category: ContentCategory, articleId: string) => void;
   contentCategory: ContentCategory;
   onChangeCategory: (category: ContentCategory) => void;
-  onRequireAuth: (action: () => void) => void;
 }
 
 export default function HomePage(props: HomePageProps) {
