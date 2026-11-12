@@ -21,6 +21,7 @@ import MemberVisitDetailPage from "@/pages/member-visit-detail/member-visit-deta
 import NotificationDetailPage from "@/pages/notification-detail/notification-detail";
 import BottomNavigation from "@/components/bottom-navigation";
 import { getAppData } from "@/services/association";
+import { authenticateZaloMember } from "@/services/member-access";
 import { readNotificationState, saveNotificationState } from "@/services/notifications";
 import type { NotificationReadState } from "@/services/notifications";
 import { applyProfileEdits, readProfileEdits, saveProfileEdits } from "@/services/profile";
@@ -53,6 +54,41 @@ export default function AppShell() {
   const data = useMemo(() => sourceData ? applyProfileEdits(sourceData, profileEdits) : null, [sourceData, profileEdits]);
   const [error, setError] = useState("");
   const [loadAttempt, setLoadAttempt] = useState(0);
+  const [memberLoading, setMemberLoading] = useState(false);
+  const [memberError, setMemberError] = useState("");
+  const sessionExpiresAt = useRef(0);
+  const memberInFlight = useRef(false);
+  const loginMember = async () => {
+    if (memberInFlight.current) return false;
+    memberInFlight.current = true;
+    setMemberLoading(true);
+    setMemberError("");
+    sessionExpiresAt.current = 0;
+    setData((current) => current ? { ...current, zaloUser: undefined, members: [], memberAccess: "required", profile: { memberId: "", memberCode: "", joinedAt: "", status: "" }, registration: { companies: [] } } : current);
+    try {
+      const { identity, members } = await authenticateZaloMember();
+      const self = identity.member ? { ...identity.member, avatar: identity.user?.avatar || identity.member.avatar } : null;
+      if (!identity.user) throw new Error("Máy chủ chưa lưu được thông tin tài khoản Zalo.");
+      setData((current) => current ? {
+        ...current, zaloUser: identity.user, memberAccess: identity.linked && self ? "granted" : "required",
+        members: self ? members.map((member) => member.id === self.id ? self : member) : [],
+        profile: { memberId: self?.id || "", memberCode: self?.id || "", joinedAt: self?.joinedAt || "", status: self ? "Đang hoạt động" : "" },
+        registration: { companies: members.filter((member, index) => members.findIndex((item) => item.company === member.company) === index).map((member) => ({ id: member.id, name: member.company })) },
+      } : current);
+      sessionExpiresAt.current = Date.now() + 15 * 60 * 1000;
+      setMemberError(identity.phoneNotice || "");
+      return true;
+    } catch (error) {
+      setMemberError(error instanceof Error ? error.message : "Không thể xác thực hội viên. Vui lòng thử lại.");
+      return false;
+    } finally { memberInFlight.current = false; setMemberLoading(false); }
+  };
+  const requireZalo = (action: () => void) => {
+    if (!data || memberInFlight.current) return;
+    if (data.isDemo || sessionExpiresAt.current > Date.now()) { action(); return; }
+    // Chỉ SDK Zalo hiển thị yêu cầu cấp quyền; không mở hộp xác thực của ứng dụng.
+    void loginMember().then((success) => { if (success) action(); });
+  };
   const [activeTab, setActiveTab] = useState<NavigationTab>("home");
   const [screens, setScreens] = useState<Screen[]>([]);
   const [homeCategory, setHomeCategory] = useState<ContentCategory>("news");
@@ -76,6 +112,10 @@ export default function AppShell() {
   }, [screens, activeTab, data]);
 
   const navigate = (tab: NavigationTab) => {
+    if (tab !== "home") { requireZalo(() => navigateDirect(tab)); return; }
+    navigateDirect(tab);
+  };
+  const navigateDirect = (tab: NavigationTab) => {
     setContactOpen(false);
     pendingScroll.current = 0;
     scrollHistory.current = [];
@@ -83,6 +123,9 @@ export default function AppShell() {
     setActiveTab(tab);
   };
   const openScreen = (screen: Screen) => {
+    requireZalo(() => openScreenDirect(screen));
+  };
+  const openScreenDirect = (screen: Screen) => {
     if (screen.kind === "utility" && screen.id === "contact") {
       setContactOpen(true);
       return;
@@ -114,10 +157,10 @@ export default function AppShell() {
     setNotificationStorageMessage(saveNotificationState(next) ? "" : "Đã cập nhật trạng thái trong phiên này, nhưng chưa lưu được trên thiết bị.");
   };
   const setNotificationRead = (id: string, read: boolean) => updateReadState({ [id]: read });
-  const openNotification = (id: string) => {
+  const openNotification = (id: string) => requireZalo(() => {
     setNotificationRead(id, true);
-    openScreen({ kind: "notification", notificationId: id });
-  };
+    openScreenDirect({ kind: "notification", notificationId: id });
+  });
   const markAllNotificationsRead = () => {
     const updates: NotificationReadState = {};
     for (const notice of data?.notifications || []) updates[notice.id] = true;
@@ -157,12 +200,14 @@ export default function AppShell() {
       case "members": return <MembersPage data={data} onBack={() => navigate("home")} />;
       case "notifications": return <NotificationsPage data={{ ...data, notifications }} onBack={() => navigate("home")} onOpenNotification={openNotification} onMarkAllRead={markAllNotificationsRead} storageMessage={notificationStorageMessage} />;
       case "profile": return <ProfilePage data={data} onBack={() => navigate("home")} onEdit={() => { setProfileSaveMessage(""); openScreen({ kind: "profile-edit" }); }} saveMessage={profileSaveMessage} />;
-      case "home": return <HomePage data={data} onNavigate={navigate} onOpenContent={openContent} onOpenUtility={(id) => openScreen({ kind: "utility", id })} onOpenArticle={openArticle} contentCategory={homeCategory} onChangeCategory={setHomeCategory} />;
+      case "home": return <HomePage data={data} onNavigate={navigate} onOpenContent={openContent} onOpenUtility={(id) => openScreen({ kind: "utility", id })} onOpenArticle={openArticle} contentCategory={homeCategory} onChangeCategory={(category) => requireZalo(() => setHomeCategory(category))} onRequireAuth={requireZalo} />;
     }
   };
   return (
     <Page className="association-page">
       <div className="app-shell" ref={content}>
+        {memberLoading && <p className="profile-save-message" role="status">Đang xác thực với Zalo…</p>}
+        {memberError && <p className="profile-save-message" role="status">{memberError}</p>}
         {!data ? <div className="data-status" role="status"><p>{error || "Đang tải dữ liệu…"}</p>{error && <button type="button" className="primary-button" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Thử lại</button>}</div> : renderPage()}
       </div>
       <BottomNavigation activeTab={activeTab} onChange={navigate} unreadCount={notifications.filter((notice) => notice.unread).length} />

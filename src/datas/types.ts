@@ -86,6 +86,8 @@ export interface UtilityPageData {
   assistant: { greeting: string; questions: { question: string; answer: string }[] };
 }
 export interface AppData {
+  zaloUser?: { id: string; name: string; avatar: string; phone: string | null };
+  memberAccess?: "required" | "granted";
   isDemo: boolean;
   association: Association;
   banners: BannerItem[];

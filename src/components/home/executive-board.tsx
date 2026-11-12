@@ -5,9 +5,10 @@ interface ExecutiveBoardProps {
   members: Member[];
   isDemo: boolean;
   onViewAll: () => void;
+  accessRequired?: boolean;
 }
 
-export default function ExecutiveBoard({ members, isDemo, onViewAll }: ExecutiveBoardProps) {
+export default function ExecutiveBoard({ members, isDemo, onViewAll, accessRequired }: ExecutiveBoardProps) {
   return (
     <section className="board-section">
       <div className="section-heading">
@@ -24,7 +25,7 @@ export default function ExecutiveBoard({ members, isDemo, onViewAll }: Executive
             <p>{member.company}</p>
           </article>
         ))}
-        {members.length === 0 && <p className="data-status">Thông tin Ban chấp hành đang được cập nhật.</p>}
+        {members.length === 0 && <p className="data-status">{accessRequired ? "Xác thực hội viên để xem thông tin Ban chấp hành." : "Thông tin Ban chấp hành đang được cập nhật."}</p>}
       </div>
     </section>
   );

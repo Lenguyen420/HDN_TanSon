@@ -16,9 +16,10 @@ interface HomeProps {
   onOpenArticle: (category: ContentCategory, articleId: string) => void;
   contentCategory: ContentCategory;
   onChangeCategory: (category: ContentCategory) => void;
+  onRequireAuth: (action: () => void) => void;
 }
 
-export default function Home({ data, onNavigate, onOpenContent, onOpenUtility, onOpenArticle, contentCategory, onChangeCategory }: HomeProps) {
+export default function Home({ data, onNavigate, onOpenContent, onOpenUtility, onOpenArticle, contentCategory, onChangeCategory, onRequireAuth }: HomeProps) {
   const [showOaNotice, setShowOaNotice] = useState(false);
 
   return (
@@ -28,10 +29,10 @@ export default function Home({ data, onNavigate, onOpenContent, onOpenUtility, o
         <Banner banners={data.banners} />
       </div>
       <main className="home-content">
-        <FollowCard association={data.association} onFollow={() => setShowOaNotice((current) => !current)} />
+        <FollowCard association={data.association} onFollow={() => onRequireAuth(() => setShowOaNotice((current) => !current))} />
         {showOaNotice && <p className="oa-notice" role="status">{data.association.oaNotice}</p>}
         <Utilities utilities={data.utilities} onSelect={(index) => onOpenUtility(data.utilities[index].id)} />
-        <ExecutiveBoard members={data.members.filter((member) => member.isBoard)} isDemo={data.isDemo} onViewAll={() => onNavigate("members")} />
+        <ExecutiveBoard members={data.members.filter((member) => member.isBoard)} isDemo={data.isDemo} accessRequired={data.memberAccess === "required"} onViewAll={() => onNavigate("members")} />
         <ContentBrowser data={data} category={contentCategory} onChangeCategory={onChangeCategory} onOpenContent={onOpenContent} onOpenArticle={onOpenArticle} />
         <div className="community-note">
           <span /><p>{data.association.slogan}</p><span />

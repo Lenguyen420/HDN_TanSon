@@ -1,5 +1,6 @@
 import type { AppData, ContentArticle, ContentCategory, Notification, ProfileEdits } from "@/datas/types";
 export interface TabPageProps { data: AppData; onBack: () => void; }
+export interface MembersPageProps extends TabPageProps {}
 export interface ProfilePageProps extends TabPageProps { onEdit: () => void; saveMessage?: string; }
 export interface ProfileEditPageProps extends TabPageProps { onSave: (edits: ProfileEdits) => void; }
 export interface NotificationsPageProps extends TabPageProps {

@@ -11,6 +11,7 @@ export async function getAppData(): Promise<AppData> {
   ]);
   return {
     isDemo: false,
+    memberAccess: "required",
     // Giữ thương hiệu, slogan và logo thống nhất theo cấu hình của mini app.
     association: mockAppData.association,
     utilities: mockAppData.utilities,
@@ -21,7 +22,7 @@ export async function getAppData(): Promise<AppData> {
       events: { ...mockAppData.content.events, articles: events },
       "member-visits": { ...mockAppData.content["member-visits"], articles: visits },
     },
-    // Backend chưa có API public cho danh bạ, hồ sơ, hội phí và lịch sử cá nhân.
+    // Danh bạ và hồ sơ được tải riêng sau khi xác thực Zalo trong AppShell.
     members: [],
     profile: { memberId: "", memberCode: "", joinedAt: "", status: "" },
     registration: { companies: [] },
