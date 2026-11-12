@@ -111,3 +111,12 @@ Khi chọn Cá nhân hoặc Đăng kí, Mini App kiểm tra quyền scope.userIn
 Không xin số điện thoại/access token và không gọi API xác minh phía server. Backend lưu riêng vào zalo_sdk_profiles với verificationStatus=unverified, không liên kết hoặc cấp tư cách hội viên. Thông tin này chưa chứng minh danh tính; không dùng cho tính năng cần xác thực. Từ chối quyền hoặc lỗi MongoDB thì giữ nguyên trang và cho chọn lại tab để thử.
 
 Luồng này hoạt động với backend Vercel, không cần chuyển VPS hoặc App Secret. Deploy lại backend trước, sau đó build/deploy Mini App. Cần thử cấp quyền thật trên Zalo ở thiết bị; trình duyệt chỉ dùng để kiểm tra giao diện.
+
+
+## Thông báo kết quả đăng ký
+
+Khi gửi hồ sơ, Mini App tạo mã theo dõi ngẫu nhiên 256 bit và lưu trên thiết bị trước khi gọi API. Mã đi kèm hồ sơ; MongoDB chỉ lưu SHA-256. Mục Thông báo và badge nhận trạng thái đã tiếp nhận, được duyệt hoặc từ chối (kèm lý do nếu có). Mỗi sự kiện có ID ổn định để không đánh dấu chưa đọc lại sau mỗi lần tải. Thông báo đọc/chưa đọc được lưu trên thiết bị.
+
+Ứng dụng kiểm tra kết quả mỗi 5 giây khi đang hiển thị và ngay sau khi gửi hồ sơ/quay lại ứng dụng. Khi mất mạng giữ thông báo cũ và tự thử lại. Không có push khi Zalo đã đóng. Chỉ giữ mã theo dõi của 20 lần gửi gần nhất trên thiết bị này; xóa bộ nhớ, đổi thiết bị hoặc đổi origin sẽ mất quyền đọc kết quả cũ. Nếu bộ nhớ bị chặn thì vẫn gửi hồ sơ được và có cảnh báo chỉ theo dõi trong phiên đang mở. Không dùng ID Zalo chưa xác minh để truy cập kết quả người khác.
+
+Deploy backend, admin và Mini App để sử dụng các API mới. Hồ sơ cũ trước thay đổi này không có mã theo dõi nên không tự xuất hiện trong thông báo cá nhân.

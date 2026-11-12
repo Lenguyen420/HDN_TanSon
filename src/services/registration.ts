@@ -1,5 +1,6 @@
 import type { RegistrationCompany, RegistrationDraft } from "@/datas/types";
 import { apiRequest, useMockData } from "./api";
+import { prepareRegistrationTracking, announceRegistrationSubmitted } from "./registration-notifications";
 
 export interface RegistrationReceipt {
   data: { id: string; status: "pending" };
@@ -10,15 +11,20 @@ export async function submitRegistration(draft: RegistrationDraft, companies: Re
   if (useMockData) throw new Error("Đang dùng dữ liệu mẫu. Hãy tắt chế độ mẫu để gửi hồ sơ đến Hội.");
   if (!isRegistrationValid(draft, companies, registrationToday())) throw new Error("Vui lòng kiểm tra thông tin đăng ký.");
   const company = draft.unknownCompany ? draft.companyName.trim() : companies.find((item) => item.id === draft.companyId)?.name;
-  return apiRequest<RegistrationReceipt>("public/registrations", {
+  const tracking = prepareRegistrationTracking();
+  const receipt = await apiRequest<RegistrationReceipt>("public/registrations", {
     method: "POST",
     body: JSON.stringify({
+      notificationToken: tracking.token,
       fullName: draft.fullName.trim(), phone: draft.phone.trim(), birthDate: draft.birthDate,
       email: draft.email.trim(), company, jobTitle: draft.position.trim(),
       taxCode: draft.unknownCompany ? draft.taxCode.trim() : "",
       companyAddress: draft.unknownCompany ? draft.companyAddress.trim() : "",
     }),
   });
+  announceRegistrationSubmitted();
+  if (!tracking.persisted) receipt.message += " Thiết bị không lưu được mã theo dõi; chỉ nhận thông báo trong phiên đang mở.";
+  return receipt;
 }
 
 export function clearRegistrationDraft() {

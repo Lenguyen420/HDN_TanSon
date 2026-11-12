@@ -103,7 +103,9 @@ test("public API integration", async (t) => {
     global.fetch = async (url, options) => {
       assert.equal(url, "http://localhost:4000/api/v1/public/registrations");
       assert.equal(options.method, "POST");
-      assert.deepEqual(JSON.parse(options.body), { fullName: "Nguyễn Văn A", phone: "0901234567", birthDate: "1990-01-01", email: "", company: "Công ty A", jobTitle: "Giám đốc", taxCode: "123", companyAddress: "Tân Sơn" });
+      const { notificationToken, ...submitted } = JSON.parse(options.body);
+      assert.match(notificationToken, /^[a-f0-9]{64}$/);
+      assert.deepEqual(submitted, { fullName: "Nguyễn Văn A", phone: "0901234567", birthDate: "1990-01-01", email: "", company: "Công ty A", jobTitle: "Giám đốc", taxCode: "123", companyAddress: "Tân Sơn" });
       return reply({ data: { id: "receipt-1", status: "pending" }, message: "Đã tiếp nhận" }, 201);
     };
     assert.equal((await services.submitRegistration(draft, [])).data.id, "receipt-1");

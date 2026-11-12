@@ -29,6 +29,8 @@ import type { ArticlePageProps, ContentListPageProps, UtilityPageProps } from "@
 
 import { saveZaloSdkProfile, type MemberIdentity } from "@/services/member-access";
 
+import useRegistrationNotifications from "@/components/shared/use-registration-notifications";
+
 type Screen =
   | { kind: "utility"; id: UtilityId }
   | { kind: "list"; category: ContentCategory }
@@ -48,6 +50,7 @@ const detailPages: Record<ContentCategory, ComponentType<ArticlePageProps>> = {
 };
 
 export default function AppShell() {
+  const { notifications: registrationNotices, error: registrationNoticeError } = useRegistrationNotifications();
   const [sourceData, setData] = useState<AppData | null>(null);
   const [profileEdits, setProfileEdits] = useState(readProfileEdits);
   const [profileSaveMessage, setProfileSaveMessage] = useState("");
@@ -193,10 +196,10 @@ export default function AppShell() {
   };
   const markAllNotificationsRead = () => {
     const updates: NotificationReadState = {};
-    for (const notice of data?.notifications || []) updates[notice.id] = true;
+    for (const notice of [...registrationNotices, ...(data?.notifications || [])]) updates[notice.id] = true;
     updateReadState(updates);
   };
-  const notifications = (data?.notifications || []).map((notice) => ({
+  const notifications = [...registrationNotices, ...(data?.notifications || [])].map((notice) => ({
     ...notice,
     unread: notificationReadState[notice.id] === undefined ? notice.unread : !notificationReadState[notice.id],
   }));
@@ -236,6 +239,7 @@ export default function AppShell() {
   return (
     <Page className="association-page">
       <div className="app-shell" ref={content}>
+        {registrationNoticeError && <div className="data-status" role="status"><p>{registrationNoticeError}</p></div>}
         {authPending && <div className="data-status" role="status"><p>Đang lưu tên và ảnh Zalo…</p></div>}
         {authError && <div className="data-status" role="alert"><p>{authError} Chọn lại Cá nhân hoặc Đăng kí để thử lại.</p></div>}
         {authMessage && !authPending && <div className="data-status" role="status"><p>{authMessage}</p></div>}

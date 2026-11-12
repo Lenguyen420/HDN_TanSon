@@ -20,6 +20,7 @@ test("protected tab navigation waits for consent and database save", async (t) =
           export const useLayoutEffect = () => {};
         `;
         else if (path === "react/jsx-runtime") contents = 'export const jsx = (type, props) => ({type, props}); export const jsxs = jsx; export const Fragment = "fragment";';
+        else if (path.endsWith("shared/use-registration-notifications")) contents = 'export default () => ({notifications: [], error: ""});';
         else if (path === "zmp-ui") contents = 'export const Page = "page";';
         else if (path.endsWith("services/member-access")) contents = 'export const saveZaloSdkProfile = () => globalThis.navigationHarness.authenticate();';
         else if (path.endsWith("services/profile")) contents = 'export const readProfileEdits = () => null; export const applyProfileEdits = data => data; export const saveProfileEdits = () => {};';
