@@ -1,3 +1,4 @@
+import { features } from "@/datas/features";
 import { useEffect, useState } from "react";
 import PageToolbar from "@/components/shared/page-toolbar";
 import type { UtilityPageProps } from "@/components/shared/page-props";
@@ -100,6 +101,7 @@ export default function Trade({ onBack }: UtilityPageProps) {
         }
       />
       <div className="trade-body">
+        {features.tradePreview && <p className="surface-card" role="status">Đang xem thử giao diện giao thương. Các thao tác thử chỉ lưu trong phiên này.</p>}
         <div className="trade-intro">
           <strong>Kết nối đúng đối tác, cùng phát triển</strong>
           <p>

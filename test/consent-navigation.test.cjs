@@ -20,6 +20,7 @@ test("protected tab navigation waits for consent and database save", async (t) =
           export const useLayoutEffect = () => {};
         `;
         else if (path === "react/jsx-runtime") contents = 'export const jsx = (type, props) => ({type, props}); export const jsxs = jsx; export const Fragment = "fragment";';
+        else if (path.endsWith("shared/use-public-notifications")) contents = 'export default () => ({notifications: globalThis.navigationHarness.publicNotices || [], error: ""});';
         else if (path.endsWith("shared/use-registration-notifications")) contents = 'export default () => ({notifications: [], profiles: globalThis.navigationHarness.registrationProfiles || [], setProfiles: () => {}, error: ""});';
         else if (path.endsWith("shared/use-event-updates")) contents = 'export default () => ({notifications: [], participations: [], setParticipations: () => {}, loading: false, error: ""});';
         else if (path === "zmp-ui") contents = 'export const Page = "page";';
@@ -31,7 +32,7 @@ test("protected tab navigation waits for consent and database save", async (t) =
         else if (path.endsWith("services/registration-notifications")) contents = 'export const updateRegistrationProfile = async () => []; export const syncRegistrationAvatar = async () => [];';
         else if (path.endsWith("services/profile")) contents = 'export const readProfileEdits = () => null; export const applyProfileEdits = data => data; export const saveProfileEdits = () => {};';
         else if (path.endsWith("services/association")) contents = 'export const getAppData = async () => globalThis.navigationHarness.data;';
-        else if (path.endsWith("services/notifications")) contents = 'export const readNotificationState = () => ({}); export const saveNotificationState = () => true;';
+        else if (path.endsWith("services/notifications")) contents = 'export const readNotificationState = () => ({}); export const saveNotificationState = () => true; export const mergeNotifications = (publicNotices, privateNotices) => [...privateNotices, ...publicNotices];';
         else contents = 'export default ' + JSON.stringify(path) + ';';
         return {contents, loader: "js"};
       });
@@ -49,6 +50,16 @@ test("protected tab navigation waits for consent and database save", async (t) =
   }
   const nav = () => find(render(), node => node.type === "@/components/bottom-navigation").props;
   t.after(() => { delete global.navigationHarness; });
+  await t.test("public notifications open without OA or Zalo authentication", async () => {
+    reset(); let calls = 0;
+    global.navigationHarness.authenticate = async () => {calls++;throw Error("Should not authenticate");};
+    global.navigationHarness.publicNotices = [{id:"content-news-1", title:"Tin mới", unread:true, date:"2026-11-13"}];
+    await nav().onChange("notifications");
+    assert.equal(nav().activeTab,"notifications");
+    const page=find(render(),node=>node.type === "@/pages/notifications/notifications");
+    assert.equal(page.props.data.notifications[0].id,"content-news-1");
+    assert.equal(calls,0);
+  });
   await t.test("web preview opens profile and registration without invoking Zalo", async () => {
     reset();
     global.navigationHarness.authEnabled = false;

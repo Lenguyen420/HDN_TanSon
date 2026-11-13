@@ -9,7 +9,7 @@ export const association: Association = {
   logo,
   slogan: associationSlogan,
   greeting: "Kính chào Quý Doanh nhân",
-  oaDescription: "Quan tâm OA để nhận thông báo mới nhất.",
+  oaDescription: "Tin tức và sự kiện mới được cập nhật tại mục Thông báo.",
   oaNotice: "Official Account của Hội đang được cập nhật. Tính năng quan tâm sẽ khả dụng khi tài khoản OA chính thức được kết nối.",
   memberSlogan: associationSlogan,
 };

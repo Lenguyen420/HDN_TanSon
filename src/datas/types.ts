@@ -26,6 +26,9 @@ export interface Member {
 }
 export interface Notification {
   id: string; title: string; description: string; date: string; unread: boolean;
+  scope?: "public" | "private";
+  source?: "announcement" | "news" | "events";
+  createdAt?: string;
   category?: string;
   time?: string;
   image?: string | null;

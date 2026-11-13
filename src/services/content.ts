@@ -33,5 +33,5 @@ export async function getBanners(): Promise<BannerItem[]> {
 
 export async function getNotifications(): Promise<Notification[]> {
   // Backend không lưu trạng thái đọc theo người dùng; trạng thái này được lưu trên thiết bị.
-  return (await getAllPublicItems<Omit<Notification, "unread">>("notifications")).map((notice) => ({ ...notice, unread: true }));
+  return (await getAllPublicItems<Omit<Notification, "unread">>("notification-feed")).map((notice) => ({ ...notice, scope: "public", image: resolveApiImage(notice.image), unread: true }));
 }

@@ -52,6 +52,11 @@ test("public API integration", async (t) => {
     const managed = "/api/v1/public/introduction-videos/00000000-0000-4000-8000-000000000000";
     assert.equal(services.introductionVideoSource(managed).url, "http://localhost:4000" + managed);
     assert.equal(services.introductionVideoSource("/api/v1/public/introduction-videos/bad-id"), null);
+    const local = "/uploads/introduction-videos/00000000-0000-4000-8000-000000000000.mp4";
+    assert.equal(services.introductionVideoSource(local).url, "http://localhost:4000" + local);
+    assert.equal(services.introductionVideoSource(local.replace(".mp4", ".webm")).kind, "video");
+    assert.equal(services.introductionVideoSource("/uploads/introduction-videos/../../.env"), null);
+    assert.equal(services.introductionVideoSource("/uploads/introduction-videos/bad.mp4"), null);
   });
 
   await t.test("loads every page", async () => {
@@ -69,17 +74,17 @@ test("public API integration", async (t) => {
       assert.ok(!options?.headers?.Authorization);
       assert.ok(!url.includes("/member/"));
       if (url.endsWith("settings")) return reply({ data: {
-        introduction: "Giới thiệu", introductionVideoUrl: "https://cdn.example.com/intro.mp4", mission: "Sứ mệnh", department: "Ban thư ký", address: "Tân Sơn", hours: "08:00", phone: "0901234567", email: "", zaloUrl: "",
+        introduction: "Giới thiệu", introductionVideoUrl: "/uploads/introduction-videos/00000000-0000-4000-8000-000000000000.mp4", mission: "Sứ mệnh", department: "Ban thư ký", address: "Tân Sơn", hours: "08:00", phone: "0901234567", email: "", zaloUrl: "",
         assistantGreeting: "Xin chào", assistantQuestions: "Câu hỏi | Trả lời | chi tiết\n",
       } });
       const data = url.includes("/news?") ? [{ id: "news-real", image: "uploads/news/photo.jpg" }]
-        : url.includes("/notifications?") ? [{ id: "notice-real" }]
+        : url.includes("/notification-feed?") ? [{ id: "notice-real" }]
         : url.includes("/public/members?") ? [{ id: "public-member", name: "Hội viên", company: "Công ty", isBoard: true }] : [];
       return reply({ data, pagination: { total: data.length } });
     };
     const data = await services.getAppData();
     assert.equal(data.isDemo, false);
-    assert.equal(data.utilityPages.about.introductionVideoUrl, "https://cdn.example.com/intro.mp4");
+    assert.equal(data.utilityPages.about.introductionVideoUrl, "/uploads/introduction-videos/00000000-0000-4000-8000-000000000000.mp4");
     assert.equal(data.members[0].id, "public-member");
     assert.equal(data.memberAccess, "granted");
     assert.equal(data.profile.memberId, "");

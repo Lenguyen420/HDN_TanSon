@@ -4,8 +4,10 @@ export function introductionVideoSource(value?: string) {
   if (!value?.trim()) return null;
   try {
     const managed = /^\/api\/v1\/public\/introduction-videos\/[a-f0-9-]{36}$/.test(value.trim());
-    const url = new URL(managed ? resolveApiImage(value.trim())! : value.trim());
-    const local = managed && url.protocol === "http:" && ["localhost", "127.0.0.1"].includes(url.hostname);
+    const uploaded = /^\/uploads\/introduction-videos\/[a-f0-9-]{36}\.(mp4|webm)$/.test(value.trim());
+    const relative = managed || uploaded;
+    const url = new URL(relative ? resolveApiImage(value.trim())! : value.trim());
+    const local = relative && url.protocol === "http:" && ["localhost", "127.0.0.1"].includes(url.hostname);
     if ((!local && url.protocol !== "https:") || url.username || url.password) return null;
     const host = url.hostname.toLowerCase();
     if (["youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be", "www.youtube-nocookie.com"].includes(host)) {

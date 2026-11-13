@@ -1,3 +1,5 @@
+import { features } from "@/datas/features";
+import { previewTradeActor } from "@/datas/trade-preview";
 import { apiRequest, apiBaseUrl, ApiError, resolveApiImage } from "./api";
 import { registrationTokens } from "./registration-notifications";
 import type { TradeActor, TradeImage, TradeResult } from "./trade-types";
@@ -8,8 +10,10 @@ let session: {
   until: number;
 } | null = null;
 let pending: Promise<TradeActor> | null = null;
-export const currentTradeUser = () => session?.user || null;
+export const currentTradeUser = () =>
+  features.tradePreview ? previewTradeActor : session?.user || null;
 export async function loginTrade(): Promise<TradeActor> {
+  if (features.tradePreview) return previewTradeActor;
   if (session && session.until > Date.now()) return session.user;
   if (pending) return pending;
   const task = (async () => {
@@ -54,6 +58,10 @@ export async function tradeRequest<T>(
   body?: unknown,
   required = false,
 ): Promise<TradeResult<T>> {
+  if (features.tradePreview) {
+    const { previewTradeRequest } = await import("./trade-preview");
+    return previewTradeRequest<T>(path, method, body);
+  }
   if (required) await loginTrade();
   try {
     const result = await apiRequest<TradeResult<T>>(path, {
@@ -81,6 +89,10 @@ export async function uploadTradeImage(file: File): Promise<TradeImage> {
     file.size > 10 * 1024 * 1024
   )
     throw new Error("Chọn ảnh JPG, PNG hoặc WebP tối đa 10 MB.");
+  if (features.tradePreview) {
+    const { previewTradeImage } = await import("./trade-preview");
+    return previewTradeImage(file);
+  }
   await loginTrade();
   const url = URL.createObjectURL(file);
   try {
@@ -126,6 +138,11 @@ export function watchTradeConversation(
   conversationId: string,
   onMessage: () => void,
 ) {
+  if (features.tradePreview) {
+    window.addEventListener("tanson-trade-preview-message", onMessage);
+    return () =>
+      window.removeEventListener("tanson-trade-preview-message", onMessage);
+  }
   const controller = new AbortController();
   let timer: ReturnType<typeof setTimeout> | undefined;
   const fallback = setInterval(() => {

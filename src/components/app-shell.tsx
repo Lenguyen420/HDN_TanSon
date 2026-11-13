@@ -1,3 +1,4 @@
+import usePublicNotifications from "@/components/shared/use-public-notifications";
 import { buildEventHistory } from "@/services/event-history";
 import useEventUpdates from "@/components/shared/use-event-updates";
 import { features } from "@/datas/features";
@@ -37,7 +38,7 @@ import MemberVisitDetailPage from "@/pages/member-visit-detail/member-visit-deta
 import NotificationDetailPage from "@/pages/notification-detail/notification-detail";
 import BottomNavigation from "@/components/bottom-navigation";
 import { getAppData, type AppResource } from "@/services/association";
-import { readNotificationState, saveNotificationState } from "@/services/notifications";
+import { readNotificationState, saveNotificationState, mergeNotifications } from "@/services/notifications";
 import type { NotificationReadState } from "@/services/notifications";
 import { applyProfileEdits, readProfileEdits, saveProfileEdits } from "@/services/profile";
 import type { AppData, ContentCategory, NavigationTab, ProfileEdits, UtilityId } from "@/datas/types";
@@ -79,6 +80,7 @@ const eventResourcePages: Record<EventResourceSection, ComponentType<EventResour
   attendance: EventCheckInPage, documents: EventDocumentListPage, minutes: EventMinuteListPage,
 };
 export default function AppShell() {
+  const { notifications: publicNotices, error: publicNoticeError } = usePublicNotifications();
   const {notifications: eventNotices, participations: eventParticipations, setParticipations: setEventParticipations, loading: eventUpdatesLoading, error: eventUpdatesError} = useEventUpdates();
   const { notifications: registrationNotices, profiles: registrationProfiles, setProfiles: setRegistrationProfiles, error: registrationNoticeError } = useRegistrationNotifications();
   const [sourceData, setData] = useState<AppData | null>(null);
@@ -177,9 +179,8 @@ export default function AppShell() {
 
   const screen = screens[screens.length - 1];
   const resources: AppResource[] = ["settings"];
-  if (!screen && activeTab === "home") resources.push("banners", "notifications", "members", homeCategory === "member-visits" ? "visits" : homeCategory);
+  if (!screen && activeTab === "home") resources.push("banners", "members", homeCategory === "member-visits" ? "visits" : homeCategory);
   if (!screen && ["members", "register"].includes(activeTab)) resources.push("members");
-  if (!screen && activeTab === "notifications" || screen?.kind === "notification") resources.push("notifications");
   if (screen?.kind === "list" || screen?.kind === "article") resources.push(screen.category === "member-visits" ? "visits" : screen.category);
   if (screen?.kind === "utility" && ["event-assistant", "activities"].includes(screen.id)) resources.push("events");
   if (screen?.kind === "event-workspace" || screen?.kind === "event-resource") resources.push("events");
@@ -325,13 +326,10 @@ export default function AppShell() {
   };
   const markAllNotificationsRead = () => {
     const updates: NotificationReadState = {};
-    for (const notice of [...eventNotices, ...registrationNotices, ...(data?.notifications || [])]) updates[notice.id] = true;
+    for (const notice of notifications) updates[notice.id] = true;
     updateReadState(updates);
   };
-  const notifications = [...eventNotices, ...registrationNotices, ...(data?.notifications || [])].map((notice) => ({
-    ...notice,
-    unread: notificationReadState[notice.id] === undefined ? notice.unread : !notificationReadState[notice.id],
-  }));
+  const notifications = mergeNotifications(publicNotices ?? data?.notifications ?? [], [...eventNotices, ...registrationNotices], notificationReadState);
 
   const renderPage = () => {
     if (!data) return null;
@@ -375,7 +373,7 @@ export default function AppShell() {
     switch (activeTab) {
       case "register": return <RegisterPage data={data} onBack={() => navigate("home")} />;
       case "members": return <MembersPage data={data} onBack={() => navigate("home")} />;
-      case "notifications": return <NotificationsPage data={{ ...data, notifications }} onBack={() => navigate("home")} onOpenNotification={openNotification} onMarkAllRead={markAllNotificationsRead} storageMessage={notificationStorageMessage} />;
+      case "notifications": return <NotificationsPage data={{ ...data, notifications }} onBack={() => navigate("home")} onOpenNotification={openNotification} onMarkAllRead={markAllNotificationsRead} storageMessage={[notificationStorageMessage, publicNoticeError, registrationNoticeError, eventUpdatesError].filter(Boolean).join(" ")} />;
       case "profile": return <ProfilePage onSupport={(action) => action === "policies" ? openScreen({kind:"policies"}) : openScreen({kind:"utility",id:action})} data={data} onBack={() => navigate("home")} onEdit={() => { setProfileSaveMessage(""); openScreen({ kind: "profile-edit" }); }} saveMessage={profileSaveMessage} />;
       case "home": return <HomePage onOpenWardMiniApp={() => void openWardMiniApp()} data={data} onNavigate={navigate} onOpenContent={openContent} onOpenUtility={(id) => openScreen({ kind: "utility", id })} onOpenArticle={openArticle} contentCategory={homeCategory} onChangeCategory={setHomeCategory} />;
     }

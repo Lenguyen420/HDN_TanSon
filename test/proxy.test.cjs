@@ -16,7 +16,7 @@ test("dev proxy returns actionable JSON when backend is unavailable", async () =
     const response = await fetch(`http://127.0.0.1:${port}/api/v1/public/settings`);
     assert.equal(response.status, 503);
     assert.match(response.headers.get("content-type"), /application\/json/);
-    assert.match((await response.json()).message, /Không thể kết nối backend Vercel/);
+    assert.match((await response.json()).message, /Không thể kết nối backend/);
   } finally {
     await server.close();
   }

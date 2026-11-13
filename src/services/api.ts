@@ -1,5 +1,5 @@
 const configuredUrl = import.meta.env.VITE_API_BASE_URL?.trim();
-export const apiBaseUrl = (configuredUrl || (import.meta.env.DEV ? "/api/v1" : "http://localhost:4000/api/v1")).replace(/\/+$/, "");
+export const apiBaseUrl = (configuredUrl || (import.meta.env.DEV ? "/api/v1" : "https://behdntanson.vercel.app/api/v1")).replace(/\/+$/, "");
 export const useMockData = import.meta.env.VITE_USE_MOCK_DATA === "true";
 
 export class ApiError extends Error {

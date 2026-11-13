@@ -5,8 +5,8 @@
 Các lời gọi API nằm trong `src/services/`; `AppShell` tải dữ liệu qua `getAppData()` và truyền xuống giao diện bằng props.
 
 1. Tạo `.env` ở thư mục gốc theo `.env.example` (hoặc bổ sung các biến nếu đã có).
-2. Khi phát triển local, để `VITE_API_BASE_URL=/api/v1` (cũng là mặc định ở chế độ dev). Vite proxy `/api` và `/uploads` tới `http://localhost:4000`, tránh phụ thuộc CORS của backend. Có thể đặt URL tuyệt đối để gọi backend trực tiếp. Khởi động lại mini app sau khi sửa biến môi trường.
-3. Chạy backend tại `D:\HDN_TanSon_Backend\hdn_tanson_be` với cấu hình MongoDB của backend, rồi chạy `npm start` tại mini app.
+2. Khi phát triển local, để `VITE_API_BASE_URL=/api/v1` (cũng là mặc định ở chế độ dev). Vite proxy `/api` và `/uploads` tới `https://behdntanson.vercel.app` (hoặc `VITE_API_PROXY_TARGET`), tránh phụ thuộc CORS của backend. Có thể đặt URL tuyệt đối để gọi backend trực tiếp. Khởi động lại mini app sau khi sửa biến môi trường.
+3. Backend đang dùng Vercel; không cần khởi động backend local. Chạy `npm start` tại Mini App.
 4. Trước khi build/chạy trên điện thoại/Zalo, đặt `VITE_API_BASE_URL=https://<backend-domain>/api/v1` và cấu hình domain mạng của Mini App. Backend phải cho phép origin của mini app trong `CORS_ORIGINS`; proxy Vite chỉ dùng khi phát triển và localhost trên điện thoại không trỏ tới máy tính.
 
 | Service | API đã nối |
@@ -157,7 +157,7 @@ Thông báo chỉ nằm trong ứng dụng, cập nhật khi đang mở hoặc k
 
 ## Tạm kiểm tra giao diện web
 
-Mặc định bước xác thực Zalo đang tắt (VITE_ENABLE_ZALO_AUTH=false). Các tab Cá nhân và Đăng ký mở trực tiếp trên trình duyệt; hồ sơ đã lưu vẫn lấy qua mã theo dõi trên thiết bị, không tạo danh tính Zalo giả. Khi cần khôi phục luồng xác thực, đặt VITE_ENABLE_ZALO_AUTH=true trong môi trường chạy/build rồi khởi động lại hoặc build/deploy lại.
+Xác thực Zalo hiện được bật (`VITE_ENABLE_ZALO_AUTH=true`), chế độ xem thử giao thương đã tắt (`VITE_TRADE_PREVIEW=false`). Cá nhân, Đăng ký và các thao tác giao thương dùng lại luồng xác thực/phân quyền hiện có. Thông báo tin tức và sự kiện công khai vẫn xem được không cần xác thực. Sau khi đổi biến môi trường, cần khởi động lại hoặc build/deploy lại Mini App.
 
 ## Video giới thiệu
 
@@ -170,3 +170,15 @@ Ngày thành lập doanh nghiệp (companyFoundedAt) là trường tùy chọn d
 ## Giao thương doanh nghiệp
 
 Tiện ích Giao thương đã mở: tìm/lọc tin, chi tiết, liên hệ/chia sẻ, lưu tin, đánh giá và phản hồi, hội thoại, thông báo, đăng tin của doanh nghiệp và thống kê. Công khai chỉ thấy tin đã duyệt trong danh mục hoạt động, còn hiệu lực. JWT Giao thương được cấp sau khi kiểm tra mã receipt bí mật của hồ sơ trên thiết bị hoặc access token Zalo đã xác minh; profile SDK chưa xác minh không cấp quyền. Hội viên doanh nghiệp đang hoạt động được đăng/gửi duyệt. Ảnh được thu nhỏ trước khi upload riêng, tối đa 10 ảnh/tin và 3 ảnh/đánh giá. Hội thoại cập nhật qua SSE có xác thực và đọc lại lịch sử khi mất kết nối. Liên kết chia sẻ ?tradePost=id-hoac-slug mở thẳng tin. Deploy backend trước; xem docs/trade-module.md ở repo backend.
+
+## Video giới thiệu từ admin
+
+Trang Giới thiệu lấy `introductionVideoUrl` từ GET `/api/v1/public/settings`. Đường dẫn `/uploads/introduction-videos/<uuid>.mp4` hoặc `.webm` được ghép với origin backend trong `VITE_API_BASE_URL`, không dùng video đóng gói sẵn. Admin xóa URL thì Mini App ẩn video. Để phát trên Zalo, backend phải có HTTPS và domain được cấu hình trong Mini App. Backend lưu video cần ổ đĩa bền vững.
+
+## Thông báo tin tức và sự kiện
+
+Mini App lấy GET `/api/v1/public/notification-feed` để hiển thị thông báo chung, tin tức mới và sự kiện mới xuất bản. Không yêu cầu xác thực/quan tâm OA. Tự cập nhật mỗi 15 giây khi đang mở ứng dụng và khi quay lại cửa sổ. Chạm thông báo rồi chọn xem bài viết/sự kiện liên quan. Bộ lọc Công khai/Riêng của bạn tách nội dung chung với kết quả đăng ký hội viên và cập nhật tham gia sự kiện dựa trên mã theo dõi cũ. Thông báo giao thương vẫn nằm trong mục Giao thương, dùng phiên và phân quyền người nhận hiện tại. Trạng thái đọc được lưu trên thiết bị. Đây là hộp thư trong ứng dụng, không phải tin nhắn OA hoặc push khi đã đóng ứng dụng.
+
+## Tạm test giao diện giao thương
+
+Đặt `VITE_TRADE_PREVIEW=true` trong `.env`, chạy `npm start`. Khi dev, giao thương dùng tài khoản xem thử và dữ liệu trong bộ nhớ để mở đăng tin, tin đã lưu, hội thoại, đánh giá, thống kê và thông báo mà không đăng ký/xác thực OA/Zalo. Thao tác thử không gửi dữ liệu giao thương lên backend; tải lại trang sẽ đặt lại dữ liệu mẫu. Đổi `VITE_TRADE_PREVIEW=false` để khôi phục luồng xác thực cũ. Build production luôn tắt chế độ này dù biến môi trường là true; API backend vẫn giữ phân quyền hiện tại.

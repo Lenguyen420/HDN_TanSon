@@ -11,7 +11,7 @@ export default function Notifications({ data, onBack, onOpenNotification, onMark
   const visible = data.notifications.filter((notice) => filter === "all" || (filter === "unread" ? notice.unread : !notice.unread));
   return (
     <main className="notifications-page">
-      <PageToolbar title="Thông báo" subtitle="Cập nhật thông tin từ Hội" onBack={onBack} />
+      <PageToolbar title="Thông báo" subtitle="Tin tức, sự kiện và cập nhật dành cho bạn" onBack={onBack} />
       <div className="notification-inbox">
         <section className="notification-summary"><span className="notification-summary-icon"><AppIcon name="bell" />{unread > 0 && <i />}</span><div><h2>{unread > 0 ? `Bạn có ${unread} thông báo chưa đọc` : "Bạn đã xem tất cả thông báo"}</h2><p>Đồng hành cùng các hoạt động của Hội</p></div></section>
         <div className="notification-inbox-toolbar"><span>{data.notifications.length} thông báo</span><button type="button" onClick={onMarkAllRead} disabled={unread === 0}><AppIcon name="check" />Đọc tất cả</button></div>
