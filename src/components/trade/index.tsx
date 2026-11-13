@@ -16,7 +16,8 @@ import TradeMine from "./trade-mine";
 import TradeInbox from "./trade-inbox";
 import TradeNotices from "./trade-notices";
 import { TradeReports, TradeSellerReviews } from "./trade-reports";
-import { useTradeAction } from "./use-trade";
+import { useTradeAction, useTradeList } from "./use-trade";
+import TradeIcon from "./trade-icon";
 import "@/css/trade.scss";
 type View =
   | {
@@ -28,7 +29,7 @@ type View =
         | "seller-reviews"
         | "notifications";
     }
-  | { kind: "detail"; id: string; managed?: boolean }
+  | { kind: "detail"; id: string; managed?: boolean; commentId?: string }
   | { kind: "edit"; post?: TradePost }
   | { kind: "inbox"; conversation?: TradeConversation };
 export default function Trade({ onBack }: UtilityPageProps) {
@@ -47,6 +48,12 @@ export default function Trade({ onBack }: UtilityPageProps) {
     window.addEventListener("tanson-trade-auth", update);
     return () => window.removeEventListener("tanson-trade-auth", update);
   }, []);
+  const notices = useTradeList<TradeNotice>(
+    actor ? "trade-notifications?limit=100" : "",
+    Boolean(actor),
+    actor ? 15000 : 0,
+  );
+  const unread = actor ? notices.data.filter((n) => !n.read).length : 0;
   async function authenticated(next: View, selling = false) {
     await task.run(async () => {
       const user = await loginTrade();
@@ -61,7 +68,13 @@ export default function Trade({ onBack }: UtilityPageProps) {
   const detail = (id: string, managed = false) =>
     setView({ kind: "detail", id, managed });
   async function openNotice(notice: TradeNotice) {
-    if (notice.conversationId) {
+    if (notice.commentId) {
+      setView({
+        kind: "detail",
+        id: notice.tradePostId,
+        commentId: notice.commentId,
+      });
+    } else if (notice.conversationId) {
       await task.run(async () => {
         const result = await tradeRequest<TradeConversation>(
           "trade-conversations/" + notice.conversationId,
@@ -81,7 +94,7 @@ export default function Trade({ onBack }: UtilityPageProps) {
     else detail(notice.tradePostId, true);
   }
   const titles: Record<string, string> = {
-    browse: "Giao thương doanh nghiệp",
+    browse: "GIAO THƯƠNG",
     saved: "Tin đã lưu",
     mine: "Tin của doanh nghiệp",
     edit: "Nội dung giao thương",
@@ -92,22 +105,66 @@ export default function Trade({ onBack }: UtilityPageProps) {
     notifications: "Thông báo giao thương",
   };
   return (
-    <main className="trade-mini">
+    <main className={"trade-mini trade-view-" + view.kind}>
       <PageToolbar
         title={titles[view.kind]}
-        subtitle="Hội Doanh nghiệp Phường Tân Sơn"
+        subtitle="Kết nối cộng đồng"
         onBack={() =>
           view.kind === "browse" ? onBack() : setView({ kind: "browse" })
         }
       />
       <div className="trade-body">
-        {features.tradePreview && <p className="surface-card" role="status">Đang xem thử giao diện giao thương. Các thao tác thử chỉ lưu trong phiên này.</p>}
-        <div className="trade-intro">
-          <strong>Kết nối đúng đối tác, cùng phát triển</strong>
-          <p>
-            Sản phẩm, dịch vụ, ưu đãi và hoạt động cộng đồng của doanh nghiệp
-            hội viên.
+        {features.tradePreview && (
+          <p className="surface-card" role="status">
+            Đang xem thử giao diện giao thương. Các thao tác thử chỉ lưu trong
+            phiên này.
           </p>
+        )}
+        {(view.kind === "browse" || view.kind === "saved") && (
+          <div className="trade-explore-heading">
+            <div>
+              <span className="trade-eyebrow">Khám phá cơ hội</span>
+              <h2>
+                {view.kind === "saved" ? "Tin đã lưu" : "Tin giao thương mới"}
+              </h2>
+            </div>
+            <div className="trade-explore-actions">
+              <button
+                disabled={task.busy}
+                onClick={() => void authenticated({ kind: "saved" })}
+              >
+                <TradeIcon name="bookmark" /> Tin đã lưu
+              </button>
+              <button
+                className="primary-button"
+                disabled={task.busy}
+                onClick={() => void authenticated({ kind: "edit" }, true)}
+              >
+                Đăng tin
+              </button>
+            </div>
+          </div>
+        )}
+        <div className="trade-header-tools">
+          <button
+            disabled={task.busy}
+            aria-label="Tin đã lưu"
+            onClick={() => void authenticated({ kind: "saved" })}
+          >
+            <TradeIcon name="bookmark" />
+          </button>
+          <button
+            disabled={task.busy}
+            aria-label={"Thông báo giao thương, " + unread + " chưa đọc"}
+            onClick={() => void authenticated({ kind: "notifications" })}
+          >
+            <TradeIcon name="bell" />
+            {unread > 0 && (
+              <span className="trade-unread-count">
+                {unread > 99 ? "99+" : unread}
+              </span>
+            )}
+          </button>
         </div>
         <nav className="trade-nav" aria-label="Giao thương">
           <button
@@ -145,32 +202,36 @@ export default function Trade({ onBack }: UtilityPageProps) {
             Thông báo
           </button>
         </nav>
-        <div className="trade-actions">
-          <button
-            className="primary-button"
-            disabled={task.busy}
-            onClick={() => void authenticated({ kind: "edit" }, true)}
-          >
-            Đăng tin giao thương
-          </button>
-          {actor ? (
-            <small>
-              {actor.displayName}
-              {actor.role === "BUSINESS" ? " · Doanh nghiệp hội viên" : ""}
-            </small>
-          ) : (
-            <button
-              disabled={task.busy}
-              onClick={() =>
-                void task.run(async () => {
-                  setActor(await loginTrade());
-                })
-              }
-            >
-              Xác thực hồ sơ
-            </button>
+        {view.kind !== "detail" &&
+          view.kind !== "browse" &&
+          view.kind !== "saved" && (
+            <div className="trade-actions">
+              <button
+                className="primary-button"
+                disabled={task.busy}
+                onClick={() => void authenticated({ kind: "edit" }, true)}
+              >
+                Đăng tin giao thương
+              </button>
+              {actor ? (
+                <small>
+                  {actor.displayName}
+                  {actor.role === "BUSINESS" ? " · Doanh nghiệp hội viên" : ""}
+                </small>
+              ) : (
+                <button
+                  disabled={task.busy}
+                  onClick={() =>
+                    void task.run(async () => {
+                      setActor(await loginTrade());
+                    })
+                  }
+                >
+                  Xác thực hồ sơ
+                </button>
+              )}
+            </div>
           )}
-        </div>
         {task.error && <p role="alert">{task.error}</p>}
         {view.kind === "browse" || view.kind === "saved" ? (
           <TradeBrowse
@@ -180,7 +241,9 @@ export default function Trade({ onBack }: UtilityPageProps) {
           />
         ) : view.kind === "detail" ? (
           <TradeDetail
+            key={view.id}
             id={view.id}
+            focusCommentId={view.commentId}
             actor={actor}
             managed={view.managed}
             onEdit={(post) => setView({ kind: "edit", post })}

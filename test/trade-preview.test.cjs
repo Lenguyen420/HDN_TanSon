@@ -39,6 +39,10 @@ test("local trade preview opens protected screens without registration, OA, SDK 
  const review=await service.tradeRequest("trade-posts/"+partner.id+"/reviews","POST",{rating:5,content:"Đánh giá thử"},true);
  assert.equal(review.data.content,"Đánh giá thử");
  assert.equal((await service.tradeRequest("reviews/me?tradePostId="+partner.id,"GET",undefined,true)).data.length,1);
+ const comment=await service.tradeRequest("trade-posts/"+partner.id+"/comments","POST",{content:"Còn hàng không?"},true);
+ assert.equal((await service.tradeRequest("trade-posts/"+partner.id+"/comments")).data[0].id,comment.data.id);
+ assert.equal((await service.tradeRequest("trade-posts/"+partner.id+"/comments/"+comment.data.id)).data.content,"Còn hàng không?");
+ await assert.rejects(service.tradeRequest("trade-posts/"+partner.id+"/comments/"+comment.data.id+"/reply","PUT",{content:"Giả chủ tin"},true),/Chỉ người đăng tin/);
  assert.ok((await service.tradeRequest("trade-posts/me/analytics","GET",undefined,true)).data.totals);
 });
 

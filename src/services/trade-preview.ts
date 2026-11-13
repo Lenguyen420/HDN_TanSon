@@ -6,6 +6,7 @@ import {
 import type {
   TradePost,
   TradeReview,
+  TradeComment,
   TradeImage,
   TradeResult,
 } from "./trade-types";
@@ -14,8 +15,12 @@ import type {
 // All mutations stay in memory and never request protected backend data.
 const state = createPreviewTradeData();
 const reviews: TradeReview[] = [];
+const comments: TradeComment[] = [];
 const media = new Map<string, TradeImage>();
-const imagesOf = (keys: string[]) => keys.map(key => media.get(key)).filter((image): image is TradeImage => Boolean(image));
+const imagesOf = (keys: string[]) =>
+  keys
+    .map((key) => media.get(key))
+    .filter((image): image is TradeImage => Boolean(image));
 const postTemplate = createPreviewTradeData().posts[0];
 const id = () => crypto.randomUUID();
 const now = () => new Date().toISOString();
@@ -140,6 +145,44 @@ export async function previewTradeRequest<T>(
     row.thumbnailUrl = row.images[0]?.url || null;
     state.posts.unshift(row);
     result = ok(row);
+  } else if (parts[0] === "trade-posts" && parts[2] === "comments") {
+    const row = post();
+    if (method === "GET") {
+      if (parts[3]) {
+        const comment = comments.find(
+          (c) => c.id === parts[3] && c.tradePostId === row.id,
+        );
+        if (!comment) throw Error("Không tìm thấy bình luận.");
+        result = ok(comment);
+      } else result = list(comments.filter((c) => c.tradePostId === row.id));
+    } else if (method === "POST" && !parts[3]) {
+      const content = String(payload.content || "").trim();
+      if (!content || content.length > 500)
+        throw Error("Bình luận cần từ 1 đến 500 ký tự.");
+      const comment: TradeComment = {
+        id: id(),
+        tradePostId: row.id,
+        userId: previewTradeActor.id,
+        content,
+        createdAt: now(),
+        user: {
+          id: previewTradeActor.id,
+          displayName: previewTradeActor.displayName,
+        },
+      };
+      comments.unshift(comment);
+      result = ok(comment);
+    } else if (method === "PUT" && parts[4] === "reply") {
+      if (row.ownerId !== previewTradeActor.id)
+        throw Error("Chỉ người đăng tin được trả lời.");
+      const comment = comments.find(
+        (c) => c.id === parts[3] && c.tradePostId === row.id,
+      );
+      if (!comment) throw Error("Không tìm thấy bình luận.");
+      comment.replyContent = String(payload.content || "");
+      comment.repliedAt = now();
+      result = ok(comment);
+    } else throw Error("Thao tác bình luận không hợp lệ.");
   } else if (parts[0] === "trade-posts" && parts[2] === "reviews") {
     if (parts[3] === "summary")
       result = ok({

@@ -1,5 +1,10 @@
-import { apiRequest } from "./api";
+import { apiRequest, resolveApiImage } from "./api";
 import type { Notification, RegistrationProfile } from "@/datas/types";
+const normalizeProfiles = (profiles: RegistrationProfile[]) => profiles.map(profile => ({
+  ...profile,
+  ...(profile.avatar ? {avatar: resolveApiImage(profile.avatar) || ""} : {}),
+  member: profile.member ? {...profile.member, ...(profile.member.avatar ? {avatar:resolveApiImage(profile.member.avatar) || ""} : {})} : null,
+}));
 const key = "tanson-registration-receipts";
 let memory: string[] = [];
 export function registrationTokens(): string[] {
@@ -24,7 +29,7 @@ export async function getRegistrationUpdates(): Promise<{data: Notification[]; p
   if (!tokens.length) return {data: [], profiles: []};
   const result = await apiRequest<{ data: Notification[]; profiles?: RegistrationProfile[] }>("public/registration-notifications", { method: "POST", body: JSON.stringify({ tokens }) });
   if (!Array.isArray(result.data)) throw new Error("Không đọc được kết quả đăng ký.");
-  return { data: result.data, profiles: Array.isArray(result.profiles) ? result.profiles : [] };
+  return { data: result.data, profiles: Array.isArray(result.profiles) ? normalizeProfiles(result.profiles) : [] };
 }
 
 export async function getRegistrationNotifications(): Promise<Notification[]> { return (await getRegistrationUpdates()).data; }
@@ -35,11 +40,11 @@ export async function updateRegistrationProfile(id: string, edits: import("@/dat
   const { memberId, ...fields } = edits;
   const result = await apiRequest<{data: Notification[]; profiles: RegistrationProfile[]}>("public/registration-profile/" + encodeURIComponent(id), {method:"PUT",body:JSON.stringify({...fields,tokens})});
   announceRegistrationSubmitted();
-  return result.profiles;
+  return normalizeProfiles(result.profiles);
 }
 
 export async function syncRegistrationAvatar(id: string, avatar: string): Promise<RegistrationProfile[]> {
   const result = await apiRequest<{profiles: RegistrationProfile[]}>("public/registration-avatar/"+encodeURIComponent(id),{method:"PUT",body:JSON.stringify({tokens:registrationTokens(),avatar})});
   announceRegistrationSubmitted();
-  return result.profiles;
+  return normalizeProfiles(result.profiles);
 }

@@ -114,6 +114,7 @@ export default function TradeReviews({
   ownerId: string;
   onLogin: () => Promise<TradeActor>;
 }) {
+  const [composing, setComposing] = useState(false);
   const [page, setPage] = useState(1),
     [own, setOwn] = useState<TradeReview>(),
     [revision, setRevision] = useState(0),
@@ -179,24 +180,51 @@ export default function TradeReviews({
   }
   return (
     <article className="surface-card">
-      <h3>Đánh giá từ cộng đồng</h3>
+      <div className="trade-review-heading">
+        <h3>Đánh giá giao thương</h3>
+        {actor?.id !== ownerId && (
+          <button onClick={() => setComposing((v) => !v)}>
+            {composing ? "Đóng" : "Viết đánh giá"}
+          </button>
+        )}
+      </div>
       {summary && (
         <>
-          <p>
-            <strong>{summary.averageRating}/5</strong> · {summary.count} đánh
-            giá
-          </p>
-          <div className="trade-rating-bars">
-            {[5, 4, 3, 2, 1].map((r) => (
-              <p key={r}>
-                <span>{r} sao</span>
-                <progress
-                  max={summary.count || 1}
-                  value={summary.counts[r] || 0}
-                />
-                <small>{summary.counts[r] || 0}</small>
-              </p>
-            ))}
+          <div className="trade-rating-overview">
+            <div className="trade-rating-score">
+              <strong>{summary.averageRating.toFixed(1)}</strong>
+              <span
+                className="trade-stars"
+                aria-label={summary.averageRating + " trên 5 sao"}
+              >
+                {"★".repeat(Math.round(summary.averageRating))}
+                <span className="trade-star-empty">
+                  {"★".repeat(5 - Math.round(summary.averageRating))}
+                </span>
+              </span>
+              <small>{summary.count} đánh giá</small>
+            </div>
+            <div className="trade-rating-bars">
+              {[5, 4, 3, 2, 1].map((r) => (
+                <p key={r}>
+                  <span>
+                    {r} <span className="trade-stars">★</span>
+                  </span>
+                  <progress
+                    max={summary.count || 1}
+                    value={summary.counts[r] || 0}
+                  />
+                  <small>
+                    {summary.count
+                      ? Math.round(
+                          ((summary.counts[r] || 0) / summary.count) * 100,
+                        )
+                      : 0}
+                    %
+                  </small>
+                </p>
+              ))}
+            </div>
           </div>
         </>
       )}
@@ -208,9 +236,30 @@ export default function TradeReviews({
       ) : list.data.length ? (
         list.data.map((review) => (
           <section className="trade-review" key={review.id}>
-            <strong>
-              {review.user?.displayName || "Người quan tâm"} · {review.rating}/5
-            </strong>
+            <div className="trade-review-person">
+              <span className="trade-avatar">
+                {review.user?.avatarUrl ? (
+                  <img src={tradeImage(review.user.avatarUrl)} alt="" />
+                ) : (
+                  (review.user?.displayName || "H").charAt(0)
+                )}
+              </span>
+              <div>
+                <strong>{review.user?.displayName || "Người quan tâm"}</strong>
+                <p
+                  className="trade-stars"
+                  aria-label={review.rating + " trên 5 sao"}
+                >
+                  {"★".repeat(review.rating)}
+                  <span className="trade-star-empty">
+                    {"★".repeat(5 - review.rating)}
+                  </span>
+                </p>
+              </div>
+              <time>
+                {new Date(review.createdAt).toLocaleDateString("vi-VN")}
+              </time>
+            </div>
             <p>{review.content}</p>
             <div className="trade-gallery">
               {review.images.map((i) => (
@@ -298,27 +347,28 @@ export default function TradeReviews({
           Sau
         </button>
       </div>
-      {actor ? (
-        actor.id !== ownerId && (
-          <Composer
-            key={(own?.id || "new") + revision}
-            postId={postId}
-            own={own}
-            onDone={refresh}
-          />
-        )
-      ) : (
-        <button
-          disabled={task.busy}
-          onClick={() =>
-            void task.run(async () => {
-              await onLogin();
-            })
-          }
-        >
-          Xác thực hồ sơ để đánh giá
-        </button>
-      )}
+      {composing &&
+        (actor ? (
+          actor.id !== ownerId && (
+            <Composer
+              key={(own?.id || "new") + revision}
+              postId={postId}
+              own={own}
+              onDone={refresh}
+            />
+          )
+        ) : (
+          <button
+            disabled={task.busy}
+            onClick={() =>
+              void task.run(async () => {
+                await onLogin();
+              })
+            }
+          >
+            Xác thực hồ sơ để đánh giá
+          </button>
+        ))}
     </article>
   );
 }

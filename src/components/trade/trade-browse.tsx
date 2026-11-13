@@ -57,24 +57,32 @@ export default function TradeBrowse({
             }}
           />
         </label>
-        <div className="trade-form-grid">
-          <label>
-            Danh mục
-            <select
-              value={category}
-              onChange={(e) => {
-                setCategory(e.target.value);
+        <div className="trade-category-tabs" aria-label="Danh mục giao thương">
+          <button
+            type="button"
+            aria-pressed={!category}
+            onClick={() => {
+              setCategory("");
+              setPage(1);
+            }}
+          >
+            Tất cả
+          </button>
+          {categories.data.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              aria-pressed={category === c.code}
+              onClick={() => {
+                setCategory(c.code);
                 setPage(1);
               }}
             >
-              <option value="">Tất cả danh mục</option>
-              {categories.data.map((c) => (
-                <option key={c.id} value={c.code}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </label>
+              {c.name}
+            </button>
+          ))}
+        </div>
+        <div className="trade-sort-row">
           <label>
             Sắp xếp
             <select

@@ -79,13 +79,14 @@ test("public API integration", async (t) => {
       } });
       const data = url.includes("/news?") ? [{ id: "news-real", image: "uploads/news/photo.jpg" }]
         : url.includes("/notification-feed?") ? [{ id: "notice-real" }]
-        : url.includes("/public/members?") ? [{ id: "public-member", name: "Hội viên", company: "Công ty", isBoard: true }] : [];
+        : url.includes("/public/members?") ? [{ id: "public-member", name: "Hội viên", company: "Công ty", isBoard: true, avatar:"uploads/members/avatar.png" }] : [];
       return reply({ data, pagination: { total: data.length } });
     };
     const data = await services.getAppData();
     assert.equal(data.isDemo, false);
     assert.equal(data.utilityPages.about.introductionVideoUrl, "/uploads/introduction-videos/00000000-0000-4000-8000-000000000000.mp4");
     assert.equal(data.members[0].id, "public-member");
+    assert.equal(data.members[0].avatar,"http://localhost:4000/uploads/members/avatar.png");
     assert.equal(data.memberAccess, "granted");
     assert.equal(data.profile.memberId, "");
     assert.deepEqual(data.utilityPages.fees, []);

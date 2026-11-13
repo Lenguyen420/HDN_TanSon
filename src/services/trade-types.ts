@@ -36,6 +36,7 @@ export interface TradePost {
   ownerId: string;
   category: string;
   categoryId: string;
+  categoryName?: string;
   title: string;
   summary: string;
   description: string;
@@ -159,6 +160,7 @@ export interface TradeNotice {
   title: string;
   reason?: string;
   reviewId?: string;
+  commentId?: string;
   conversationId?: string;
   createdAt: string;
   read: boolean;
@@ -180,6 +182,8 @@ export const businessTypeLabels: Record<string, string> = {
   GARDEN: "Nông nghiệp – sản phẩm địa phương",
 };
 export const tradeNoticeLabels: Record<string, string> = {
+  TRADE_COMMENT_RECEIVED: "Có bình luận mới về tin giao thương",
+  TRADE_COMMENT_REPLIED: "Người đăng tin đã trả lời bình luận của bạn",
   TRADE_POST_SUBMITTED: "Có tin giao thương chờ duyệt",
   TRADE_POST_APPROVED: "Tin của doanh nghiệp đã được duyệt",
   TRADE_POST_NEW: "Cơ hội kết nối mới trong Hội",
@@ -217,3 +221,25 @@ export const tradeQuery = (values: Record<string, unknown> = {}) => {
   });
   return query.size ? "?" + query.toString() : "";
 };
+
+export const tradeCategoryLabel = (code: string) =>
+  ({
+    PRODUCTS: "Sản phẩm",
+    PRODUCT: "Sản phẩm",
+    SERVICES: "Dịch vụ",
+    SERVICE: "Dịch vụ",
+    BUY: "Cần mua",
+    BUY_REQUEST: "Cần mua",
+    PROMOTION: "Khuyến mãi",
+    COMMUNITY: "Cộng đồng",
+  })[code] || code;
+export interface TradeComment {
+  id: string;
+  tradePostId: string;
+  userId: string;
+  content: string;
+  createdAt: string;
+  replyContent?: string | null;
+  repliedAt?: string | null;
+  user?: { id: string; displayName: string; avatarUrl?: string } | null;
+}

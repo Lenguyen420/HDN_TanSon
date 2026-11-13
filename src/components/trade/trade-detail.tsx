@@ -9,14 +9,19 @@ import {
 } from "@/services/trade-types";
 import { useTradeAction } from "./use-trade";
 import TradeReviews from "./trade-reviews";
+import TradeComments from "./trade-comments";
+import TradeIcon from "./trade-icon";
+import { tradeCategoryLabel } from "@/services/trade-types";
 export default function TradeDetail({
   id,
   actor,
   managed = false,
   onEdit,
   onConversation,
+  focusCommentId,
 }: {
   id: string;
+  focusCommentId?: string;
   actor: TradeActor | null;
   managed?: boolean;
   onEdit: (post: TradePost) => void;
@@ -119,74 +124,87 @@ export default function TradeDetail({
       encodeURIComponent(post.contactZalo.replace(/^https:\/\/zalo\.me\//, ""))
     : "";
   return (
-    <section>
+    <section className="trade-detail-page">
+      <div className="trade-hero">
+        <span className="trade-hero-category">
+          {post.categoryName || tradeCategoryLabel(post.category)}
+        </span>
+        {post.images.length ? (
+          <div className="trade-hero-gallery">
+            {post.images.map((image) => (
+              <img
+                key={image.id}
+                src={tradeImage(image.url)}
+                alt={post.title}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="trade-hero-placeholder">
+            Kết nối doanh nghiệp Tân Sơn
+          </div>
+        )}
+        {!!post.promotionPercent && (
+          <span className="trade-discount">-{post.promotionPercent}%</span>
+        )}
+      </div>
       <article className="surface-card trade-detail">
-        {managed && (
-          <p className="trade-badge">{tradeStatusLabels[post.status]}</p>
-        )}
-        {post.featured && (
-          <p className="trade-badge">Cơ hội do Hội giới thiệu</p>
-        )}
+        <span
+          className={
+            "trade-eyebrow " +
+            (post.status === "PUBLISHED" ? "trade-active" : "")
+          }
+        >
+          {post.status === "PUBLISHED"
+            ? "Tin đang hoạt động"
+            : tradeStatusLabels[post.status]}
+        </span>
         <h2>{post.title}</h2>
         <p className="trade-price">{tradePrice(post)}</p>
-        <p>{post.owner?.displayName || "Doanh nghiệp hội viên"}</p>
-        <div className="trade-gallery">
-          {post.images.map((image) => (
-            <img
-              key={image.id}
-              src={tradeImage(image.url)}
-              alt={post.title}
-              loading="lazy"
-            />
-          ))}
-        </div>
-        <p>
-          <strong>{post.summary}</strong>
+        <p className="trade-card-rating">
+          <span className="trade-stars">★</span>{" "}
+          <b>{post.averageRating.toFixed(1)}</b>{" "}
+          <span className="trade-muted">{post.reviewCount} lượt đánh giá</span>
         </p>
-        <div className="trade-description">{post.description}</div>
-        {post.promotionPercent && (
-          <p className="trade-promotion">
-            Ưu đãi {post.promotionPercent}% ·{" "}
-            {new Date(post.promotionStartAt!).toLocaleDateString("vi-VN")} –{" "}
-            {new Date(post.promotionEndAt!).toLocaleDateString("vi-VN")}
-          </p>
-        )}
-        {post.eventStartAt && (
-          <p>
-            Hoạt động: {new Date(post.eventStartAt).toLocaleString("vi-VN")}
-            {post.eventEndAt
-              ? " – " + new Date(post.eventEndAt).toLocaleString("vi-VN")
-              : ""}
-          </p>
-        )}
-        <p>Địa chỉ: {post.address}</p>
-        {post.googleMapsUrl && (
-          <a
-            href={post.googleMapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Xem đường đi trên Google Maps
-          </a>
-        )}
-        {post.expiresAt && (
-          <small>
-            Hiệu lực đến {new Date(post.expiresAt).toLocaleString("vi-VN")}
-          </small>
-        )}
+        <div className="trade-detail-meta">
+          <span>
+            <TradeIcon name="pin" />
+            {post.address}
+          </span>
+          <span>
+            <TradeIcon name="clock" />
+            Đăng{" "}
+            {new Date(post.publishedAt || post.createdAt).toLocaleDateString(
+              "vi-VN",
+            )}
+          </span>
+          <span>
+            <TradeIcon name="eye" />
+            {post.viewCount} lượt xem
+          </span>
+          <span>
+            <TradeIcon name="bookmark" />
+            {post.saveCount} người đã lưu
+          </span>
+          <span>
+            {post.purpose === "NON_PROFIT"
+              ? "Kết nối cộng đồng"
+              : post.priceType === "FIXED"
+                ? "Giá cố định"
+                : post.priceType === "NEGOTIABLE"
+                  ? "Giá thỏa thuận"
+                  : "Liên hệ báo giá"}
+          </span>
+        </div>
+        {post.featured && <p className="trade-badge">Hội giới thiệu</p>}
         {post.rejectedReason && (
           <p role="status">Hội đề nghị bổ sung: {post.rejectedReason}</p>
         )}
         <div className="trade-actions">
           {post.status === "PUBLISHED" && (
-            <>
-              <button disabled={task.busy} onClick={() => void save()}>
-                {post.saved ? "Bỏ lưu" : "Lưu tin"}
-              </button>
-              <button disabled={task.busy} onClick={() => void share()}>
-                Chia sẻ
-              </button>
-            </>
+            <button disabled={task.busy} onClick={() => void share()}>
+              <TradeIcon name="share" /> Chia sẻ
+            </button>
           )}
           {mine && (
             <button
@@ -200,54 +218,154 @@ export default function TradeDetail({
         {shareMessage && <p role="status">{shareMessage}</p>}
       </article>
       {task.error && <p role="alert">{task.error}</p>}
-      {!managed && (
-        <article className="surface-card">
-          <h3>Kết nối với doanh nghiệp</h3>
-          <p>{post.contactName}</p>
-          <div className="trade-actions">
+      <article className="surface-card">
+        <h3>Thông tin người đăng</h3>
+        <div className="trade-seller">
+          <span className="trade-avatar">
+            {post.owner?.avatarUrl ? (
+              <img src={tradeImage(post.owner.avatarUrl)} alt="" />
+            ) : (
+              (post.owner?.displayName || post.contactName).charAt(0)
+            )}
+          </span>
+          <div>
+            <strong>{post.owner?.displayName || post.contactName}</strong>
+            <p className="trade-muted">Hội viên doanh nghiệp Tân Sơn</p>
+          </div>
+        </div>
+        <dl className="trade-contact-info">
+          <div>
+            <dt>Người liên hệ</dt>
+            <dd>{post.contactName}</dd>
+          </div>
+          <div>
+            <dt>Điện thoại</dt>
+            <dd>
+              <a
+                href={"tel:" + post.contactPhone}
+                onClick={() => void interaction("CONTACT_PHONE")}
+              >
+                {post.contactPhone}
+              </a>
+            </dd>
+          </div>
+        </dl>
+        {zalo && (
+          <a
+            href={zalo}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => void interaction("CONTACT_ZALO")}
+          >
+            Liên hệ qua Zalo
+          </a>
+        )}
+      </article>
+      <article className="surface-card">
+        <h3>Nội dung chi tiết</h3>
+        <p>
+          <strong>{post.summary}</strong>
+        </p>
+        <div className="trade-description">{post.description}</div>
+        {!!post.promotionPercent && (
+          <p className="trade-promotion">
+            Ưu đãi {post.promotionPercent}%
+            {post.promotionStartAt && post.promotionEndAt
+              ? " · " +
+                new Date(post.promotionStartAt).toLocaleDateString("vi-VN") +
+                " – " +
+                new Date(post.promotionEndAt).toLocaleDateString("vi-VN")
+              : ""}
+          </p>
+        )}
+        {post.eventStartAt && (
+          <p>
+            Hoạt động: {new Date(post.eventStartAt).toLocaleString("vi-VN")}
+            {post.eventEndAt
+              ? " – " + new Date(post.eventEndAt).toLocaleString("vi-VN")
+              : ""}
+          </p>
+        )}
+        {post.expiresAt && (
+          <small>
+            Hiệu lực đến {new Date(post.expiresAt).toLocaleString("vi-VN")}
+          </small>
+        )}
+      </article>
+      <article className="surface-card">
+        <h3>Khu vực giao dịch</h3>
+        <div className="trade-location">
+          <TradeIcon name="pin" size={30} />
+          <div>
+            <strong>{post.address}</strong>
+            <p>Có thể thỏa thuận giao nhận trong khu vực.</p>
+          </div>
+        </div>
+        {post.googleMapsUrl && (
+          <a
+            href={post.googleMapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Xem đường đi trên Google Maps
+          </a>
+        )}
+      </article>
+      {post.status === "PUBLISHED" && (
+        <>
+          <TradeReviews
+            key={"reviews-" + (actor?.id || "guest")}
+            postId={post.id}
+            actor={actor}
+            ownerId={post.ownerId}
+            onLogin={() => loginTrade()}
+          />
+          <TradeComments
+            key={"comments-" + post.id + (actor?.id || "guest")}
+            postId={post.id}
+            actor={actor}
+            ownerId={post.ownerId}
+            focusId={focusCommentId}
+          />
+          {!mine && (
+            <article className="surface-card">
+              <h3>Trao đổi riêng với doanh nghiệp</h3>
+              <form className="trade-form" onSubmit={message}>
+                <label>
+                  Lời nhắn hợp tác
+                  <textarea
+                    name="message"
+                    required
+                    maxLength={1000}
+                    placeholder="Thông tin muốn trao đổi riêng với doanh nghiệp."
+                  />
+                </label>
+                <button className="primary-button" disabled={task.busy}>
+                  Gửi lời nhắn riêng
+                </button>
+              </form>
+            </article>
+          )}
+          <div className="trade-detail-footer">
+            <button
+              disabled={task.busy}
+              onClick={() => void save()}
+              aria-pressed={Boolean(post.saved)}
+            >
+              <TradeIcon name="bookmark" />
+              {post.saved ? "Đã lưu" : "Lưu tin"}
+            </button>
             <a
               href={"tel:" + post.contactPhone}
               onClick={() => void interaction("CONTACT_PHONE")}
             >
-              Gọi {post.contactPhone}
+              <TradeIcon name="phone" size={24} />
+              <span>
+                Liên hệ ngay<small>{post.contactPhone}</small>
+              </span>
             </a>
-            {zalo && (
-              <a
-                href={zalo}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => void interaction("CONTACT_ZALO")}
-              >
-                Liên hệ Zalo
-              </a>
-            )}
           </div>
-          {!mine && (
-            <form className="trade-form" onSubmit={message}>
-              <label>
-                Lời nhắn hợp tác
-                <textarea
-                  name="message"
-                  required
-                  maxLength={1000}
-                  placeholder="Giới thiệu nhu cầu và thông tin muốn trao đổi với doanh nghiệp."
-                />
-              </label>
-              <button className="primary-button" disabled={task.busy}>
-                Gửi lời nhắn
-              </button>
-            </form>
-          )}
-        </article>
-      )}
-      {!managed && (
-        <TradeReviews
-          key={actor?.id || "guest"}
-          postId={post.id}
-          actor={actor}
-          ownerId={post.ownerId}
-          onLogin={() => loginTrade()}
-        />
+        </>
       )}
     </section>
   );

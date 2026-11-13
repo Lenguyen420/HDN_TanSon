@@ -5,7 +5,7 @@ import type {
   ContentArticle,
   Notification,
 } from "@/datas/types";
-import { getAllPublicItems } from "./api";
+import { getAllPublicItems, resolveApiImage } from "./api";
 import type { Member } from "@/datas/types";
 import { useMockData } from "./api";
 import { getArticles, getBanners, getNotifications } from "./content";
@@ -19,7 +19,7 @@ const loaders = {
   events: () => getArticles("events"),
   visits: () => getArticles("member-visits"),
   notifications: getNotifications,
-  members: () => getAllPublicItems<Member>("members"),
+  members: async () => (await getAllPublicItems<Member>("members")).map(member=>({...member,...(member.avatar?{avatar:resolveApiImage(member.avatar)||""}:{})})),
 };
 export type AppResource = keyof typeof loaders;
 const cache = new Map<

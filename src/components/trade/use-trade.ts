@@ -8,6 +8,12 @@ export function useTradeList<T>(path: string, required = false, poll = 0) {
     [loading, setLoading] = useState(true),
     [revision, setRevision] = useState(0);
   useEffect(() => {
+    if (!path) {
+      setData([]);
+      setError("");
+      setLoading(false);
+      return;
+    }
     let cancelled = false,
       first = true;
     let timer: ReturnType<typeof setTimeout> | undefined;

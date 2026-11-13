@@ -379,7 +379,7 @@ export default function AppShell() {
     }
   };
   return (
-    <Page className="association-page">
+    <Page className={"association-page"+(screen?.kind==="utility"&&screen.id==="giao-thuong"?" trade-fullscreen":"")}>
       <div className="app-shell" ref={content}>
         {miniAppError && <div className="data-status" role="alert"><p>{miniAppError}</p></div>}
         {miniAppOpening && <div className="data-status" role="status"><p>Đang mở Mini App UBND phường Tân Sơn…</p></div>}
@@ -391,7 +391,7 @@ export default function AppShell() {
         {data && (loading || error) && <div className="data-status" role="status"><p>{error || "Đang cập nhật dữ liệu…"}</p>{error && <button type="button" className="primary-button" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Thử lại</button>}</div>}
         {!data ? <div className="data-status" role="status"><p>{error || "Đang tải dữ liệu…"}</p>{error && <button type="button" className="primary-button" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Thử lại</button>}</div> : renderPage()}
       </div>
-      <BottomNavigation activeTab={activeTab} onChange={navigate} unreadCount={notifications.filter((notice) => notice.unread).length} />
+      {!(screen?.kind === "utility" && screen.id === "giao-thuong") && <BottomNavigation activeTab={activeTab} onChange={navigate} unreadCount={notifications.filter((notice) => notice.unread).length} />}
       {data && contactOpen && <ContactPage data={data} onBack={() => setContactOpen(false)} onOpenArticle={openArticle} />}
     </Page>
   );
