@@ -19,9 +19,11 @@ export default function TradeDetail({
   onEdit,
   onConversation,
   focusCommentId,
+  onNotices,
 }: {
   id: string;
   focusCommentId?: string;
+  onNotices?: () => void;
   actor: TradeActor | null;
   managed?: boolean;
   onEdit: (post: TradePost) => void;
@@ -326,6 +328,7 @@ export default function TradeDetail({
             actor={actor}
             ownerId={post.ownerId}
             focusId={focusCommentId}
+            onNotices={onNotices}
           />
           {!mine && (
             <article className="surface-card">

@@ -27,7 +27,11 @@ export interface Member {
 export interface Notification {
   id: string; title: string; description: string; date: string; unread: boolean;
   scope?: "public" | "private";
-  source?: "announcement" | "news" | "events" | "company-anniversary";
+  source?: "announcement" | "news" | "events" | "company-anniversary" | "trade";
+  tradePostId?: string;
+  tradeManaged?: boolean;
+  tradeCommentId?: string;
+  tradeNoticeId?: string;
   company?: string;
   companyFoundedAt?: string;
   anniversaryYears?: number;

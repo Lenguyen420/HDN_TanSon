@@ -37,6 +37,8 @@ export default function TradeEditor({
     [priceType, setPriceType] = useState(post?.priceType || "CONTACT"),
     [images, setImages] = useState<TradeImage[]>(post?.images || []);
   const [imagesBusy, setImagesBusy] = useState(false);
+  const [savedId, setSavedId] = useState(post?.id);
+  const [sendForReview, setSendForReview] = useState(true);
   const categories = useTradeList<TradeCategory>("trade-post-categories"),
     task = useTradeAction(),
     promotion = categories.data.find(
@@ -76,15 +78,13 @@ export default function TradeEditor({
         : null;
     await task.run(async () => {
       const result = await tradeRequest<TradePost>(
-        post ? "trade-posts/" + post.id : "trade-posts",
-        post ? "PATCH" : "POST",
+        savedId ? "trade-posts/" + savedId : "trade-posts",
+        savedId ? "PATCH" : "POST",
         body,
         true,
       );
-      if (
-        data.has("submit") &&
-        ["DRAFT", "REJECTED"].includes(result.data.status)
-      )
+      setSavedId(result.data.id);
+      if (sendForReview && ["DRAFT", "REJECTED"].includes(result.data.status))
         await tradeRequest(
           "trade-posts/" + result.data.id + "/submit",
           "PATCH",
@@ -372,7 +372,12 @@ export default function TradeEditor({
         </label>
         {(!post || ["DRAFT", "REJECTED"].includes(post.status)) && (
           <label className="trade-checkbox">
-            <input type="checkbox" name="submit" defaultChecked />
+            <input
+              type="checkbox"
+              name="submit"
+              checked={sendForReview}
+              onChange={(e) => setSendForReview(e.target.checked)}
+            />
             Gửi Hội kiểm duyệt sau khi lưu
           </label>
         )}
@@ -388,7 +393,12 @@ export default function TradeEditor({
             className="primary-button"
             disabled={!categories.data.length || task.busy || imagesBusy}
           >
-            {task.busy ? "Đang lưu tin…" : "Lưu tin giao thương"}
+            {task.busy
+              ? "Đang lưu tin…"
+              : sendForReview &&
+                  (!post || ["DRAFT", "REJECTED"].includes(post.status))
+                ? "Lưu và gửi duyệt"
+                : "Lưu tin giao thương"}
           </button>
           <button type="button" onClick={onCancel}>
             Quay lại

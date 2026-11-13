@@ -7,11 +7,13 @@ export default function TradeComments({
   ownerId,
   actor,
   focusId,
+  onNotices,
 }: {
   postId: string;
   ownerId: string;
   actor: TradeActor | null;
   focusId?: string;
+  onNotices?: () => void;
 }) {
   const [focused, setFocused] = useState<TradeComment | null>(null);
   useEffect(() => {
@@ -71,6 +73,9 @@ export default function TradeComments({
       id="trade-comments"
     >
       <h3>Bình luận & trao đổi</h3>
+      {actor && onNotices && (
+        <button onClick={onNotices}>Xem phản hồi của tôi</button>
+      )}
       <p className="trade-muted">Trao đổi công khai với người đăng tin.</p>
       {actor ? (
         <form className="trade-form" onSubmit={(e) => void submit(e)}>

@@ -1,3 +1,5 @@
+import useTradeNotifications from "@/components/shared/use-trade-notifications";
+import { tradeRequest } from "@/services/trade";
 import usePublicNotifications from "@/components/shared/use-public-notifications";
 import { buildEventHistory } from "@/services/event-history";
 import useEventUpdates from "@/components/shared/use-event-updates";
@@ -54,7 +56,7 @@ import { updateRegistrationProfile, syncRegistrationAvatar } from "@/services/re
 type Screen =
   | { kind: "event-workspace"; section: EventSection }
   | { kind: "event-resource"; section: EventResourceSection; articleId: string }
-  | { kind: "utility"; id: UtilityId }
+  | { kind: "utility"; id: UtilityId; tradePostId?:string; tradeManaged?:boolean; tradeCommentId?:string }
   | { kind: "list"; category: ContentCategory }
   | { kind: "article"; category: ContentCategory; articleId: string }
   | { kind: "notification"; notificationId: string }
@@ -80,6 +82,7 @@ const eventResourcePages: Record<EventResourceSection, ComponentType<EventResour
   attendance: EventCheckInPage, documents: EventDocumentListPage, minutes: EventMinuteListPage,
 };
 export default function AppShell() {
+  const {notifications:tradeNotices,error:tradeNoticeError}=useTradeNotifications();
   const { notifications: publicNotices, error: publicNoticeError } = usePublicNotifications();
   const {notifications: eventNotices, participations: eventParticipations, setParticipations: setEventParticipations, loading: eventUpdatesLoading, error: eventUpdatesError} = useEventUpdates();
   const { notifications: registrationNotices, profiles: registrationProfiles, setProfiles: setRegistrationProfiles, error: registrationNoticeError } = useRegistrationNotifications();
@@ -322,6 +325,8 @@ export default function AppShell() {
   const setNotificationRead = (id: string, read: boolean) => updateReadState({ [id]: read });
   const openNotification = (id: string) => {
     setNotificationRead(id, true);
+    const notice = notifications.find(n=>n.id===id);
+    if(notice?.tradePostId){if(notice.tradeNoticeId)void tradeRequest("trade-notifications/read","PATCH",{ids:[notice.tradeNoticeId]},true).catch(()=>{});openScreen({kind:"utility",id:"giao-thuong",tradePostId:notice.tradePostId,tradeManaged:notice.tradeManaged,tradeCommentId:notice.tradeCommentId});return;}
     openScreen({ kind: "notification", notificationId: id });
   };
   const markAllNotificationsRead = () => {
@@ -329,7 +334,7 @@ export default function AppShell() {
     for (const notice of notifications) updates[notice.id] = true;
     updateReadState(updates);
   };
-  const notifications = mergeNotifications(publicNotices ?? data?.notifications ?? [], [...eventNotices, ...registrationNotices], notificationReadState);
+  const notifications = mergeNotifications(publicNotices ?? data?.notifications ?? [], [...eventNotices, ...registrationNotices, ...tradeNotices], notificationReadState);
 
   const renderPage = () => {
     if (!data) return null;
@@ -358,7 +363,7 @@ export default function AppShell() {
     }
     if (screen?.kind === "utility") {
       const UtilityPage = utilityPages[screen.id];
-      return <UtilityPage key={screen.id} {...common} />;
+      return <UtilityPage key={screen.id+(screen.tradePostId||"")} {...common} initialTradePostId={screen.tradePostId} initialTradeManaged={screen.tradeManaged} initialTradeCommentId={screen.tradeCommentId} />;
     }
     if (screen?.kind === "list") {
       const ListPage = listPages[screen.category];
@@ -373,7 +378,7 @@ export default function AppShell() {
     switch (activeTab) {
       case "register": return <RegisterPage data={data} onBack={() => navigate("home")} />;
       case "members": return <MembersPage data={data} onBack={() => navigate("home")} />;
-      case "notifications": return <NotificationsPage data={{ ...data, notifications }} onBack={() => navigate("home")} onOpenNotification={openNotification} onMarkAllRead={markAllNotificationsRead} storageMessage={[notificationStorageMessage, publicNoticeError, registrationNoticeError, eventUpdatesError].filter(Boolean).join(" ")} />;
+      case "notifications": return <NotificationsPage data={{ ...data, notifications }} onBack={() => navigate("home")} onOpenNotification={openNotification} onMarkAllRead={markAllNotificationsRead} storageMessage={[notificationStorageMessage, publicNoticeError, registrationNoticeError, eventUpdatesError, tradeNoticeError].filter(Boolean).join(" ")} />;
       case "profile": return <ProfilePage onSupport={(action) => action === "policies" ? openScreen({kind:"policies"}) : openScreen({kind:"utility",id:action})} data={data} onBack={() => navigate("home")} onEdit={() => { setProfileSaveMessage(""); openScreen({ kind: "profile-edit" }); }} saveMessage={profileSaveMessage} />;
       case "home": return <HomePage onOpenWardMiniApp={() => void openWardMiniApp()} data={data} onNavigate={navigate} onOpenContent={openContent} onOpenUtility={(id) => openScreen({ kind: "utility", id })} onOpenArticle={openArticle} contentCategory={homeCategory} onChangeCategory={setHomeCategory} />;
     }

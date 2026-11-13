@@ -33,6 +33,9 @@ export interface NotificationDetailPageProps {
   onOpenArticle: (category: ContentCategory, articleId: string) => void;
 }
 export interface UtilityPageProps {
+  initialTradePostId?: string;
+  initialTradeManaged?: boolean;
+  initialTradeCommentId?: string;
   eventHistoryLoading?: boolean;
   eventHistoryError?: string;
   data: AppData;

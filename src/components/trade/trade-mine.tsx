@@ -13,12 +13,14 @@ export default function TradeMine({
   onCreate,
   onAnalytics,
   onReviews,
+  onNotices,
 }: {
   onOpen: (id: string) => void;
   onEdit: (post: TradePost) => void;
   onCreate: () => void;
   onAnalytics: () => void;
   onReviews: () => void;
+  onNotices: () => void;
 }) {
   const [status, setStatus] = useState(""),
     [page, setPage] = useState(1),
@@ -35,6 +37,7 @@ export default function TradeMine({
         </button>
         <button onClick={onAnalytics}>Hiệu quả kết nối</button>
         <button onClick={onReviews}>Phản hồi đánh giá</button>
+        <button onClick={onNotices}>Thông báo của tôi</button>
       </div>
       <label>
         Trạng thái

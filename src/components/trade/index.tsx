@@ -16,7 +16,7 @@ import TradeMine from "./trade-mine";
 import TradeInbox from "./trade-inbox";
 import TradeNotices from "./trade-notices";
 import { TradeReports, TradeSellerReviews } from "./trade-reports";
-import { useTradeAction, useTradeList } from "./use-trade";
+import { useTradeAction } from "./use-trade";
 import TradeIcon from "./trade-icon";
 import "@/css/trade.scss";
 type View =
@@ -32,9 +32,21 @@ type View =
   | { kind: "detail"; id: string; managed?: boolean; commentId?: string }
   | { kind: "edit"; post?: TradePost }
   | { kind: "inbox"; conversation?: TradeConversation };
-export default function Trade({ onBack }: UtilityPageProps) {
+export default function Trade({
+  onBack,
+  initialTradePostId,
+  initialTradeManaged,
+  initialTradeCommentId,
+}: UtilityPageProps) {
   const [actor, setActor] = useState<TradeActor | null>(currentTradeUser),
     [view, setView] = useState<View>(() => {
+      if (initialTradePostId)
+        return {
+          kind: "detail",
+          id: initialTradePostId,
+          managed: initialTradeManaged,
+          commentId: initialTradeCommentId,
+        };
       const value = new URLSearchParams(window.location.search).get(
         "tradePost",
       );
@@ -48,12 +60,6 @@ export default function Trade({ onBack }: UtilityPageProps) {
     window.addEventListener("tanson-trade-auth", update);
     return () => window.removeEventListener("tanson-trade-auth", update);
   }, []);
-  const notices = useTradeList<TradeNotice>(
-    actor ? "trade-notifications?limit=100" : "",
-    Boolean(actor),
-    actor ? 15000 : 0,
-  );
-  const unread = actor ? notices.data.filter((n) => !n.read).length : 0;
   async function authenticated(next: View, selling = false) {
     await task.run(async () => {
       const user = await loginTrade();
@@ -145,27 +151,6 @@ export default function Trade({ onBack }: UtilityPageProps) {
             </div>
           </div>
         )}
-        <div className="trade-header-tools">
-          <button
-            disabled={task.busy}
-            aria-label="Tin đã lưu"
-            onClick={() => void authenticated({ kind: "saved" })}
-          >
-            <TradeIcon name="bookmark" />
-          </button>
-          <button
-            disabled={task.busy}
-            aria-label={"Thông báo giao thương, " + unread + " chưa đọc"}
-            onClick={() => void authenticated({ kind: "notifications" })}
-          >
-            <TradeIcon name="bell" />
-            {unread > 0 && (
-              <span className="trade-unread-count">
-                {unread > 99 ? "99+" : unread}
-              </span>
-            )}
-          </button>
-        </div>
         <nav className="trade-nav" aria-label="Giao thương">
           <button
             aria-pressed={view.kind === "browse"}
@@ -186,20 +171,6 @@ export default function Trade({ onBack }: UtilityPageProps) {
             onClick={() => void authenticated({ kind: "mine" }, true)}
           >
             Tin của tôi
-          </button>
-          <button
-            aria-pressed={view.kind === "inbox"}
-            disabled={task.busy}
-            onClick={() => void authenticated({ kind: "inbox" })}
-          >
-            Hội thoại
-          </button>
-          <button
-            aria-pressed={view.kind === "notifications"}
-            disabled={task.busy}
-            onClick={() => void authenticated({ kind: "notifications" })}
-          >
-            Thông báo
           </button>
         </nav>
         {view.kind !== "detail" &&
@@ -244,6 +215,7 @@ export default function Trade({ onBack }: UtilityPageProps) {
             key={view.id}
             id={view.id}
             focusCommentId={view.commentId}
+            onNotices={() => void authenticated({ kind: "notifications" })}
             actor={actor}
             managed={view.managed}
             onEdit={(post) => setView({ kind: "edit", post })}
@@ -266,6 +238,7 @@ export default function Trade({ onBack }: UtilityPageProps) {
             onCreate={() => setView({ kind: "edit" })}
             onAnalytics={() => setView({ kind: "reports" })}
             onReviews={() => setView({ kind: "seller-reviews" })}
+            onNotices={() => setView({ kind: "notifications" })}
           />
         ) : view.kind === "inbox" && actor ? (
           <TradeInbox

@@ -20,6 +20,8 @@ test("protected tab navigation waits for consent and database save", async (t) =
           export const useLayoutEffect = () => {};
         `;
         else if (path === "react/jsx-runtime") contents = 'export const jsx = (type, props) => ({type, props}); export const jsxs = jsx; export const Fragment = "fragment";';
+        else if (path.endsWith("shared/use-trade-notifications")) contents = 'export default () => ({notifications: globalThis.navigationHarness.tradeNotices || [], error: ""});';
+        else if (path.endsWith("services/trade")) contents = 'export const tradeRequest = async () => ({});';
         else if (path.endsWith("shared/use-public-notifications")) contents = 'export default () => ({notifications: globalThis.navigationHarness.publicNotices || [], error: ""});';
         else if (path.endsWith("shared/use-registration-notifications")) contents = 'export default () => ({notifications: [], profiles: globalThis.navigationHarness.registrationProfiles || [], setProfiles: () => {}, error: ""});';
         else if (path.endsWith("shared/use-event-updates")) contents = 'export default () => ({notifications: [], participations: [], setParticipations: () => {}, loading: false, error: ""});';
@@ -59,6 +61,17 @@ test("protected tab navigation waits for consent and database save", async (t) =
     const page=find(render(),node=>node.type === "@/pages/notifications/notifications");
     assert.equal(page.props.data.notifications[0].id,"content-news-1");
     assert.equal(calls,0);
+  });
+  await t.test("public trade notices open the published post without OA and private pending notices open owner management", async () => {
+    for (const privateNotice of [false,true]) {
+      reset();let calls=0;global.navigationHarness.authenticate=async()=>{calls++;throw Error("Should not authenticate");};
+      const notice={id:"trade-notice",title:"Tin giao thương",unread:true,date:"2026-11-13",tradePostId:"post-id",tradeManaged:privateNotice};
+      if(privateNotice)global.navigationHarness.tradeNotices=[notice];else global.navigationHarness.publicNotices=[notice];
+      await nav().onChange("notifications");
+      find(render(),node=>node.type==="@/pages/notifications/notifications").props.onOpenNotification(notice.id);
+      const trade=find(render(),node=>node.type==="@/pages/trade/trade");
+      assert.equal(trade.props.initialTradePostId,"post-id");assert.equal(trade.props.initialTradeManaged,privateNotice);assert.equal(calls,0);
+    }
   });
   await t.test("web preview opens profile and registration without invoking Zalo", async () => {
     reset();

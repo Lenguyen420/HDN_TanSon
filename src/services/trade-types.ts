@@ -182,6 +182,7 @@ export const businessTypeLabels: Record<string, string> = {
   GARDEN: "Nông nghiệp – sản phẩm địa phương",
 };
 export const tradeNoticeLabels: Record<string, string> = {
+  TRADE_POST_PENDING: "Tin đã gửi thành công, đang chờ Hội duyệt",
   TRADE_COMMENT_RECEIVED: "Có bình luận mới về tin giao thương",
   TRADE_COMMENT_REPLIED: "Người đăng tin đã trả lời bình luận của bạn",
   TRADE_POST_SUBMITTED: "Có tin giao thương chờ duyệt",

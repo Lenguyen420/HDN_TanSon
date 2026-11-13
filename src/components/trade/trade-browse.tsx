@@ -15,11 +15,7 @@ export default function TradeBrowse({
 }) {
   const [search, setSearch] = useState(""),
     [category, setCategory] = useState(""),
-    [purpose, setPurpose] = useState(""),
     [sortBy, setSortBy] = useState("newest"),
-    [featured, setFeatured] = useState(false),
-    [minPrice, setMinPrice] = useState(""),
-    [maxPrice, setMaxPrice] = useState(""),
     [page, setPage] = useState(1);
   const categories = useTradeList<TradeCategory>("trade-post-categories"),
     posts = useTradeList<TradePost>(
@@ -29,11 +25,7 @@ export default function TradeBrowse({
           limit: 12,
           search,
           category,
-          purpose,
           sortBy,
-          minPrice,
-          maxPrice,
-          featured: featured ? true : undefined,
         }),
       saved,
     );
@@ -100,60 +92,6 @@ export default function TradeBrowse({
             </select>
           </label>
         </div>
-        <details>
-          <summary>Bộ lọc thêm</summary>
-          <label>
-            Mục đích
-            <select
-              value={purpose}
-              onChange={(e) => {
-                setPurpose(e.target.value);
-                setPage(1);
-              }}
-            >
-              <option value="">Tất cả</option>
-              <option value="COMMERCIAL">Kết nối thương mại</option>
-              <option value="NON_PROFIT">Hoạt động cộng đồng</option>
-            </select>
-          </label>
-          <div className="trade-form-grid">
-            <label>
-              Giá từ
-              <input
-                type="number"
-                min="0"
-                value={minPrice}
-                onChange={(e) => {
-                  setMinPrice(e.target.value);
-                  setPage(1);
-                }}
-              />
-            </label>
-            <label>
-              Giá đến
-              <input
-                type="number"
-                min="0"
-                value={maxPrice}
-                onChange={(e) => {
-                  setMaxPrice(e.target.value);
-                  setPage(1);
-                }}
-              />
-            </label>
-          </div>
-          <label className="trade-checkbox">
-            <input
-              type="checkbox"
-              checked={featured}
-              onChange={(e) => {
-                setFeatured(e.target.checked);
-                setPage(1);
-              }}
-            />
-            Tin nổi bật do Hội giới thiệu
-          </label>
-        </details>
       </form>
       {(posts.error || categories.error) && (
         <p role="alert">{posts.error || categories.error}</p>
