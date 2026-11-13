@@ -10,10 +10,12 @@ import TradeImages from "./trade-images";
 function Composer({
   postId,
   own,
+  disabledReason,
   onDone,
 }: {
   postId: string;
   own?: TradeReview;
+  disabledReason?: string;
   onDone: () => void;
 }) {
   const [images, setImages] = useState<TradeImage[]>(own?.images || []),
@@ -45,6 +47,7 @@ function Composer({
           Đánh giá đang được Hội ẩn. Chỉnh sửa sẽ giữ nguyên trạng thái này.
         </p>
       )}
+      {disabledReason && <p role="status">{disabledReason}</p>}
       <fieldset className="trade-rating-picker" disabled={task.busy}>
         <legend>Chọn số sao</legend>
         <div className="trade-rating-choices">
@@ -78,21 +81,27 @@ function Composer({
         Nội dung
         <textarea
           name="content"
+          disabled={Boolean(disabledReason)}
           required
           maxLength={500}
           defaultValue={own?.content || ""}
           placeholder="Chia sẻ trung thực về thông tin hoặc trải nghiệm hợp tác."
         />
       </label>
-      <TradeImages
-        value={images}
-        onChange={setImages}
-        onBusyChange={setImagesBusy}
-        max={3}
-      />
+      {!disabledReason && (
+        <TradeImages
+          value={images}
+          onChange={setImages}
+          onBusyChange={setImagesBusy}
+          max={3}
+        />
+      )}
       {task.error && <p role="alert">{task.error}</p>}
       <div className="trade-actions">
-        <button className="primary-button" disabled={task.busy || imagesBusy}>
+        <button
+          className="primary-button"
+          disabled={task.busy || imagesBusy || Boolean(disabledReason)}
+        >
           {own ? "Cập nhật đánh giá" : "Gửi đánh giá"}
         </button>
         {own && (
@@ -200,30 +209,31 @@ export default function TradeReviews({
     <article className="surface-card">
       <div className="trade-review-heading">
         <h3>Đánh giá giao thương</h3>
-        {actor?.id !== ownerId && (
-          <button
-            type="button"
-            aria-expanded={composing}
-            onClick={() => setComposing((v) => !v)}
-          >
-            {composing ? "Đóng" : "Đánh giá"}
-          </button>
-        )}
+        <button
+          type="button"
+          aria-expanded={composing}
+          onClick={() => setComposing((v) => !v)}
+        >
+          {composing ? "Đóng" : "Đánh giá"}
+        </button>
       </div>
       {composing &&
         (actor ? (
-          actor.id !== ownerId && (
-            <Composer
-              key={(own?.id || "new") + revision}
-              postId={postId}
-              own={own}
-              onDone={() => {
-                refresh();
-                setComposing(false);
-                onUpdated?.();
-              }}
-            />
-          )
+          <Composer
+            key={(own?.id || "new") + revision}
+            postId={postId}
+            own={own}
+            disabledReason={
+              actor.id === ownerId
+                ? "Bạn là người đăng tin nên không thể tự gửi đánh giá. Chỉ người dùng khác mới có thể đánh giá tin này."
+                : undefined
+            }
+            onDone={() => {
+              refresh();
+              setComposing(false);
+              onUpdated?.();
+            }}
+          />
         ) : (
           <button
             disabled={task.busy}

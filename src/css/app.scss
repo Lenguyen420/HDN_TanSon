@@ -777,3 +777,6 @@ textarea:focus-visible, select:focus-visible { outline: 3px solid #7cabff; outli
 .about-page .page-toolbar-copy > p, .about-page .section-page-header > p { font-size: 16px; line-height: 1.7; font-weight: 600; }
 .about-intro > .overline { font-size: 18px; line-height: 1.7; font-weight: 700; letter-spacing: .2px; color: #315c97; }
 @media (min-width: 480px) { .header-eyebrow { font-size: 15px; } }
+
+/* Hide the floating Eruda debug control injected by the preview host. */
+#eruda { display:none !important; }
