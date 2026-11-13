@@ -82,11 +82,12 @@ export async function getEventAttendance(eventId: string): Promise<AttendanceRec
   if (!token || useMockData) return null;
   return (await apiRequest<{ data: AttendanceReceipt | null }>(`public/events/${encodeURIComponent(eventId)}/check-in`, { headers: { "X-Attendance-Token": token } })).data;
 }
-export async function checkInEvent(eventId: string, name: string, company: string) {
+export async function checkInEvent(eventId: string) {
   if (useMockData) throw new Error("Điểm danh chỉ khả dụng với sự kiện chính thức.");
+  if (!readTokens()[eventId]) throw new Error("Chưa có đăng ký tham gia sự kiện trên thiết bị này.");
   const { token, persisted } = prepareToken(eventId);
-  const result = await apiRequest<{ data: AttendanceReceipt }>(`public/events/${encodeURIComponent(eventId)}/check-in`, { method: "POST", body: JSON.stringify({ token, name: name.trim(), company: company.trim() }) });
-  if (typeof window.dispatchEvent === "function") announceEventUpdated();
+  const result = await apiRequest<{ data: AttendanceReceipt }>(`public/events/${encodeURIComponent(eventId)}/check-in`, { method: "POST", body: JSON.stringify({ token }) });
+  announceEventUpdated();
   return { receipt: result.data, persisted };
 }
 export async function openEventFile(url: string) {

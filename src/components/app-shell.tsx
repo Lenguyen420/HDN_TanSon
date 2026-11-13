@@ -286,8 +286,8 @@ export default function AppShell() {
     setEventParticipations(current => [...current.filter(item => item.eventId !== eventId), participation]);
     return { persisted };
   };
-  const submitCheckIn = async (eventId: string, name: string, company: string) => {
-    const { receipt, persisted } = await checkInEvent(eventId, name, company);
+  const submitCheckIn = async (eventId: string) => {
+    const { receipt, persisted } = await checkInEvent(eventId);
     setAttendance(current => ({ ...current, [eventId]: receipt }));
     setEventParticipations(current => current.map(item => item.eventId === eventId ? { ...item, checkedAt: receipt.checkedAt, status: "attended" } : item));
     if (!persisted) setAttendanceError("Đã điểm danh trên hệ thống nhưng thiết bị không lưu được mã theo dõi. Hãy giữ màn hình xác nhận.");
@@ -338,7 +338,7 @@ export default function AppShell() {
       onOpenEventSection: (section: EventSection) => openScreen({ kind: "event-workspace", section }),
       onOpenEventResource: (articleId: string, section: EventResourceSection) => openEvent(articleId, section),
     };
-    const workspaceProps = { data, onBack: goBack, onOpenEvent: openEvent, attendance, attendanceLoading, attendanceError, participations: eventParticipations };
+    const workspaceProps = { data, onBack: goBack, onOpenEvent: openEvent, attendance, attendanceLoading: attendanceLoading || eventUpdatesLoading, attendanceError, participations: eventParticipations };
     if (screen?.kind === "event-workspace") {
       const WorkspacePage = eventWorkspacePages[screen.section];
       return <WorkspacePage key={screen.section} {...workspaceProps} />;

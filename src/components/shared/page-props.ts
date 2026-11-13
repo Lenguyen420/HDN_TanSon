@@ -13,7 +13,7 @@ export interface EventWorkspacePageProps {
 }
 export interface EventResourcePageProps extends EventWorkspacePageProps {
   article: ContentArticle;
-  onCheckIn: (eventId: string, name: string, company: string) => Promise<{ persisted: boolean }>;
+  onCheckIn: (eventId: string) => Promise<{ persisted: boolean }>;
   onOpenFile: (url: string) => Promise<void>;
 }
 export interface TabPageProps { data: AppData; onBack: () => void; }

@@ -182,3 +182,7 @@ Mini App lấy GET `/api/v1/public/notification-feed` để hiển thị thông 
 ## Tạm test giao diện giao thương
 
 Đặt `VITE_TRADE_PREVIEW=true` trong `.env`, chạy `npm start`. Khi dev, giao thương dùng tài khoản xem thử và dữ liệu trong bộ nhớ để mở đăng tin, tin đã lưu, hội thoại, đánh giá, thống kê và thông báo mà không đăng ký/xác thực OA/Zalo. Thao tác thử không gửi dữ liệu giao thương lên backend; tải lại trang sẽ đặt lại dữ liệu mẫu. Đổi `VITE_TRADE_PREVIEW=false` để khôi phục luồng xác thực cũ. Build production luôn tắt chế độ này dù biến môi trường là true; API backend vẫn giữ phân quyền hiện tại.
+
+## Điểm danh bằng thông tin đăng ký sự kiện
+
+Người đã đăng ký tham gia chỉ bấm Xác nhận điểm danh; không nhập lại họ tên/đơn vị. Mini App gửi mã theo dõi đã dùng khi đăng ký, backend lấy tên/đơn vị từ hồ sơ tham gia đã lưu. Chưa có đăng ký trên thiết bị thì hiển thị hướng dẫn quay lại đăng ký, không tạo lượt điểm danh mới từ tên tự nhập. Cần deploy backend chấp nhận body `{token}` trước khi phát hành Mini App mới.
