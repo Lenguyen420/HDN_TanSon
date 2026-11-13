@@ -39,14 +39,14 @@ function Composer({
   }
   return (
     <form className="trade-form" onSubmit={submit}>
-      <h4>{own ? "Đánh giá của bạn" : "Chia sẻ trải nghiệm kết nối"}</h4>
+      <h4>{own ? "Đánh giá của bạn" : "Chọn số sao đánh giá"}</h4>
       {own?.status === "HIDDEN" && (
         <p>
           Đánh giá đang được Hội ẩn. Chỉnh sửa sẽ giữ nguyên trạng thái này.
         </p>
       )}
       <fieldset className="trade-rating-picker" disabled={task.busy}>
-        <legend>Mức đánh giá</legend>
+        <legend>Chọn số sao</legend>
         <div className="trade-rating-choices">
           {[1, 2, 3, 4, 5].map((value) => (
             <label key={value} className="trade-rating-choice">
@@ -201,11 +201,41 @@ export default function TradeReviews({
       <div className="trade-review-heading">
         <h3>Đánh giá giao thương</h3>
         {actor?.id !== ownerId && (
-          <button onClick={() => setComposing((v) => !v)}>
-            {composing ? "Đóng" : "Viết đánh giá"}
+          <button
+            type="button"
+            aria-expanded={composing}
+            onClick={() => setComposing((v) => !v)}
+          >
+            {composing ? "Đóng" : "Đánh giá"}
           </button>
         )}
       </div>
+      {composing &&
+        (actor ? (
+          actor.id !== ownerId && (
+            <Composer
+              key={(own?.id || "new") + revision}
+              postId={postId}
+              own={own}
+              onDone={() => {
+                refresh();
+                setComposing(false);
+                onUpdated?.();
+              }}
+            />
+          )
+        ) : (
+          <button
+            disabled={task.busy}
+            onClick={() =>
+              void task.run(async () => {
+                await onLogin();
+              })
+            }
+          >
+            Xác thực hồ sơ để đánh giá
+          </button>
+        ))}
       {summary && (
         <>
           <div className="trade-rating-overview">
@@ -365,32 +395,6 @@ export default function TradeReviews({
           Sau
         </button>
       </div>
-      {composing &&
-        (actor ? (
-          actor.id !== ownerId && (
-            <Composer
-              key={(own?.id || "new") + revision}
-              postId={postId}
-              own={own}
-              onDone={() => {
-                refresh();
-                setComposing(false);
-                onUpdated?.();
-              }}
-            />
-          )
-        ) : (
-          <button
-            disabled={task.busy}
-            onClick={() =>
-              void task.run(async () => {
-                await onLogin();
-              })
-            }
-          >
-            Xác thực hồ sơ để đánh giá
-          </button>
-        ))}
     </article>
   );
 }
