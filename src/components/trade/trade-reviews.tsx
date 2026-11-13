@@ -18,6 +18,7 @@ function Composer({
 }) {
   const [images, setImages] = useState<TradeImage[]>(own?.images || []),
     [imagesBusy, setImagesBusy] = useState(false),
+    [rating, setRating] = useState(own?.rating || 0),
     task = useTradeAction();
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -44,20 +45,35 @@ function Composer({
           Đánh giá đang được Hội ẩn. Chỉnh sửa sẽ giữ nguyên trạng thái này.
         </p>
       )}
-      <label>
-        Mức đánh giá
-        <select
-          name="rating"
-          aria-label="Mức đánh giá"
-          defaultValue={own?.rating || 5}
-        >
-          {[5, 4, 3, 2, 1].map((v) => (
-            <option key={v} value={v}>
-              {v} sao
-            </option>
+      <fieldset className="trade-rating-picker" disabled={task.busy}>
+        <legend>Mức đánh giá</legend>
+        <div className="trade-rating-choices">
+          {[1, 2, 3, 4, 5].map((value) => (
+            <label key={value} className="trade-rating-choice">
+              <input
+                type="radio"
+                name="rating"
+                value={value}
+                checked={rating === value}
+                onChange={() => setRating(value)}
+                required
+                aria-label={value + " sao"}
+              />
+              <span
+                aria-hidden="true"
+                className={value <= rating ? "is-selected" : ""}
+              >
+                ★
+              </span>
+            </label>
           ))}
-        </select>
-      </label>
+        </div>
+        <p className="trade-rating-selection" role="status">
+          {rating
+            ? rating + "/5 sao"
+            : "Chạm vào ngôi sao để chọn mức đánh giá"}
+        </p>
+      </fieldset>
       <label>
         Nội dung
         <textarea
@@ -108,11 +124,13 @@ export default function TradeReviews({
   actor,
   ownerId,
   onLogin,
+  onUpdated,
 }: {
   postId: string;
   actor: TradeActor | null;
   ownerId: string;
   onLogin: () => Promise<TradeActor>;
+  onUpdated?: () => void;
 }) {
   const [composing, setComposing] = useState(false);
   const [page, setPage] = useState(1),
@@ -354,7 +372,11 @@ export default function TradeReviews({
               key={(own?.id || "new") + revision}
               postId={postId}
               own={own}
-              onDone={refresh}
+              onDone={() => {
+                refresh();
+                setComposing(false);
+                onUpdated?.();
+              }}
             />
           )
         ) : (

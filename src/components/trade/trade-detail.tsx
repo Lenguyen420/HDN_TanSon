@@ -321,6 +321,7 @@ export default function TradeDetail({
             actor={actor}
             ownerId={post.ownerId}
             onLogin={() => loginTrade()}
+            onUpdated={() => setRevision((r) => r + 1)}
           />
           <TradeComments
             key={"comments-" + post.id + (actor?.id || "guest")}

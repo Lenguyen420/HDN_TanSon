@@ -17,6 +17,32 @@ const state = createPreviewTradeData();
 const reviews: TradeReview[] = [];
 const comments: TradeComment[] = [];
 const media = new Map<string, TradeImage>();
+function reviewSummary(postId: string) {
+  const rows = reviews.filter(
+    (r) => r.tradePostId === postId && r.status === "PUBLISHED",
+  );
+  return {
+    count: rows.length,
+    averageRating: rows.length
+      ? Math.round(
+          (rows.reduce((sum, r) => sum + r.rating, 0) / rows.length) * 10,
+        ) / 10
+      : 0,
+    counts: [1, 2, 3, 4, 5].reduce<Record<number, number>>((counts, stars) => {
+      counts[stars] = rows.filter((r) => r.rating === stars).length;
+      return counts;
+    }, {}),
+  };
+}
+function updatePreviewRating(postId: string) {
+  const post = state.posts.find((p) => p.id === postId);
+  if (post) {
+    const summary = reviewSummary(postId);
+    post.averageRating = summary.averageRating;
+    post.reviewCount = summary.count;
+  }
+}
+
 const imagesOf = (keys: string[]) =>
   keys
     .map((key) => media.get(key))
@@ -184,12 +210,7 @@ export async function previewTradeRequest<T>(
       result = ok(comment);
     } else throw Error("Thao tác bình luận không hợp lệ.");
   } else if (parts[0] === "trade-posts" && parts[2] === "reviews") {
-    if (parts[3] === "summary")
-      result = ok({
-        count: reviews.filter((r) => r.tradePostId === parts[1]).length,
-        averageRating: 0,
-        counts: {},
-      });
+    if (parts[3] === "summary") result = ok(reviewSummary(parts[1]));
     else if (method === "GET")
       result = list(reviews.filter((r) => r.tradePostId === parts[1]));
     else if (parts[4] === "replies") {
@@ -221,6 +242,7 @@ export async function previewTradeRequest<T>(
         },
       } as TradeReview;
       reviews.push(row);
+      updatePreviewRating(row.tradePostId);
       result = ok(row);
     }
   } else if (parts[0] === "trade-posts") {
@@ -327,6 +349,7 @@ export async function previewTradeRequest<T>(
           row.replyContent =
             method === "DELETE" ? null : String(payload.content || "");
         else Object.assign(row, payload);
+        updatePreviewRating(row.tradePostId);
       }
       result = ok(row || null);
     }
