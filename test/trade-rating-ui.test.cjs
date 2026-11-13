@@ -62,6 +62,9 @@ test("rating action remains visible on own posts and only other users can submit
       if (!open) assert.match(html, />Đánh giá<\/button>/);
       else {
         assert.equal((html.match(/type="radio"/g) || []).length, 5);
+        const textarea = html.match(/<textarea[^>]*>/)[0];
+        assert.equal(textarea.includes('required=""'), false);
+        assert.match(html, /Nội dung \(không bắt buộc\)/);
         const submit = html.match(
           /<button[^>]*class="primary-button"[^>]*>/,
         )[0];

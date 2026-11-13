@@ -60,6 +60,8 @@ button:focus-visible, input:focus-visible { outline: 3px solid #7cabff; outline-
 .community-note p { margin: 0; font-size: 11px; letter-spacing: .4px; color: #8c9ab4; }
 .community-note > span { width: 18px; height: 1px; background: #ccd6e9; }
 .bottom-navigation {
+  --nav-surface: #f0f2f5;
+  filter: drop-shadow(0 -3px 9px #263b5a12);
   position: fixed;
   z-index: 20;
   bottom: 0;
@@ -81,16 +83,16 @@ button:focus-visible, input:focus-visible { outline: 3px solid #7cabff; outline-
   inset: 0;
   border-radius: 20px 20px 0 0;
   /* Chồng 2px với SVG để tránh khe hở do làm tròn pixel trên WebView. */
-  background: linear-gradient(to right, white calc(50% - 58px), transparent calc(50% - 58px), transparent calc(50% + 58px), white calc(50% + 58px));
+  background: linear-gradient(to right, var(--nav-surface) calc(50% - 58px), transparent calc(50% - 58px), transparent calc(50% + 58px), var(--nav-surface) calc(50% + 58px));
 }
-.nav-curve { position: absolute; z-index: -1; top: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 78px; fill: white; pointer-events: none; }
-.bottom-navigation::after { content: ''; position: absolute; z-index: -1; top: 76px; bottom: 0; left: calc(50% - 60px); width: 120px; background: white; }
-.nav-item { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 0 0; background: transparent; color: #89939f; font-size: 12px; line-height: 1.4; font-weight: 500; }
+.nav-curve { position: absolute; z-index: -1; top: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 78px; fill: var(--nav-surface); pointer-events: none; }
+.bottom-navigation::after { content: ''; position: absolute; z-index: -1; top: 76px; bottom: 0; left: calc(50% - 60px); width: 120px; background: var(--nav-surface); }
+.nav-item { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 0 0; background: transparent; color: #657080; font-size: 12px; line-height: 1.4; font-weight: 500; }
 .nav-icon { display: grid; place-items: center; height: 25px; }
 .nav-icon svg { width: 25px; height: 25px; stroke-width: 1.6; }
 .nav-item.is-active { color: #244bb6; font-weight: 650; }
 .nav-home { padding-top: 0; gap: 8px; }
-.nav-home .nav-icon { position: relative; margin-top: -35px; width: 70px; height: 70px; border: 5px solid white; border-radius: 50%; background: linear-gradient(135deg, #3465d9, #2545b2); box-shadow: 0 5px 12px #22365c20; color: white; }
+.nav-home .nav-icon { position: relative; margin-top: -35px; width: 70px; height: 70px; border: 5px solid var(--nav-surface); border-radius: 50%; background: linear-gradient(135deg, #3465d9, #2545b2); box-shadow: 0 5px 12px #22365c20; color: white; }
 .nav-home.is-active .nav-icon { background: linear-gradient(135deg, #3465d9, #2545b2); }
 .nav-home .nav-icon svg { width: 29px; height: 29px; }
 .section-page-icon { width: 55px; height: 55px; border-radius: 17px; background: #eaf0ff; color: #3154b6; display: grid; place-items: center; }

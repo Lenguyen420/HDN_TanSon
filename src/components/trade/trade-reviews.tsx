@@ -78,14 +78,13 @@ function Composer({
         </p>
       </fieldset>
       <label>
-        Nội dung
+        Nội dung (không bắt buộc)
         <textarea
           name="content"
           disabled={Boolean(disabledReason)}
-          required
           maxLength={500}
           defaultValue={own?.content || ""}
-          placeholder="Chia sẻ trung thực về thông tin hoặc trải nghiệm hợp tác."
+          placeholder="Bạn có thể chỉ chọn sao hoặc chia sẻ thêm trải nghiệm."
         />
       </label>
       {!disabledReason && (
