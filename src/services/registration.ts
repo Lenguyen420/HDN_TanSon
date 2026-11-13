@@ -1,3 +1,4 @@
+import { validBusinessLicenseImage } from "./business-license";
 import type { RegistrationCompany, RegistrationDraft } from "@/datas/types";
 import { apiRequest, useMockData } from "./api";
 import { prepareRegistrationTracking, announceRegistrationSubmitted } from "./registration-notifications";
@@ -16,6 +17,7 @@ export async function submitRegistration(draft: RegistrationDraft, companies: Re
     method: "POST",
     body: JSON.stringify({
       notificationToken: tracking.token,
+      businessLicenseImage: draft.businessLicenseImage,
       ...(avatar ? {avatar} : {}),
       fullName: draft.fullName.trim(), phone: draft.phone.trim(), birthDate: draft.birthDate,
       email: draft.email.trim(), company, jobTitle: draft.position.trim(),
@@ -35,6 +37,7 @@ export function clearRegistrationDraft() {
 
 const draftKey = "tanson-registration-draft";
 const emptyDraft: RegistrationDraft = {
+  businessLicenseImage: "",
   fullName: "", phone: "", birthDate: "", email: "", companyId: "", unknownCompany: false,
   companyName: "", companyFoundedAt: "", taxCode: "", companyAddress: "", position: "",
 };
@@ -45,6 +48,7 @@ export function readRegistrationDraft(companies: RegistrationCompany[]): Registr
     if (!value || typeof value !== "object" || Array.isArray(value)) return { ...emptyDraft, unknownCompany: !companies.length };
     const draft = { ...emptyDraft };
     for (const key of Object.keys(emptyDraft) as (keyof RegistrationDraft)[]) {
+      if (key === "businessLicenseImage") continue;
       if (key === "unknownCompany") draft.unknownCompany = value.unknownCompany === true;
       else if (typeof value[key] === "string") draft[key] = value[key];
     }
@@ -63,7 +67,8 @@ export function readRegistrationDraft(companies: RegistrationCompany[]): Registr
 }
 
 export function saveRegistrationDraft(draft: RegistrationDraft) {
-  localStorage.setItem(draftKey, JSON.stringify(draft));
+  const { businessLicenseImage: _image, ...fields } = draft;
+  localStorage.setItem(draftKey, JSON.stringify(fields));
 }
 
 export function registrationToday() {
@@ -83,5 +88,5 @@ export function isRegistrationValid(draft: RegistrationDraft, companies: Registr
   const founded = draft.companyFoundedAt || "";
   const foundedDate = new Date(`${founded}T00:00:00Z`);
   const validFounded = !founded || /^\d{4}-\d{2}-\d{2}$/.test(founded) && Number.isFinite(foundedDate.getTime()) && foundedDate.toISOString().slice(0, 10) === founded && founded <= today;
-  return Boolean(validFounded && draft.fullName.trim() && validPhone && validDate && validEmail && validCompany);
+  return Boolean(validBusinessLicenseImage(draft.businessLicenseImage) && validFounded && draft.fullName.trim() && validPhone && validDate && validEmail && validCompany);
 }

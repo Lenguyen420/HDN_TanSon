@@ -186,3 +186,11 @@ Mini App lấy GET `/api/v1/public/notification-feed` để hiển thị thông 
 ## Điểm danh bằng thông tin đăng ký sự kiện
 
 Người đã đăng ký tham gia chỉ bấm Xác nhận điểm danh; không nhập lại họ tên/đơn vị. Mini App gửi mã theo dõi đã dùng khi đăng ký, backend lấy tên/đơn vị từ hồ sơ tham gia đã lưu. Chưa có đăng ký trên thiết bị thì hiển thị hướng dẫn quay lại đăng ký, không tạo lượt điểm danh mới từ tên tự nhập. Cần deploy backend chấp nhận body `{token}` trước khi phát hành Mini App mới.
+
+## Sinh nhật doanh nghiệp
+
+Thông báo chung hiển thị vào đúng ngày kỷ niệm thành lập doanh nghiệp theo giờ Việt Nam, lấy `companyFoundedAt` từ hồ sơ hội viên đang hoạt động. Không dùng ngày sinh cá nhân. Nhiều hội viên thuộc cùng doanh nghiệp và cùng ngày thành lập chỉ tạo một thông báo; thông báo có số năm thành lập và ID theo năm để giữ trạng thái đọc. Ngày 29/2 được chúc mừng vào 28/2 trong năm không nhuận. Hộp thư tự cập nhật khi Mini App đang mở, không gửi OA hoặc push nền. Cần deploy backend có source `company-anniversary`.
+
+## Ảnh giấy phép kinh doanh bắt buộc
+
+Form đăng ký hội viên yêu cầu ảnh giấy phép kinh doanh JPG/PNG/WebP tối đa 10 MiB, có xem trước. Mini App thu gọn ảnh xuống tối đa 1 MiB trước khi gửi trường `businessLicenseImage` cùng hồ sơ. Không lưu ảnh giấy phép trong bản nháp localStorage. Backend kiểm tra bắt buộc và định dạng thật, lưu riêng trong MongoDB; chỉ admin xem được trong chi tiết hồ sơ. Cần deploy backend có trường ảnh bắt buộc trước khi phát hành form Mini App mới.

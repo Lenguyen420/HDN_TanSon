@@ -1,3 +1,4 @@
+import BusinessLicenseField from "./business-license-field";
 import { useRef, useState } from "react";
 import type { RegistrationData, RegistrationDraft } from "@/datas/types";
 import { clearRegistrationDraft, isRegistrationValid, readRegistrationDraft, registrationToday, submitRegistration } from "@/services/registration";
@@ -10,6 +11,7 @@ export default function RegistrationForm({ registration }: RegistrationFormProps
   const [status, setStatus] = useState("");
   const [hasError, setHasError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [imageBusy, setImageBusy] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const inFlight = useRef(false);
   const today = registrationToday();
@@ -26,7 +28,7 @@ export default function RegistrationForm({ registration }: RegistrationFormProps
       className="member-registration-form"
       onSubmit={async (event) => {
         event.preventDefault();
-        if (!valid || inFlight.current || submitted) return;
+        if (!valid || imageBusy || inFlight.current || submitted) return;
         inFlight.current = true;
         setSubmitting(true);
         setStatus("");
@@ -53,9 +55,10 @@ export default function RegistrationForm({ registration }: RegistrationFormProps
       <fieldset className="member-registration-fields" disabled={submitting}>
         <PersonalFields draft={draft} onChange={updateDraft} today={today} />
         <CompanyFields draft={draft} onChange={updateDraft} companies={registration.companies} />
+        <BusinessLicenseField value={draft.businessLicenseImage} onChange={businessLicenseImage=>updateDraft({businessLicenseImage})} onBusyChange={setImageBusy} />
       </fieldset>
       <p className="register-draft-note" id="register-draft-note">Các trường có dấu <span aria-hidden="true">*</span> là bắt buộc. Hồ sơ được gửi đến Hội để xét duyệt.</p>
-      <button className="register-submit" type="submit" disabled={!valid || submitting || submitted} aria-describedby="register-draft-note">{submitting ? "Đang gửi…" : submitted ? "Đã gửi đăng ký" : "Gửi đăng ký"}</button>
+      <button className="register-submit" type="submit" disabled={!valid || imageBusy || submitting || submitted} aria-describedby="register-draft-note">{submitting ? "Đang gửi…" : submitted ? "Đã gửi đăng ký" : "Gửi đăng ký"}</button>
       {status && <p className={`registration-result ${hasError ? "is-error" : ""}`} role="status">{status}</p>}
     </form>
   );

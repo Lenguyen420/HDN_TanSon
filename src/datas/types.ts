@@ -27,7 +27,10 @@ export interface Member {
 export interface Notification {
   id: string; title: string; description: string; date: string; unread: boolean;
   scope?: "public" | "private";
-  source?: "announcement" | "news" | "events";
+  source?: "announcement" | "news" | "events" | "company-anniversary";
+  company?: string;
+  companyFoundedAt?: string;
+  anniversaryYears?: number;
   createdAt?: string;
   category?: string;
   time?: string;
@@ -39,6 +42,7 @@ export interface MemberProfile { memberId: string; memberCode: string; joinedAt:
 export interface RegistrationCompany { id: string; name: string; companyFoundedAt?: string | null; }
 export interface RegistrationData { companies: RegistrationCompany[]; avatar?: string; }
 export interface RegistrationDraft {
+  businessLicenseImage: string;
   fullName: string;
   phone: string;
   birthDate: string;

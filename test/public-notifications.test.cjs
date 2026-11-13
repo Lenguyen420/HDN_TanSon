@@ -48,8 +48,9 @@ test("public feed is anonymous, resolves images and opens the corresponding arti
             image: "uploads/news/image.webp",
             related: { category: "news", articleId: "1" },
           },
+          {id:"company-anniversary-2026-test",title:"Chúc mừng 10 năm thành lập Công ty A",source:"company-anniversary",category:"Sinh nhật doanh nghiệp",company:"Công ty A",anniversaryYears:10,date:"2026-11-13"},
         ],
-        pagination: { total: 1 },
+        pagination: { total: 2 },
       }),
     );
   };
@@ -61,6 +62,11 @@ test("public feed is anonymous, resolves images and opens the corresponding arti
     "https://backend.example/uploads/news/image.webp",
   );
   assert.deepEqual(notices[0].related, { category: "news", articleId: "1" });
+  assert.equal(notices[1].source,"company-anniversary");
+  assert.equal(notices[1].scope,"public");
+  assert.equal(notices[1].unread,true);
+  assert.equal(notices[1].anniversaryYears,10);
+  assert.equal(notices[1].related,undefined);
 });
 
 test("merging inboxes preserves private recipients, stable IDs and per-device read state", async () => {
