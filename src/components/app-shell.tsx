@@ -28,6 +28,10 @@ import EventsPage from "@/pages/events/events";
 import MemberVisitsPage from "@/pages/member-visits/member-visits";
 import AboutPage from "@/pages/about/about";
 import MapPage from "@/pages/map/map";
+import useLocalGo from "@/components/map/use-localgo";
+import LocalGoMinePage from "@/pages/localgo-mine/localgo-mine";
+import LocalGoDetailPage from "@/pages/localgo-detail/localgo-detail";
+import LocalGoEditorPage from "@/pages/localgo-editor/localgo-editor";
 import TradePage from "@/pages/trade/trade";
 import FeesPage from "@/pages/fees/fees";
 import ActivitiesPage from "@/pages/activities/activities";
@@ -181,6 +185,7 @@ export default function AppShell() {
   const scroller = () => content.current?.closest(".zaui-page");
 
   const screen = screens[screens.length - 1];
+  const localgo = useLocalGo(screen?.kind === "utility" && screen.id === "ban-do");
   const resources: AppResource[] = ["settings"];
   if (!screen && activeTab === "home") resources.push("banners", "members", homeCategory === "member-visits" ? "visits" : homeCategory);
   if (!screen && ["members", "register"].includes(activeTab)) resources.push("members");
@@ -362,6 +367,12 @@ export default function AppShell() {
       return <NotificationDetailPage key={notification.id} notification={notification} isDemo={data.isDemo} onBack={goBack} onSetRead={setNotificationRead} onOpenArticle={openArticle} />;
     }
     if (screen?.kind === "utility") {
+      if (screen.id === "ban-do") {
+        if (localgo.view.kind === "mine") return <LocalGoMinePage controller={localgo} />;
+        if (localgo.view.kind === "detail") return <LocalGoDetailPage key={localgo.view.place.id} controller={localgo} place={localgo.view.place} managed={localgo.view.managed} />;
+        if (localgo.view.kind === "editor") return <LocalGoEditorPage key={localgo.view.place?.id || "new"} controller={localgo} place={localgo.view.place} />;
+        return <MapPage {...common} localgo={localgo} />;
+      }
       const UtilityPage = utilityPages[screen.id];
       return <UtilityPage key={screen.id+(screen.tradePostId||"")} {...common} initialTradePostId={screen.tradePostId} initialTradeManaged={screen.tradeManaged} initialTradeCommentId={screen.tradeCommentId} />;
     }

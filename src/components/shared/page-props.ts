@@ -33,6 +33,7 @@ export interface NotificationDetailPageProps {
   onOpenArticle: (category: ContentCategory, articleId: string) => void;
 }
 export interface UtilityPageProps {
+  localgo?: import("@/components/map/use-localgo").LocalGoController;
   initialTradePostId?: string;
   initialTradeManaged?: boolean;
   initialTradeCommentId?: string;

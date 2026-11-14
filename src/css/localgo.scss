@@ -1,0 +1,365 @@
+.localgo-page {
+  color: #18334b;
+  background: #f5f8fb;
+  min-height: 100%;
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:disabled {
+    opacity: 0.55;
+    cursor: wait;
+  }
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 3px solid #70baf1;
+    outline-offset: 2px;
+  }
+  .localgo-body {
+    display: grid;
+    gap: 16px;
+    padding: 18px 16px 32px;
+  }
+  .localgo-intro {
+    background: linear-gradient(120deg, #e0f3ff, #eef8f2);
+    border: 1px solid #d2e8f3;
+    border-radius: 20px;
+    padding: 22px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    overflow: hidden;
+  }
+  .localgo-eyebrow {
+    font-size: 10px;
+    letter-spacing: 1.8px;
+    color: #1677a7;
+    font-weight: 800;
+  }
+  .localgo-intro h2 {
+    font-size: 25px;
+    line-height: 1.25;
+    margin: 10px 0;
+    color: #12486b;
+    letter-spacing: -0.7px;
+  }
+  .localgo-intro p {
+    font-size: 12px;
+    line-height: 1.6;
+    margin: 0;
+    color: #55707e;
+  }
+  .localgo-illustration {
+    font-size: 90px;
+    color: #42a49b;
+    transform: rotate(-18deg);
+  }
+  .localgo-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+  }
+  .localgo-actions button,
+  .localgo-actions a,
+  .localgo-section > button {
+    border: 1px solid #d5e2eb;
+    border-radius: 12px;
+    background: white;
+    padding: 11px 13px;
+    font-size: 12px;
+    font-weight: 650;
+    color: #1b668e;
+    min-height: 44px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .localgo-actions .primary-button,
+  .localgo-submit {
+    background: #087bc1;
+    border-color: #087bc1;
+    color: white;
+  }
+  .localgo-search {
+    display: grid;
+    gap: 7px;
+    font-size: 12px;
+    font-weight: 650;
+  }
+  input,
+  select,
+  textarea {
+    width: 100%;
+    min-width: 0;
+    background: #fff;
+    color: #18334b;
+    border: 1px solid #d8e4ed;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: #8b9ba8;
+  }
+  .content-categories {
+    margin: 0 -16px;
+    padding: 0 16px 5px;
+  }
+  .localgo-results {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 12px;
+  }
+  .localgo-results > div {
+    display: flex;
+    gap: 3px;
+  }
+  .localgo-results button {
+    border: 0;
+    background: transparent;
+    color: #638093;
+    padding: 9px;
+    border-radius: 9px;
+    min-height: 40px;
+  }
+  .localgo-results [aria-pressed="true"] {
+    background: #e3f0fb;
+    color: #0875b6;
+    font-weight: 700;
+  }
+  .localgo-map-wrap {
+    border-radius: 16px;
+    overflow: hidden;
+    background: #e6edf1;
+    border: 1px solid #dbe5ec;
+  }
+  .localgo-map {
+    height: 300px;
+    width: 100%;
+    z-index: 0;
+  }
+  .localgo-card {
+    position: relative;
+    margin-bottom: 12px;
+    background: white;
+    border: 1px solid #e1e9ef;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .content-list-item {
+    width: 100%;
+    border: 0;
+    margin: 0;
+    background: white;
+  }
+  .localgo-status {
+    display: inline-block;
+    margin: 10px 12px 0;
+    font-size: 11px;
+    color: #697988;
+    background: #eef1f4;
+    padding: 4px 9px;
+    border-radius: 6px;
+  }
+  .localgo-status.is-visible,
+  .localgo-success {
+    color: #166948;
+    background: #e8f7ef;
+  }
+  .localgo-error {
+    padding: 13px;
+    border-radius: 12px;
+    background: #fff0ef;
+    color: #aa3434;
+    font-size: 13px;
+    white-space: pre-line;
+  }
+  .localgo-error button {
+    margin-left: 8px;
+    text-decoration: underline;
+  }
+  .localgo-success {
+    padding: 13px;
+    border-radius: 12px;
+    font-size: 13px;
+  }
+  .localgo-hint {
+    font-size: 12px;
+    line-height: 1.6;
+    color: #6d8292;
+    margin: 0;
+  }
+  .localgo-map-wrap .localgo-hint {
+    padding: 10px;
+  }
+  .localgo-empty {
+    text-align: center;
+    padding: 30px 18px;
+    background: #fff;
+    border: 1px dashed #d6e3ed;
+    border-radius: 16px;
+    font-size: 13px;
+    color: #6e8494;
+  }
+  .localgo-empty h2,
+  .localgo-empty h3 {
+    color: #31546a;
+    font-size: 17px;
+    margin: 0 0 8px;
+  }
+  .localgo-cover {
+    width: 100%;
+    height: 230px;
+    object-fit: cover;
+  }
+  .localgo-tag {
+    justify-self: start;
+    background: #e6f3fa;
+    color: #0874ab;
+    border-radius: 7px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .localgo-place-title {
+    font-size: 25px;
+    line-height: 1.3;
+    margin: 0;
+  }
+  .localgo-address {
+    color: #657f90;
+    font-size: 13px;
+    margin: 0;
+  }
+  .localgo-section {
+    display: grid;
+    gap: 12px;
+    border-top: 1px solid #e0e8ef;
+    padding-top: 18px;
+  }
+  .localgo-section h2 {
+    font-size: 16px;
+    margin: 0;
+    color: #20475f;
+  }
+  .localgo-prose {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    line-height: 1.7;
+    font-size: 14px;
+  }
+  .localgo-gallery {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .localgo-gallery img {
+    width: 100%;
+    height: 120px;
+    border-radius: 12px;
+    object-fit: cover;
+  }
+  .localgo-gallery button {
+    color: #b14646;
+    font-size: 12px;
+    padding: 8px;
+  }
+  .localgo-confirm {
+    border: 1px solid #e7c1bb;
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px;
+    font-size: 13px;
+  }
+  .localgo-confirm h2 {
+    font-size: 18px;
+  }
+  .localgo-actions .localgo-danger {
+    color: #b23333;
+    border-color: #ebcece;
+  }
+  .localgo-form fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 18px;
+    min-width: 0;
+  }
+  .localgo-form label {
+    display: grid;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .localgo-form textarea {
+    resize: vertical;
+  }
+  .localgo-image-preview {
+    width: 100%;
+    height: 180px;
+    border-radius: 14px;
+    object-fit: cover;
+  }
+  .localgo-coordinate-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .localgo-hours {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr 1fr 24px;
+    gap: 5px;
+    align-items: end;
+  }
+  .localgo-hours input,
+  .localgo-hours select {
+    padding: 9px 5px;
+    font-size: 12px;
+  }
+  .localgo-hours button {
+    min-height: 42px;
+  }
+  .localgo-submit {
+    width: 100%;
+    min-height: 48px;
+    border-radius: 12px;
+    font-weight: 700;
+  }
+  @media (max-width: 360px) {
+    .localgo-results {
+      flex-wrap: wrap;
+    }
+    .localgo-intro h2 {
+      font-size: 22px;
+    }
+    .localgo-illustration {
+      font-size: 65px;
+    }
+  }
+}
+.localgo-pin {
+  background: #087bc1;
+  border: 3px solid white;
+  color: white;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 3px 9px #12456c55;
+  display: grid;
+  place-items: center;
+}
+.localgo-popup {
+  border: 0;
+  background: white;
+  color: #087bc1;
+  padding: 8px;
+  font-weight: 700;
+}

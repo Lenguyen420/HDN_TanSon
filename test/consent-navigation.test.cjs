@@ -25,6 +25,7 @@ test("protected tab navigation waits for consent and database save", async (t) =
         else if (path.endsWith("shared/use-public-notifications")) contents = 'export default () => ({notifications: globalThis.navigationHarness.publicNotices || [], error: ""});';
         else if (path.endsWith("shared/use-registration-notifications")) contents = 'export default () => ({notifications: [], profiles: globalThis.navigationHarness.registrationProfiles || [], setProfiles: () => {}, error: ""});';
         else if (path.endsWith("shared/use-event-updates")) contents = 'export default () => ({notifications: [], participations: [], setParticipations: () => {}, loading: false, error: ""});';
+        else if (path.endsWith("map/use-localgo")) contents = 'export default () => ({view: {kind: "browse"}});';
         else if (path === "zmp-ui") contents = 'export const Page = "page";';
         else if (path === "@/datas/features") contents = 'export const features = {get zaloAuthentication() {return globalThis.navigationHarness.authEnabled !== false;}};';
         else if (path.endsWith("services/event-history")) contents = 'export const buildEventHistory = () => [];';

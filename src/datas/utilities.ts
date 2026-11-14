@@ -15,7 +15,7 @@ export const utilities: Utility[] = [
   { id: "activities", title: "Lịch sử tham gia", icon: participationIcon, description: "Theo dõi các sự kiện đã đăng ký, điểm danh và trạng thái tham gia." },
   { id: "giao-thuong", title: "Giao thương", icon: giaoThuongIcon, description: "Kết nối sản phẩm, dịch vụ và cơ hội hợp tác giữa doanh nghiệp hội viên." },
   { id: "tan-son-ward", title: "UBND phường Tân Sơn", icon: tanSonWardIcon, description: "Mở Mini App UBND phường Tân Sơn." },
-  { id: "ban-do", title: "LocalGo", icon: mapIcon, description: "Bản đồ đang được hoàn thiện để giúp Quý hội viên dễ dàng tìm kiếm địa điểm và kết nối cộng đồng doanh nghiệp." },
+  { id: "ban-do", title: "LocalGo", icon: mapIcon, description: "Khám phá địa điểm, dịch vụ và doanh nghiệp Tân Sơn. Hội viên tự đăng và quản lý địa điểm của mình." },
   { id: "fees", title: "Theo dõi thu chi", icon: membershipFeeIcon, description: "Theo dõi khoản hội phí cần đóng và lịch sử đóng hội phí." },
   { id: "sponsorships", title: "Đơn vị đồng hành", icon: sponsorshipIcon, description: "Dữ liệu mẫu\nChương trình đồng hành cùng cộng đồng\nGiá trị tài trợ: 5.000.000 đ\nNgày ghi nhận: 25/10/2026" },
   { id: "contact", title: "Liên hệ", icon: contactIcon, description: "Ban thư ký Hội Doanh nghiệp Phường Tân Sơn.\nThông tin liên hệ chính thức đang được cập nhật." },
