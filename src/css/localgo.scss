@@ -146,6 +146,11 @@
     width: 100%;
     z-index: 0;
   }
+  .localgo-map-wrap .localgo-hint button {
+    color: #087bc1;
+    text-decoration: underline;
+    padding: 6px;
+  }
   .localgo-card {
     position: relative;
     margin-bottom: 12px;
@@ -346,20 +351,19 @@
     }
   }
 }
-.localgo-pin {
-  background: #087bc1;
-  border: 3px solid white;
-  color: white;
-  border-radius: 50% 50% 50% 0;
-  transform: rotate(-45deg);
-  box-shadow: 0 3px 9px #12456c55;
-  display: grid;
-  place-items: center;
-}
 .localgo-popup {
   border: 0;
   background: white;
   color: #087bc1;
   padding: 8px;
   font-weight: 700;
+}
+.localgo-pin {
+  background: #087bc1;
+  border: 3px solid white;
+  color: white;
+  border-radius: 50%;
+  box-shadow: 0 3px 9px #12456c55;
+  display: grid;
+  place-items: center;
 }
