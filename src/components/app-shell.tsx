@@ -1,3 +1,5 @@
+import PartnerDetailPage from "@/pages/partner-detail/partner-detail";
+import usePartners from "@/components/sponsorships/use-partners";
 import useFees from "@/components/fees/use-fees";
 import useTradeNotifications from "@/components/shared/use-trade-notifications";
 import { tradeRequest } from "@/services/trade";
@@ -59,6 +61,7 @@ import PoliciesPage from "@/pages/policies/policies";
 import { updateRegistrationProfile, syncRegistrationAvatar } from "@/services/registration-notifications";
 
 type Screen =
+  | { kind: "partner-detail"; partnerId: string; contributionId?: string }
   | { kind: "event-workspace"; section: EventSection }
   | { kind: "event-resource"; section: EventResourceSection; articleId: string }
   | { kind: "utility"; id: UtilityId; feeDueId?:string; tradePostId?:string; tradeManaged?:boolean; tradeCommentId?:string }
@@ -187,6 +190,7 @@ export default function AppShell() {
 
   const screen = screens[screens.length - 1];
   const fees = useFees(screen?.kind === "utility" && screen.id === "fees", screen?.kind === "utility" ? screen.feeDueId : undefined);
+  const partners = usePartners((screen?.kind === "utility" && screen.id === "sponsorships") || screen?.kind === "partner-detail", screen?.kind === "partner-detail" ? screen.partnerId : undefined, screen?.kind === "partner-detail" ? screen.contributionId : undefined);
   const localgo = useLocalGo(screen?.kind === "utility" && screen.id === "ban-do");
   const resources: AppResource[] = ["settings"];
   if (!screen && activeTab === "home") resources.push("banners", "members", homeCategory === "member-visits" ? "visits" : homeCategory);
@@ -333,6 +337,7 @@ export default function AppShell() {
   const openNotification = (id: string) => {
     setNotificationRead(id, true);
     const notice = notifications.find(n=>n.id===id);
+    if(notice?.partnerId){partners.setHistoryPage(1);openScreen({kind:"partner-detail",partnerId:notice.partnerId,contributionId:notice.contributionId});return;}
     if(notice?.feeDueId){openScreen({kind:"utility",id:"fees",feeDueId:notice.feeDueId});return;}
     if(notice?.tradePostId){if(notice.tradeNoticeId)void tradeRequest("trade-notifications/read","PATCH",{ids:[notice.tradeNoticeId]},true).catch(()=>{});openScreen({kind:"utility",id:"giao-thuong",tradePostId:notice.tradePostId,tradeManaged:notice.tradeManaged,tradeCommentId:notice.tradeCommentId});return;}
     openScreen({ kind: "notification", notificationId: id });
@@ -347,7 +352,7 @@ export default function AppShell() {
   const renderPage = () => {
     if (!data) return null;
     const screen = screens[screens.length - 1];
-    const common = { data, fees, eventHistoryLoading: eventUpdatesLoading || (screen?.kind === "utility" && screen.id === "activities" && loading), eventHistoryError: eventUpdatesError, onBack: goBack, onOpenArticle: openArticle, onOpenContent: openContent,
+    const common = { data, fees, partners, onOpenPartner: (id:string) => { partners.setHistoryPage(1); openScreen({kind:"partner-detail",partnerId:id}); }, eventHistoryLoading: eventUpdatesLoading || (screen?.kind === "utility" && screen.id === "activities" && loading), eventHistoryError: eventUpdatesError, onBack: goBack, onOpenArticle: openArticle, onOpenContent: openContent,
       onOpenEventSection: (section: EventSection) => openScreen({ kind: "event-workspace", section }),
       onOpenEventResource: (articleId: string, section: EventResourceSection) => openEvent(articleId, section),
     };
@@ -362,6 +367,7 @@ export default function AppShell() {
       const ResourcePage = eventResourcePages[screen.section];
       return <ResourcePage key={screen.section + article.id} {...workspaceProps} article={article} onCheckIn={submitCheckIn} onOpenFile={openEventFile} />;
     }
+    if (screen?.kind === "partner-detail") return <PartnerDetailPage partners={partners} contributionId={screen.contributionId} onBack={goBack} />;
     if (screen?.kind === "policies") return <PoliciesPage onBack={goBack} />;
     if (screen?.kind === "profile-edit") return <ProfileEditPage data={data} onBack={goBack} onSave={savePersonalProfile} />;
     if (screen?.kind === "notification") {

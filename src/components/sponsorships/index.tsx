@@ -1,21 +1,109 @@
-import { useState } from "react";
-import UtilityLayout from "@/components/shared/utility-layout";
-import FilterChips from "@/components/shared/filter-chips";
-import { formatDate, formatMoney } from "@/components/shared/format";
+import PageToolbar from "@/components/shared/page-toolbar";
+import ContentCategories from "@/components/shared/content-categories";
+import ContentListItem from "@/components/shared/content-list-item";
+import { formatMoney } from "@/components/shared/format";
 import type { UtilityPageProps } from "@/components/shared/page-props";
-import AppIcon from "@/components/icons";
-
-export default function Sponsorships({ data, onBack }: UtilityPageProps) {
-  const [kind, setKind] = useState("all");
-  const records = data.utilityPages.sponsorships;
-  const visible = records.filter((record) => kind === "all" || record.kind === kind);
+import "./partners.scss";
+export default function Sponsorships({
+  onBack,
+  partners,
+  onOpenPartner,
+}: UtilityPageProps) {
+  if (!partners) return null;
+  const c = partners;
   return (
-    <UtilityLayout data={data} id="sponsorships" subtitle="Trân trọng từng đóng góp của Quý doanh nghiệp" onBack={onBack}>
-      <section className="summary-banner sponsorship-summary"><span>TỔNG GIÁ TRỊ ĐỒNG HÀNH</span><strong>{formatMoney(records.reduce((total, record) => total + record.amount, 0))}</strong><p>{records.length} chương trình · Bao gồm giá trị hiện vật quy đổi</p><AppIcon name="handshake" /></section>
-      <h2 className="utility-section-title">Dấu ấn đồng hành</h2>
-      <FilterChips label="Hình thức tài trợ" value={kind} onChange={setKind} options={[{ value: "all", label: "Tất cả" }, { value: "cash", label: "Tiền mặt" }, { value: "in-kind", label: "Hiện vật" }]} />
-      <div className="record-list">{visible.map((record) => <article className="surface-card history-record" key={record.id}><div className="record-title"><span className="record-icon warm"><AppIcon name="handshake" /></span><div><h3>{record.title}</h3><span className="record-reference">{record.kind === "cash" ? "Tài trợ tiền mặt" : "Tài trợ hiện vật"}</span></div></div><p className="record-description">{record.description}</p><div className="record-amount"><strong>{formatMoney(record.amount)}</strong><span className="status-pill success">{record.status}</span></div><div className="record-footer"><span>Ngày ghi nhận</span><time dateTime={record.date}>{formatDate(record.date)}</time></div></article>)}</div>
-      {visible.length === 0 && <p className="surface-card empty-state">Chưa có tài trợ phù hợp.</p>}
-    </UtilityLayout>
+    <main className="partners-page">
+      <PageToolbar title="Đơn vị đồng hành" onBack={onBack} sticky />
+      <ContentCategories
+        value={c.sort}
+        onChange={c.setSort}
+        items={[
+          { id: "amount", title: "Tiền lũy kế" },
+          { id: "updated", title: "Cập nhật mới" },
+          { id: "name", title: "Tên đơn vị" },
+        ]}
+      />
+      <div className="partners-body">
+        <section className="partner-summary">
+          <span>TRÂN TRỌNG SỰ ĐỒNG HÀNH</span>
+          <strong>
+            {c.summary ? formatMoney(c.summary.totalAmount) : "—"}
+          </strong>
+          <p>
+            {c.summary?.totalPartners ?? "—"} đơn vị ·{" "}
+            {c.summary?.contributionCount ?? "—"} lượt tài trợ công khai
+          </p>
+          <small>Tổng tiền tài trợ, hiện vật được ghi nhận riêng.</small>
+        </section>
+        <label className="partner-search">
+          <span>Tìm đơn vị đồng hành</span>
+          <input
+            type="search"
+            placeholder="Nhập tên công ty, đơn vị…"
+            maxLength={150}
+            value={c.search}
+            onChange={(e) => c.setSearch(e.target.value)}
+          />
+        </label>
+        {c.loading && (
+          <p className="partner-status" role="status">
+            Đang tải đơn vị đồng hành…
+          </p>
+        )}
+        {c.error && (
+          <div className="surface-card partner-status" role="alert">
+            <p>{c.error}</p>
+            <button className="primary-button" onClick={c.retry}>
+              Thử lại
+            </button>
+          </div>
+        )}
+        {!c.loading && !c.error && !c.rows.length && (
+          <div className="surface-card empty-state">
+            Chưa có đơn vị đồng hành phù hợp.
+          </div>
+        )}
+        {!c.error && (
+          <section
+            className="partner-list"
+            aria-label="Danh sách đơn vị đồng hành"
+          >
+            {c.rows.map((p) => (
+              <ContentListItem
+                key={p.id}
+                categoryTitle="Đơn vị đồng hành"
+                article={{
+                  id: p.id,
+                  title: p.name,
+                  image: p.logo,
+                  topic: p.industry || "Đơn vị đồng hành",
+                  publishedAt: p.updatedAt?.slice(0, 10) || "",
+                  summary: `${formatMoney(p.totalAmount)} · ${p.contributionCount} lượt đóng góp · Xem chi tiết`,
+                  paragraphs: [],
+                }}
+                onSelect={() => onOpenPartner?.(p.id)}
+              />
+            ))}
+          </section>
+        )}
+        {c.total > 20 && !c.error && (
+          <div className="partner-pagination">
+            <button
+              disabled={c.loading || c.page <= 1}
+              onClick={() => c.setPage((n) => n - 1)}
+            >
+              Trước
+            </button>
+            <span>Trang {c.page}</span>
+            <button
+              disabled={c.loading || c.page * 20 >= c.total}
+              onClick={() => c.setPage((n) => n + 1)}
+            >
+              Sau
+            </button>
+          </div>
+        )}
+      </div>
+    </main>
   );
 }

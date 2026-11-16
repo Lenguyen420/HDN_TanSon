@@ -33,6 +33,8 @@ export interface NotificationDetailPageProps {
   onOpenArticle: (category: ContentCategory, articleId: string) => void;
 }
 export interface UtilityPageProps {
+  partners?: import("@/components/sponsorships/use-partners").PartnersController;
+  onOpenPartner?: (id:string) => void;
   fees?: import("@/components/fees/use-fees").FeesController;
   localgo?: import("@/components/map/use-localgo").LocalGoController;
   initialTradePostId?: string;

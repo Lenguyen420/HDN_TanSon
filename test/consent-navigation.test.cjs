@@ -26,6 +26,7 @@ test("protected tab navigation waits for consent and database save", async (t) =
         else if (path.endsWith("shared/use-registration-notifications")) contents = 'export default () => ({notifications: [], profiles: globalThis.navigationHarness.registrationProfiles || [], setProfiles: () => {}, error: ""});';
         else if (path.endsWith("shared/use-event-updates")) contents = 'export default () => ({notifications: [], participations: [], setParticipations: () => {}, loading: false, error: ""});';
         else if (path.endsWith("fees/use-fees")) contents = 'export default (_enabled, initialDueId) => ({initialDueId});';
+        else if (path.endsWith("sponsorships/use-partners")) contents = 'export default (_active, partnerId) => ({partnerId, setHistoryPage: () => {}});';
         else if (path.endsWith("map/use-localgo")) contents = 'export default () => ({view: {kind: "browse"}});';
         else if (path === "zmp-ui") contents = 'export const Page = "page";';
         else if (path === "@/datas/features") contents = 'export const features = {get zaloAuthentication() {return globalThis.navigationHarness.authEnabled !== false;}};';
@@ -125,6 +126,15 @@ test("protected tab navigation waits for consent and database save", async (t) =
     await nav().onChange("notifications");
     resolve(saved()); await pending;
     assert.equal(nav().activeTab, "notifications");
+  });
+  await t.test("partner notification opens the contribution detail anonymously", async () => {
+    reset(); let calls=0;
+    global.navigationHarness.authenticate=async()=>{calls++;throw Error("Unexpected consent");};
+    global.navigationHarness.publicNotices=[{id:"partner-notice",partnerId:"partner-1",contributionId:"contribution-1",title:"Đồng hành",unread:true}];
+    await nav().onChange("notifications");
+    find(render(),node=>node.type==="@/pages/notifications/notifications").props.onOpenNotification("partner-notice");
+    const detail=find(render(),node=>node.type==="@/pages/partner-detail/partner-detail");
+    assert.ok(detail); assert.equal(detail.props.partners.partnerId,"partner-1"); assert.equal(detail.props.contributionId,"contribution-1"); assert.equal(calls,0);
   });
   await t.test("fee notification opens its own due without requesting Zalo consent",async()=>{
     reset();let authCalls=0;
