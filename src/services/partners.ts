@@ -26,6 +26,16 @@ export interface Partner {
   contributionCount: number;
   selectedContribution?: PartnerContribution | null;
   contributions?: PartnerContribution[];
+  latestContributions?: Pick<
+    PartnerContribution,
+    | "id"
+    | "title"
+    | "type"
+    | "amount"
+    | "itemName"
+    | "quantity"
+    | "contributionDate"
+  >[];
 }
 export interface PartnerSummary {
   totalPartners: number;

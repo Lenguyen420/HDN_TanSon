@@ -56,20 +56,15 @@ export default function PartnerDetail({
               {p.industry && (
                 <span className="content-topic">{p.industry}</span>
               )}
-              <p className="partner-prose">{p.description}</p>
-              {p.address && <p>Địa chỉ: {p.address}</p>}
-              {p.website && (
-                <a href={p.website} target="_blank" rel="noreferrer">
-                  Website doanh nghiệp ↗
-                </a>
-              )}
             </section>
             <section className="partner-summary">
               <span>TÀI TRỢ BẰNG TIỀN LŨY KẾ</span>
               <strong>{formatMoney(p.totalAmount)}</strong>
               <p>{p.contributionCount} lượt đóng góp công khai</p>
             </section>
-            <h2 className="utility-section-title">Lịch sử đóng góp</h2>
+            <h2 className="utility-section-title">
+              Đơn vị đã đóng góp những gì?
+            </h2>
             {!p.contributions?.length && (
               <p className="surface-card empty-state">
                 Chưa có khoản đóng góp công khai.
@@ -118,6 +113,16 @@ export default function PartnerDetail({
                 </article>
               ))}
             </section>
+            <details className="surface-card partner-profile">
+              <summary>Thông tin về đơn vị</summary>
+              <p className="partner-prose">{p.description}</p>
+              {p.address && <p>Địa chỉ: {p.address}</p>}
+              {p.website && (
+                <a href={p.website} target="_blank" rel="noreferrer">
+                  Website doanh nghiệp ↗
+                </a>
+              )}
+            </details>
             {c.historyTotal > 20 && (
               <div className="partner-pagination">
                 <button

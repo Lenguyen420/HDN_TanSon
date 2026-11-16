@@ -1,7 +1,7 @@
 import PageToolbar from "@/components/shared/page-toolbar";
 import ContentCategories from "@/components/shared/content-categories";
 import ContentListItem from "@/components/shared/content-list-item";
-import { formatMoney } from "@/components/shared/format";
+import { formatMoney, formatDate } from "@/components/shared/format";
 import type { UtilityPageProps } from "@/components/shared/page-props";
 import "./partners.scss";
 export default function Sponsorships({
@@ -69,20 +69,51 @@ export default function Sponsorships({
             aria-label="Danh sách đơn vị đồng hành"
           >
             {c.rows.map((p) => (
-              <ContentListItem
-                key={p.id}
-                categoryTitle="Đơn vị đồng hành"
-                article={{
-                  id: p.id,
-                  title: p.name,
-                  image: p.logo,
-                  topic: p.industry || "Đơn vị đồng hành",
-                  publishedAt: p.updatedAt?.slice(0, 10) || "",
-                  summary: `${formatMoney(p.totalAmount)} · ${p.contributionCount} lượt đóng góp · Xem chi tiết`,
-                  paragraphs: [],
-                }}
-                onSelect={() => onOpenPartner?.(p.id)}
-              />
+              <article key={p.id} className="surface-card partner-list-card">
+                <ContentListItem
+                  categoryTitle="Đơn vị đồng hành"
+                  article={{
+                    id: p.id,
+                    title: p.name,
+                    image: p.logo,
+                    topic: p.industry || "Đơn vị đồng hành",
+                    publishedAt: p.updatedAt?.slice(0, 10) || "",
+                    summary: `${formatMoney(p.totalAmount)} · ${p.contributionCount} lượt đóng góp · Xem chi tiết`,
+                    paragraphs: [],
+                  }}
+                  onSelect={() => onOpenPartner?.(p.id)}
+                />
+                <div className="partner-recent">
+                  <h3>Đã đóng góp</h3>
+                  {p.latestContributions?.length ? (
+                    <ul>
+                      {p.latestContributions.map((item) => (
+                        <li key={item.id}>
+                          <strong>{item.title}</strong>
+                          <span>
+                            {item.type === "money"
+                              ? formatMoney(item.amount || 0)
+                              : `${item.itemName} · Số lượng: ${item.quantity}`}
+                          </span>
+                          <small>{formatDate(item.contributionDate)}</small>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>
+                      {p.contributionCount
+                        ? "Mở lịch sử để xem các khoản đóng góp."
+                        : "Chưa có khoản đóng góp công khai."}
+                    </p>
+                  )}
+                  <button
+                    className="primary-button"
+                    onClick={() => onOpenPartner?.(p.id)}
+                  >
+                    Xem lịch sử đóng góp ({p.contributionCount}) →
+                  </button>
+                </div>
+              </article>
             ))}
           </section>
         )}

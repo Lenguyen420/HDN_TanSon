@@ -136,6 +136,15 @@ test("protected tab navigation waits for consent and database save", async (t) =
     const detail=find(render(),node=>node.type==="@/pages/partner-detail/partner-detail");
     assert.ok(detail); assert.equal(detail.props.partners.partnerId,"partner-1"); assert.equal(detail.props.contributionId,"contribution-1"); assert.equal(calls,0);
   });
+  await t.test("new partner announcement opens the unit without a contribution or Zalo login",async()=>{
+    reset();let calls=0;
+    global.navigationHarness.authenticate=async()=>{calls++;throw Error("Unexpected consent");};
+    global.navigationHarness.publicNotices=[{id:"partner-published-unit",partnerId:"unit",title:"Đơn vị đồng hành mới",unread:true}];
+    await nav().onChange("notifications");
+    find(render(),node=>node.type==="@/pages/notifications/notifications").props.onOpenNotification("partner-published-unit");
+    const detail=find(render(),node=>node.type==="@/pages/partner-detail/partner-detail");
+    assert.equal(detail.props.partners.partnerId,"unit");assert.equal(detail.props.contributionId,undefined);assert.equal(calls,0);
+  });
   await t.test("fee notification opens its own due without requesting Zalo consent",async()=>{
     reset();let authCalls=0;
     global.navigationHarness.authenticate=async()=>{authCalls++;throw Error("Unexpected consent");};

@@ -159,3 +159,49 @@
 .partner-contribution.is-highlighted {
   outline: 2px solid #d1a14b;
 }
+.partner-list-card {
+  overflow: hidden;
+}
+.partner-recent {
+  padding: 0 16px 18px;
+  display: grid;
+  gap: 12px;
+}
+.partner-recent h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #18344c;
+}
+.partner-recent ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+.partner-recent li {
+  padding: 12px;
+  background: #f5f8fb;
+  border-radius: 10px;
+  display: grid;
+  gap: 5px;
+  overflow-wrap: anywhere;
+}
+.partner-recent li strong {
+  font-size: 14px;
+  color: #18344c;
+}
+.partner-recent li span {
+  font-size: 15px;
+  font-weight: 650;
+  color: #14654e;
+}
+.partner-recent small,
+.partner-recent p {
+  font-size: 12px;
+  color: #64748b;
+}
+.partner-recent .primary-button {
+  width: 100%;
+  justify-content: center;
+}
