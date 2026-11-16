@@ -46,7 +46,7 @@ export default function Fees({ fees, onBack }: UtilityPageProps) {
       )}
       <div className="fee-workspace-body">
         <div className="fee-live-toolbar">
-          <p>Hội phí được giao cho tài khoản Zalo của bạn</p>
+          <p>Hội phí theo hồ sơ hội viên đã được duyệt</p>
           <button
             type="button"
             disabled={fees.loading || fees.busy}

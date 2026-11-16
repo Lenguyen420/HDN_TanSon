@@ -1,4 +1,5 @@
-import { apiRequest, type ApiData, type ApiList } from "./api";
+import { apiRequest, ApiError, type ApiData, type ApiList } from "./api";
+import { registrationTokens } from "./registration-notifications";
 export type FeeStatus =
   "unpaid" | "overdue" | "pending_confirmation" | "paid" | "cancelled";
 export interface FeeCampaign {
@@ -47,26 +48,70 @@ export const feeStatusLabels: Record<string, string> = {
   confirmed: "Đã xác nhận",
   rejected: "Đã từ chối",
 };
+type FeeSession = {
+  accessToken: string;
+  expiresIn: number;
+  member: { id: string; name: string };
+};
+let session: { token: string; key: string; until: number } | undefined;
+let pending: { key: string; promise: Promise<string> } | undefined;
+async function feeToken(): Promise<string> {
+  const tokens = registrationTokens();
+  if (!tokens.length) {
+    session = undefined;
+    throw new Error(
+      "Thiết bị này chưa có mã bí mật của hồ sơ đăng ký. Vui lòng mở trên thiết bị đã đăng ký hoặc liên hệ Ban thư ký.",
+    );
+  }
+  const key = [...tokens].sort().join(":");
+  if (session?.key === key && session.until > Date.now()) return session.token;
+  if (pending?.key === key) return pending.promise;
+  const promise = apiRequest<ApiData<FeeSession>>("membership-fees/session", {
+    method: "POST",
+    body: JSON.stringify({ tokens }),
+  })
+    .then(({ data }) => {
+      if (
+        !data.accessToken ||
+        !Number.isFinite(data.expiresIn) ||
+        !data.member?.id
+      )
+        throw new Error("Không xác thực được phiên hội phí.");
+      if (pending?.promise === promise)
+        session = {
+          token: data.accessToken,
+          key,
+          until: Date.now() + data.expiresIn * 1000 - 30000,
+        };
+      return data.accessToken;
+    })
+    .finally(() => {
+      if (pending?.promise === promise) pending = undefined;
+    });
+  pending = { key, promise };
+  return promise;
+}
 async function request<T>(
   path: string,
   method = "GET",
   body?: unknown,
 ): Promise<T> {
-  let token: string;
+  const send = (token: string) =>
+    apiRequest<T>("membership-fees/" + path, {
+      method,
+      headers: { Authorization: "Bearer " + token },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+  const token = await feeToken();
   try {
-    const { getAccessToken } = await import("zmp-sdk/apis");
-    token = await getAccessToken({});
-  } catch {
-    throw new Error(
-      "Vui lòng mở Mini App trong Zalo để xác thực và xem hội phí của bạn.",
-    );
+    return await send(token);
+  } catch (error) {
+    if (!(error instanceof ApiError) || error.status !== 401) throw error;
+    if (session?.token === token) session = undefined;
+    return send(await feeToken());
   }
-  return apiRequest<T>("membership-fees/" + path, {
-    method,
-    headers: { Authorization: "Bearer " + token },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
 }
+
 export async function getMyFees(): Promise<FeeDue[]> {
   const rows: FeeDue[] = [];
   for (let page = 1; ; page++) {
