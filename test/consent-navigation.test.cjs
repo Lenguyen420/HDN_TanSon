@@ -25,7 +25,7 @@ test("protected tab navigation waits for consent and database save", async (t) =
         else if (path.endsWith("shared/use-public-notifications")) contents = 'export default () => ({notifications: globalThis.navigationHarness.publicNotices || [], error: ""});';
         else if (path.endsWith("shared/use-registration-notifications")) contents = 'export default () => ({notifications: [], profiles: globalThis.navigationHarness.registrationProfiles || [], setProfiles: () => {}, error: ""});';
         else if (path.endsWith("shared/use-event-updates")) contents = 'export default () => ({notifications: [], participations: [], setParticipations: () => {}, loading: false, error: ""});';
-        else if (path.endsWith("fees/use-fees")) contents = 'export default () => ({});';
+        else if (path.endsWith("fees/use-fees")) contents = 'export default (_enabled, initialDueId) => ({initialDueId});';
         else if (path.endsWith("map/use-localgo")) contents = 'export default () => ({view: {kind: "browse"}});';
         else if (path === "zmp-ui") contents = 'export const Page = "page";';
         else if (path === "@/datas/features") contents = 'export const features = {get zaloAuthentication() {return globalThis.navigationHarness.authEnabled !== false;}};';
@@ -125,5 +125,14 @@ test("protected tab navigation waits for consent and database save", async (t) =
     await nav().onChange("notifications");
     resolve(saved()); await pending;
     assert.equal(nav().activeTab, "notifications");
+  });
+  await t.test("fee notification opens its own due without requesting Zalo consent",async()=>{
+    reset();let authCalls=0;
+    global.navigationHarness.authenticate=async()=>{authCalls++;throw Error("Unexpected consent");};
+    global.navigationHarness.publicNotices=[{id:"fee-notice",feeDueId:"due-target",title:"Hội phí",unread:true}];
+    await nav().onChange("notifications");
+    find(render(),node=>node.type==="@/pages/notifications/notifications").props.onOpenNotification("fee-notice");
+    const fees=find(render(),node=>node.type==="@/pages/fees/fees");
+    assert.ok(fees);assert.equal(fees.props.fees.initialDueId,"due-target");assert.equal(authCalls,0);
   });
 });

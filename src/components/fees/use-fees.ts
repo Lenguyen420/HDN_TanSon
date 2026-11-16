@@ -6,7 +6,7 @@ import {
   type FeeDue,
   type FeeProof,
 } from "@/services/membership-fees";
-export default function useFees(enabled: boolean) {
+export default function useFees(enabled: boolean, initialDueId?: string) {
   const [rows, setRows] = useState<FeeDue[]>([]),
     [detail, setDetail] = useState<FeeDue>();
   const [loading, setLoading] = useState(false),
@@ -44,7 +44,7 @@ export default function useFees(enabled: boolean) {
   }, []);
   useEffect(() => {
     if (!enabled) return;
-    selected.current = "";
+    selected.current = initialDueId || "";
     setDetail(undefined);
     setNotice("");
     setTab("dues");
@@ -60,7 +60,7 @@ export default function useFees(enabled: boolean) {
       window.removeEventListener("focus", wake);
       document.removeEventListener("visibilitychange", wake);
     };
-  }, [enabled, refresh]);
+  }, [enabled, refresh, initialDueId]);
   async function open(id: string) {
     selected.current = id;
     const current = ++generation.current;

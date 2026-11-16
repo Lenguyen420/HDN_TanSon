@@ -34,8 +34,7 @@ export interface FeeDue {
   payments?: FeePayment[];
 }
 export interface FeeProof {
-  transactionRef: string;
-  proofUrl: string;
+  proofImage: string;
   note: string;
 }
 export const feeStatusLabels: Record<string, string> = {
@@ -134,4 +133,12 @@ export async function submitFeeProof(id: string, proof: FeeProof) {
     "POST",
     proof,
   );
+}
+
+export async function getFeeProofImage(id: string) {
+  return (
+    await request<ApiData<{ image: string }>>(
+      "payments/" + encodeURIComponent(id) + "/proof?format=data",
+    )
+  ).data.image;
 }

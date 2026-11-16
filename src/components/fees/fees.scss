@@ -142,3 +142,13 @@
 .fee-live-history a {
   color: #2a65ab;
 }
+
+.fee-proof-preview {
+  display: block;
+  width: 100%;
+  max-height: 420px;
+  object-fit: contain;
+  border-radius: 12px;
+  margin: 12px 0;
+  background: #f5f7fa;
+}

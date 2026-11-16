@@ -97,8 +97,7 @@ test("fee client uses receipt sessions, deduplicates login and refreshes only on
     assert.equal(call.url.includes(receipt), false);
   }
   const proof = {
-    transactionRef: "REF-1",
-    proofUrl: "https://example.com/proof",
+    proofImage: "data:image/png;base64,iVBORw0KGgoAAA==",
     note: "Đã chuyển",
   };
   unauthorized = true;

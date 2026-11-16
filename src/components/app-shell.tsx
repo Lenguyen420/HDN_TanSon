@@ -61,7 +61,7 @@ import { updateRegistrationProfile, syncRegistrationAvatar } from "@/services/re
 type Screen =
   | { kind: "event-workspace"; section: EventSection }
   | { kind: "event-resource"; section: EventResourceSection; articleId: string }
-  | { kind: "utility"; id: UtilityId; tradePostId?:string; tradeManaged?:boolean; tradeCommentId?:string }
+  | { kind: "utility"; id: UtilityId; feeDueId?:string; tradePostId?:string; tradeManaged?:boolean; tradeCommentId?:string }
   | { kind: "list"; category: ContentCategory }
   | { kind: "article"; category: ContentCategory; articleId: string }
   | { kind: "notification"; notificationId: string }
@@ -186,7 +186,7 @@ export default function AppShell() {
   const scroller = () => content.current?.closest(".zaui-page");
 
   const screen = screens[screens.length - 1];
-  const fees = useFees(screen?.kind === "utility" && screen.id === "fees");
+  const fees = useFees(screen?.kind === "utility" && screen.id === "fees", screen?.kind === "utility" ? screen.feeDueId : undefined);
   const localgo = useLocalGo(screen?.kind === "utility" && screen.id === "ban-do");
   const resources: AppResource[] = ["settings"];
   if (!screen && activeTab === "home") resources.push("banners", "members", homeCategory === "member-visits" ? "visits" : homeCategory);
@@ -333,6 +333,7 @@ export default function AppShell() {
   const openNotification = (id: string) => {
     setNotificationRead(id, true);
     const notice = notifications.find(n=>n.id===id);
+    if(notice?.feeDueId){openScreen({kind:"utility",id:"fees",feeDueId:notice.feeDueId});return;}
     if(notice?.tradePostId){if(notice.tradeNoticeId)void tradeRequest("trade-notifications/read","PATCH",{ids:[notice.tradeNoticeId]},true).catch(()=>{});openScreen({kind:"utility",id:"giao-thuong",tradePostId:notice.tradePostId,tradeManaged:notice.tradeManaged,tradeCommentId:notice.tradeCommentId});return;}
     openScreen({ kind: "notification", notificationId: id });
   };

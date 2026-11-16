@@ -1,4 +1,5 @@
-import { useState, type FormEvent } from "react";
+import { prepareFeeProofImage } from "@/services/fee-proof-image";
+import { useRef, useState, type FormEvent } from "react";
 import { formatDate, formatMoney } from "@/components/shared/format";
 import {
   feeStatusLabels,
@@ -14,18 +15,35 @@ export default function FeePayment({
   busy: boolean;
   onSubmit: (proof: FeeProof) => Promise<void>;
 }) {
-  const [transactionRef, setRef] = useState(""),
-    [proofUrl, setUrl] = useState(""),
+  const [proofImage, setProofImage] = useState(""),
     [note, setNote] = useState("");
+  const [preparing, setPreparing] = useState(false),
+    [imageError, setImageError] = useState("");
+  const selection = useRef(0);
+  async function selectImage(file?: File) {
+    const current = ++selection.current;
+    setProofImage("");
+    setImageError("");
+    if (!file) return;
+    setPreparing(true);
+    try {
+      const image = await prepareFeeProofImage(file);
+      if (selection.current === current) setProofImage(image);
+    } catch (e) {
+      if (selection.current === current)
+        setImageError(e instanceof Error ? e.message : "Không đọc được ảnh.");
+    } finally {
+      if (selection.current === current) setPreparing(false);
+    }
+  }
   const canPay =
     ["unpaid", "overdue"].includes(due.status) &&
     due.campaign.status === "published";
   function submit(e: FormEvent) {
     e.preventDefault();
-    if (!busy)
+    if (!busy && !preparing && proofImage)
       void onSubmit({
-        transactionRef: transactionRef.trim(),
-        proofUrl: proofUrl.trim(),
+        proofImage,
         note: note.trim(),
       });
   }
@@ -69,28 +87,41 @@ export default function FeePayment({
               xác nhận.
             </p>
             <form className="fee-proof-form" onSubmit={submit}>
-              <fieldset disabled={busy}>
+              <fieldset disabled={busy || preparing}>
                 <label>
-                  Mã giao dịch *
+                  Ảnh minh chứng thanh toán *
                   <input
-                    required
-                    maxLength={150}
-                    value={transactionRef}
-                    onChange={(e) => setRef(e.target.value)}
-                    placeholder="Mã giao dịch trên biên lai"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={(e) => {
+                      const file = e.currentTarget.files?.[0];
+                      e.currentTarget.value = "";
+                      void selectImage(file);
+                    }}
                   />
                 </label>
-                <label>
-                  Đường dẫn minh chứng (HTTPS)
-                  <input
-                    type="url"
-                    pattern="https://.*"
-                    maxLength={2048}
-                    value={proofUrl}
-                    onChange={(e) => setUrl(e.target.value)}
-                    placeholder="https://…"
-                  />
-                </label>
+                <small>
+                  Chọn ảnh JPG, PNG hoặc WebP từ thiết bị, tối đa 10 MB. Ảnh
+                  được thu nhỏ trước khi gửi.
+                </small>
+                {preparing && <p role="status">Đang xử lý ảnh…</p>}
+                {imageError && (
+                  <p className="fee-live-error" role="alert">
+                    {imageError}
+                  </p>
+                )}
+                {proofImage && (
+                  <div>
+                    <img
+                      className="fee-proof-preview"
+                      src={proofImage}
+                      alt="Ảnh minh chứng đã chọn"
+                    />
+                    <button type="button" onClick={() => setProofImage("")}>
+                      Xóa ảnh
+                    </button>
+                  </div>
+                )}
                 <label>
                   Ghi chú
                   <textarea
@@ -104,7 +135,7 @@ export default function FeePayment({
               </fieldset>
               <button
                 className="primary-button"
-                disabled={busy || !transactionRef.trim()}
+                disabled={busy || preparing || !proofImage}
               >
                 {busy ? "Đang gửi…" : "Đã chuyển khoản / Gửi minh chứng"}
               </button>
@@ -122,7 +153,7 @@ export default function FeePayment({
             {due.paidAt
               ? " ngày " + new Date(due.paidAt).toLocaleDateString("vi-VN")
               : ""}
-            . Mã giao dịch: {due.transactionRef}
+            .
           </p>
         )}
         {due.status === "cancelled" && (

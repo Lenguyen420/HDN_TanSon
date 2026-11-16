@@ -27,7 +27,8 @@ export interface Member {
 export interface Notification {
   id: string; title: string; description: string; date: string; unread: boolean;
   scope?: "public" | "private";
-  source?: "announcement" | "news" | "events" | "company-anniversary" | "trade";
+  source?: "announcement" | "news" | "events" | "company-anniversary" | "trade" | "membership-fees";
+  feeDueId?: string;
   tradePostId?: string;
   tradeManaged?: boolean;
   tradeCommentId?: string;

@@ -1,3 +1,4 @@
+import FeeProofPreview from "./fee-proof-preview";
 import { formatMoney } from "@/components/shared/format";
 import { feeStatusLabels, type FeePayment } from "@/services/membership-fees";
 export default function FeeHistory({ payments }: { payments: FeePayment[] }) {
@@ -16,13 +17,9 @@ export default function FeeHistory({ payments }: { payments: FeePayment[] }) {
             {p.method === "cash" ? "Tiền mặt" : "Chuyển khoản"} ·{" "}
             {new Date(p.createdAt).toLocaleString("vi-VN")}
           </p>
-          <p className="fee-break">Mã giao dịch: {p.transactionRef}</p>
+
           {p.note && <p>{p.note}</p>}
-          {p.proofUrl && (
-            <a href={p.proofUrl} target="_blank" rel="noreferrer">
-              Xem minh chứng đã gửi
-            </a>
-          )}
+          <FeeProofPreview payment={p} />
           {p.audit
             .filter((a) => a.note)
             .map((a, i) => (
