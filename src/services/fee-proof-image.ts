@@ -8,19 +8,62 @@ export function validFeeProofImage(value: string) {
   );
 }
 export async function prepareFeeProofImage(file: File): Promise<string> {
-  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type))
-    throw new Error("Chọn ảnh JPG, PNG hoặc WebP của minh chứng thanh toán.");
+  const declared = file.type?.toLowerCase();
+  const extension = file.name?.split(".").pop()?.toLowerCase();
+  const inferred =
+    extension &&
+    (
+      {
+        jpg: "image/jpeg",
+        jpeg: "image/jpeg",
+        png: "image/png",
+        webp: "image/webp",
+      } as Record<string, string>
+    )[extension];
+  const type =
+    !declared || declared === "application/octet-stream"
+      ? inferred
+      : declared === "image/jpg"
+        ? "image/jpeg"
+        : declared;
+  if (!type || !["image/jpeg", "image/png", "image/webp"].includes(type))
+    throw new Error(
+      "Chọn ảnh JPG, PNG hoặc WebP. Với ảnh HEIC trên iPhone, hãy chọn ảnh chụp màn hình hoặc chuyển ảnh sang JPG.",
+    );
   if (!file.size || file.size > 10 * 1024 * 1024)
     throw new Error("Ảnh minh chứng thanh toán tối đa 10 MiB.");
-  const objectUrl = URL.createObjectURL(file);
+  const objectUrl = URL.createObjectURL(file),
+    image = new Image();
   try {
-    const image = new Image();
     await new Promise<void>((resolve, reject) => {
-      image.onload = () => resolve();
+      const finish = (error?: Error) => {
+        clearTimeout(timer);
+        image.onload = null;
+        image.onerror = null;
+        error ? reject(error) : resolve();
+      };
+      const timer = setTimeout(
+        () =>
+          finish(
+            new Error(
+              "Đọc ảnh quá lâu. Vui lòng chọn lại ảnh hoặc dùng ảnh chụp màn hình.",
+            ),
+          ),
+        20000,
+      );
+      image.onload = () => finish();
       image.onerror = () =>
-        reject(new Error("Không đọc được ảnh. Vui lòng chọn ảnh khác."));
+        finish(
+          new Error(
+            "Không đọc được ảnh. Vui lòng chọn ảnh JPG, PNG hoặc WebP khác.",
+          ),
+        );
       image.src = objectUrl;
     });
+    if (!image.naturalWidth || !image.naturalHeight)
+      throw new Error(
+        "Ảnh không có kích thước hợp lệ. Vui lòng chọn ảnh khác.",
+      );
     let edge = 2000;
     for (let attempt = 0; attempt < 6; attempt++) {
       const ratio = Math.min(
@@ -35,23 +78,22 @@ export async function prepareFeeProofImage(file: File): Promise<string> {
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-      const blob = await new Promise<Blob | null>((resolve) =>
-        canvas.toBlob(resolve, "image/jpeg", 0.88),
-      );
-      if (blob && blob.size <= 1024 * 1024)
-        return await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(String(reader.result));
-          reader.onerror = () =>
-            reject(new Error("Không đọc được ảnh minh chứng."));
-          reader.readAsDataURL(blob);
-        });
+      // Avoid toBlob/FileReader callbacks getting suspended by the mobile picker.
+      const result = canvas.toDataURL("image/jpeg", 0.88);
+      const encoded = result.split(",")[1] || "";
+      const bytes =
+        Math.floor((encoded.length * 3) / 4) -
+        (encoded.endsWith("==") ? 2 : encoded.endsWith("=") ? 1 : 0);
+      if (validFeeProofImage(result) && bytes > 0 && bytes <= 1024 * 1024)
+        return result;
       edge = Math.round(edge * 0.8);
     }
     throw new Error(
       "Ảnh quá lớn sau xử lý. Vui lòng chụp lại rõ nội dung minh chứng.",
     );
   } finally {
+    image.onload = null;
+    image.onerror = null;
     URL.revokeObjectURL(objectUrl);
   }
 }

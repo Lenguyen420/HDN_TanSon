@@ -105,6 +105,16 @@ test("fee form selects a local image and submits image/note without transaction 
   assert.deepEqual(submitted, [{ proofImage: image, note: "" }]);
   all
     .find((n) => n.type === "input")
+    .props.onChange({ currentTarget: { files: [], value: "" } });
+  await new Promise(setImmediate);
+  all = nodes(render());
+  assert.equal(
+    all.find((n) => n.type === "img").props.src,
+    image,
+    "cancelling the picker must retain the selected photo",
+  );
+  all
+    .find((n) => n.type === "input")
     .props.onChange({
       currentTarget: {
         files: [{ type: "application/pdf" }],
@@ -118,6 +128,6 @@ test("fee form selects a local image and submits image/note without transaction 
     all.find(
       (n) => n.type === "button" && n.props.className === "primary-button",
     ).props.disabled,
-    true,
+    false,
   );
 });

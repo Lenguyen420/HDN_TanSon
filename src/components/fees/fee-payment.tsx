@@ -22,9 +22,8 @@ export default function FeePayment({
   const selection = useRef(0);
   async function selectImage(file?: File) {
     const current = ++selection.current;
-    setProofImage("");
-    setImageError("");
     if (!file) return;
+    setImageError("");
     setPreparing(true);
     try {
       const image = await prepareFeeProofImage(file);
@@ -41,7 +40,7 @@ export default function FeePayment({
     due.campaign.status === "published";
   function submit(e: FormEvent) {
     e.preventDefault();
-    if (!busy && !preparing && proofImage)
+    if (canPay && !busy && !preparing && proofImage)
       void onSubmit({
         proofImage,
         note: note.trim(),
@@ -92,11 +91,13 @@ export default function FeePayment({
                   Ảnh minh chứng thanh toán *
                   <input
                     type="file"
-                    accept="image/jpeg,image/png,image/webp"
+                    accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
                     onChange={(e) => {
-                      const file = e.currentTarget.files?.[0];
-                      e.currentTarget.value = "";
-                      void selectImage(file);
+                      const input = e.currentTarget;
+                      const file = input.files?.[0];
+                      void selectImage(file).finally(() => {
+                        input.value = "";
+                      });
                     }}
                   />
                 </label>
@@ -105,6 +106,11 @@ export default function FeePayment({
                   được thu nhỏ trước khi gửi.
                 </small>
                 {preparing && <p role="status">Đang xử lý ảnh…</p>}
+                {proofImage && !preparing && (
+                  <p className="fee-live-notice" role="status">
+                    Ảnh đã sẵn sàng. Bạn có thể bấm Gửi minh chứng.
+                  </p>
+                )}
                 {imageError && (
                   <p className="fee-live-error" role="alert">
                     {imageError}
@@ -134,6 +140,7 @@ export default function FeePayment({
                 </label>
               </fieldset>
               <button
+                type="submit"
                 className="primary-button"
                 disabled={busy || preparing || !proofImage}
               >

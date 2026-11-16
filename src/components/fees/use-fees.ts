@@ -1,3 +1,4 @@
+import { ApiError } from "@/services/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   getMyFees,
@@ -16,10 +17,13 @@ export default function useFees(enabled: boolean, initialDueId?: string) {
   const [tab, setTab] = useState<"dues" | "history">("dues");
   const generation = useRef(0),
     selected = useRef(""),
-    lock = useRef(false);
-  const refresh = useCallback(async () => {
+    lock = useRef(false),
+    refreshing = useRef(false);
+  const refresh = useCallback(async (background = false) => {
+    if (background && refreshing.current) return;
+    refreshing.current = true;
     const current = ++generation.current;
-    setLoading(true);
+    if (!background) setLoading(true);
     setError("");
     try {
       const [all, one] = await Promise.all([
@@ -34,12 +38,20 @@ export default function useFees(enabled: boolean, initialDueId?: string) {
       }
     } catch (e) {
       if (generation.current === current) {
-        setRows([]);
-        setDetail(undefined);
+        if (
+          !background ||
+          (e instanceof ApiError && [401, 403, 404].includes(e.status))
+        ) {
+          setRows([]);
+          setDetail(undefined);
+        }
         setError(e instanceof Error ? e.message : "Chưa tải được hội phí.");
       }
     } finally {
-      if (generation.current === current) setLoading(false);
+      if (generation.current === current) {
+        refreshing.current = false;
+        if (!background) setLoading(false);
+      }
     }
   }, []);
   useEffect(() => {
@@ -51,18 +63,20 @@ export default function useFees(enabled: boolean, initialDueId?: string) {
     void refresh();
     const wake = () => {
       if (document.visibilityState !== "hidden" && !lock.current)
-        void refresh();
+        void refresh(true);
     };
     window.addEventListener("focus", wake);
     document.addEventListener("visibilitychange", wake);
     return () => {
       generation.current++;
+      refreshing.current = false;
       window.removeEventListener("focus", wake);
       document.removeEventListener("visibilitychange", wake);
     };
   }, [enabled, refresh, initialDueId]);
   async function open(id: string) {
     selected.current = id;
+    refreshing.current = true;
     const current = ++generation.current;
     setLoading(true);
     setError("");
@@ -75,11 +89,15 @@ export default function useFees(enabled: boolean, initialDueId?: string) {
       if (generation.current === current)
         setError(e instanceof Error ? e.message : "Chưa tải được chi tiết.");
     } finally {
-      if (generation.current === current) setLoading(false);
+      if (generation.current === current) {
+        refreshing.current = false;
+        setLoading(false);
+      }
     }
   }
   function back() {
     selected.current = "";
+    refreshing.current = false;
     generation.current++;
     setDetail(undefined);
     setLoading(false);
