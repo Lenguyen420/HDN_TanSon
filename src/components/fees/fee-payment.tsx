@@ -1,20 +1,134 @@
-import type { FeeRecord } from "@/datas/types";
+import { useState, type FormEvent } from "react";
 import { formatDate, formatMoney } from "@/components/shared/format";
-
-interface FeePaymentProps { records: FeeRecord[]; selectedId: string; onSelect: (id: string) => void; }
-export default function FeePayment({ records, selectedId, onSelect }: FeePaymentProps) {
-  const pending = records.filter((record) => record.status === "pending");
-  const selected = pending.find((record) => record.id === selectedId);
+import {
+  feeStatusLabels,
+  type FeeDue,
+  type FeeProof,
+} from "@/services/membership-fees";
+export default function FeePayment({
+  due,
+  busy,
+  onSubmit,
+}: {
+  due: FeeDue;
+  busy: boolean;
+  onSubmit: (proof: FeeProof) => Promise<void>;
+}) {
+  const [transactionRef, setRef] = useState(""),
+    [proofUrl, setUrl] = useState(""),
+    [note, setNote] = useState("");
+  const canPay =
+    ["unpaid", "overdue"].includes(due.status) &&
+    due.campaign.status === "published";
+  function submit(e: FormEvent) {
+    e.preventDefault();
+    if (!busy)
+      void onSubmit({
+        transactionRef: transactionRef.trim(),
+        proofUrl: proofUrl.trim(),
+        note: note.trim(),
+      });
+  }
   return (
-    <div className="fee-payment-panels">
-      <section className="fee-panel"><h2>Khoản cần đóng</h2>
-        {pending.length === 0 ? <p className="fee-empty-message">Bạn chưa có công nợ hội phí cần thanh toán.</p> : (
-          <fieldset className="fee-due-list"><legend className="sr-only">Chọn khoản hội phí cần đóng</legend>{pending.map((record) => <label key={record.id} className={`fee-due-option ${selectedId === record.id ? "is-selected" : ""}`}><input type="radio" name="fee-payment" value={record.id} checked={selectedId === record.id} onChange={() => onSelect(record.id)} /><span><strong>{record.title}</strong><small>{record.reference} · {formatDate(record.date)}</small></span><b>{formatMoney(record.amount)}</b></label>)}</fieldset>
+    <section className="fee-panel">
+      <h2>{due.campaign.title}</h2>
+      <span className={"fee-live-status " + due.status}>
+        {feeStatusLabels[due.status]}
+      </span>
+      <div className="fee-payment-detail">
+        <strong className="fee-payment-amount">
+          {formatMoney(due.amountDue)}
+        </strong>
+        <dl>
+          <div>
+            <dt>Năm hội phí</dt>
+            <dd>{due.campaign.year}</dd>
+          </div>
+          <div>
+            <dt>Hạn đóng</dt>
+            <dd>{formatDate(due.campaign.dueDate)}</dd>
+          </div>
+          <div>
+            <dt>Mã khoản phí</dt>
+            <dd className="fee-break">{due.id}</dd>
+          </div>
+        </dl>
+        {due.campaign.description && (
+          <p className="fee-live-description">{due.campaign.description}</p>
         )}
-      </section>
-      <section className="fee-panel"><h2>Thanh toán hội phí</h2>
-        {!selected ? <p className="fee-empty-message">Chọn khoản hội phí để xem số tiền cần đóng.</p> : <div className="fee-payment-detail"><span className="overline">SỐ TIỀN CẦN ĐÓNG</span><strong className="fee-payment-amount">{formatMoney(selected.amount)}</strong><dl><div><dt>Khoản hội phí</dt><dd>{selected.title}</dd></div><div><dt>Mã tham chiếu</dt><dd>{selected.reference}</dd></div></dl><p className="fee-payment-note">Thông tin tài khoản và cổng thanh toán chính thức chưa được kết nối. Vui lòng chờ hướng dẫn từ Ban thư ký Hội.</p><button type="button" className="primary-button" disabled>Chưa hỗ trợ thanh toán trực tuyến</button></div>}
-      </section>
-    </div>
+        {canPay && (
+          <>
+            <h3>Hướng dẫn chuyển khoản</h3>
+            <p className="fee-payment-note fee-live-description">
+              {due.campaign.paymentInstructions ||
+                "Vui lòng liên hệ Ban thư ký Hội để nhận thông tin tài khoản chính thức trước khi chuyển khoản."}
+            </p>
+            <p className="fee-payment-note">
+              Chuyển đúng số tiền và nội dung theo hướng dẫn. Gửi thông tin sau
+              khi chuyển khoản; hội phí chỉ được ghi nhận đã đóng khi Ban thư ký
+              xác nhận.
+            </p>
+            <form className="fee-proof-form" onSubmit={submit}>
+              <fieldset disabled={busy}>
+                <label>
+                  Mã giao dịch *
+                  <input
+                    required
+                    maxLength={150}
+                    value={transactionRef}
+                    onChange={(e) => setRef(e.target.value)}
+                    placeholder="Mã giao dịch trên biên lai"
+                  />
+                </label>
+                <label>
+                  Đường dẫn minh chứng (HTTPS)
+                  <input
+                    type="url"
+                    pattern="https://.*"
+                    maxLength={2048}
+                    value={proofUrl}
+                    onChange={(e) => setUrl(e.target.value)}
+                    placeholder="https://…"
+                  />
+                </label>
+                <label>
+                  Ghi chú
+                  <textarea
+                    maxLength={2000}
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    rows={3}
+                    placeholder="Ngày chuyển, tên người chuyển…"
+                  />
+                </label>
+              </fieldset>
+              <button
+                className="primary-button"
+                disabled={busy || !transactionRef.trim()}
+              >
+                {busy ? "Đang gửi…" : "Đã chuyển khoản / Gửi minh chứng"}
+              </button>
+            </form>
+          </>
+        )}
+        {due.status === "pending_confirmation" && (
+          <p className="fee-live-notice">
+            Đã gửi thông tin thanh toán, đang chờ Ban thư ký đối soát.
+          </p>
+        )}
+        {due.status === "paid" && (
+          <p className="fee-live-notice">
+            Đã xác nhận đủ {formatMoney(due.amountDue)}
+            {due.paidAt
+              ? " ngày " + new Date(due.paidAt).toLocaleDateString("vi-VN")
+              : ""}
+            . Mã giao dịch: {due.transactionRef}
+          </p>
+        )}
+        {due.status === "cancelled" && (
+          <p className="fee-payment-note">Khoản phải đóng này đã được hủy.</p>
+        )}
+      </div>
+    </section>
   );
 }

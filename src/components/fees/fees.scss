@@ -1,0 +1,144 @@
+.fee-live-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  color: #72849c;
+  font-size: 12px;
+}
+.fee-live-toolbar button,
+.fee-live-error button {
+  padding: 9px 12px;
+  color: #2d60a5;
+  background: #e6efff;
+  border-radius: 9px;
+  flex-shrink: 0;
+}
+.fee-live-card {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  margin: 0 0 14px;
+  width: 100%;
+  text-align: left;
+  background: #fff;
+  border: 1px solid #e1e9f6;
+  border-radius: 18px;
+  box-shadow: 0 5px 15px #284b7d05;
+}
+.fee-live-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+.fee-live-card strong {
+  color: #29486f;
+  line-height: 1.5;
+  font-size: 15px;
+}
+.fee-live-card small {
+  color: #798da7;
+  font-size: 12px;
+}
+.fee-live-card b {
+  color: #3269b1;
+  font-size: 22px;
+}
+.fee-live-link {
+  color: #4075b6;
+  font-size: 12px;
+}
+.fee-live-status {
+  display: inline-block;
+  white-space: nowrap;
+  border-radius: 20px;
+  padding: 5px 9px;
+  font-size: 11px;
+  color: #416488;
+  background: #edf3fc;
+}
+.fee-live-status.paid {
+  background: #e3f6ee;
+  color: #167959;
+}
+.fee-live-status.overdue {
+  background: #fff0e8;
+  color: #bc542b;
+}
+.fee-live-status.pending_confirmation {
+  background: #fff6d9;
+  color: #9a7419;
+}
+.fee-live-status.cancelled {
+  background: #edf0f4;
+  color: #78879a;
+}
+.fee-live-error {
+  color: #a33333;
+  background: #fff0f0;
+  padding: 14px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+}
+.fee-live-notice {
+  color: #267057;
+  background: #eaf8f1;
+  border: 1px solid #cfe9dc;
+  padding: 14px;
+  border-radius: 12px;
+  line-height: 1.8;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+.fee-live-description {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.8;
+  font-size: 13px;
+}
+.fee-break {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.fee-proof-form fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 15px;
+}
+.fee-proof-form label {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  color: #536f90;
+}
+.fee-proof-form input,
+.fee-proof-form textarea {
+  width: 100%;
+  border: 1px solid #dce6f4;
+  border-radius: 10px;
+  background: #fff;
+  padding: 12px;
+  color: #29486f;
+  font: inherit;
+}
+.fee-proof-form .primary-button {
+  margin-top: 18px;
+  width: 100%;
+}
+.fee-live-history {
+  padding: 16px 0;
+  border-bottom: 1px solid #e4ecf6;
+  color: #607a98;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.fee-live-history p {
+  margin: 6px 0;
+}
+.fee-live-history a {
+  color: #2a65ab;
+}

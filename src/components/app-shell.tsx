@@ -1,3 +1,4 @@
+import useFees from "@/components/fees/use-fees";
 import useTradeNotifications from "@/components/shared/use-trade-notifications";
 import { tradeRequest } from "@/services/trade";
 import usePublicNotifications from "@/components/shared/use-public-notifications";
@@ -185,6 +186,7 @@ export default function AppShell() {
   const scroller = () => content.current?.closest(".zaui-page");
 
   const screen = screens[screens.length - 1];
+  const fees = useFees(screen?.kind === "utility" && screen.id === "fees");
   const localgo = useLocalGo(screen?.kind === "utility" && screen.id === "ban-do");
   const resources: AppResource[] = ["settings"];
   if (!screen && activeTab === "home") resources.push("banners", "members", homeCategory === "member-visits" ? "visits" : homeCategory);
@@ -344,7 +346,7 @@ export default function AppShell() {
   const renderPage = () => {
     if (!data) return null;
     const screen = screens[screens.length - 1];
-    const common = { data, eventHistoryLoading: eventUpdatesLoading || (screen?.kind === "utility" && screen.id === "activities" && loading), eventHistoryError: eventUpdatesError, onBack: goBack, onOpenArticle: openArticle, onOpenContent: openContent,
+    const common = { data, fees, eventHistoryLoading: eventUpdatesLoading || (screen?.kind === "utility" && screen.id === "activities" && loading), eventHistoryError: eventUpdatesError, onBack: goBack, onOpenArticle: openArticle, onOpenContent: openContent,
       onOpenEventSection: (section: EventSection) => openScreen({ kind: "event-workspace", section }),
       onOpenEventResource: (articleId: string, section: EventResourceSection) => openEvent(articleId, section),
     };
