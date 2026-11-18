@@ -43,7 +43,7 @@ export default function LocalGoDetail({
   return (
     <main className="utility-page localgo-page">
       <PageToolbar
-        title={place.isSample ? "Địa điểm mẫu" : "Chi tiết địa điểm"}
+        title="Chi tiết địa điểm"
         onBack={c.back}
       />
       <ArticleImage
