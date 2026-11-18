@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { localGoSampleCategory } from "@/datas/localgo-samples";
-import { listLocalGoSamples } from "@/services/localgo-samples";
 import {
   getLocalGoCategories,
   listLocalGoPlaces,
@@ -19,7 +17,6 @@ type View =
   | { kind: "editor"; place?: LocalGoPlace };
 export default function useLocalGo(enabled: boolean) {
   const [view, setView] = useState<View>({ kind: "browse" });
-  const [showSamples, setShowSamples] = useState(false);
   const [categories, setCategories] = useState<LocalGoCategory[]>([]),
     [places, setPlaces] = useState<LocalGoPlace[]>([]);
   const [search, setSearch] = useState(""),
@@ -41,7 +38,6 @@ export default function useLocalGo(enabled: boolean) {
     if (!enabled) {
       generation.current++;
       setView({ kind: "browse" });
-      setShowSamples(false);
       setSearch("");
       setCategory("");
       setError("");
@@ -59,17 +55,14 @@ export default function useLocalGo(enabled: boolean) {
     setLoading(true);
     setError("");
     setPlaces([]);
-    const result = view.kind === "browse" && showSamples
-      ? listLocalGoSamples(query).then((data) => ({ cats: [localGoSampleCategory], data }))
-      : Promise.all([
-          getLocalGoCategories(),
-          listLocalGoPlaces(query, category, view.kind === "mine"),
-        ]).then(([cats, places]) => ({ cats, data: places.data }));
-    void result
-      .then(({ cats, data }) => {
+    void Promise.all([
+      getLocalGoCategories(),
+      listLocalGoPlaces(query, category, view.kind === "mine"),
+    ])
+      .then(([cats, result]) => {
         if (active) {
           setCategories(cats);
-          setPlaces(data);
+          setPlaces(result.data);
         }
       })
       .catch((e) => {
@@ -82,7 +75,7 @@ export default function useLocalGo(enabled: boolean) {
     return () => {
       active = false;
     };
-  }, [enabled, view.kind, query, category, revision, showSamples]);
+  }, [enabled, view.kind, query, category, revision]);
   async function run(action: () => Promise<void>) {
     if (lock.current) return;
     lock.current = true;
@@ -109,14 +102,6 @@ export default function useLocalGo(enabled: boolean) {
   };
   return {
     view,
-    showSamples,
-    changeSampleMode: (next: boolean) => {
-      if (next === showSamples) return;
-      setLoading(true);
-      setPlaces([]);
-      setCategory("");
-      setShowSamples(next);
-    },
     categories,
     places,
     search,
@@ -145,7 +130,7 @@ export default function useLocalGo(enabled: boolean) {
     open: (place: LocalGoPlace, managed = false) =>
       run(async () => {
         const current = generation.current;
-        const result = place.isSample ? place : await getLocalGoPlace(place.id, managed);
+        const result = await getLocalGoPlace(place.id, managed);
         if (current === generation.current)
           setView({ kind: "detail", place: result, managed });
       }),

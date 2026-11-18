@@ -45,17 +45,6 @@ export default function Map({ onBack, localgo: c }: UtilityPageProps) {
             + Thêm địa điểm
           </button>
         </div>
-        <ContentCategories
-          value={c.showSamples ? "samples" : "public"}
-          onChange={(value) => c.changeSampleMode(value === "samples")}
-          items={[
-            { id: "public", title: "Địa điểm công khai" },
-            { id: "samples", title: "Địa điểm mẫu" },
-          ]}
-        />
-        {c.showSamples && (
-          <p className="localgo-hint">Các ghim mẫu minh họa vị trí trên bản đồ Tân Sơn.</p>
-        )}
         <label className="localgo-search">
           <span>Tìm địa điểm</span>
           <input
@@ -66,19 +55,17 @@ export default function Map({ onBack, localgo: c }: UtilityPageProps) {
             placeholder="Tên địa điểm, địa chỉ, từ khóa…"
           />
         </label>
-        {!c.showSamples && (
-          <ContentCategories
-            value={c.category}
-            onChange={c.setCategory}
-            items={[
-              { id: "", title: "Tất cả" },
-              ...c.categories.map((item) => ({
-                id: item.code,
-                title: item.name,
-              })),
-            ]}
-          />
-        )}
+        <ContentCategories
+          value={c.category}
+          onChange={c.setCategory}
+          items={[
+            { id: "", title: "Tất cả" },
+            ...c.categories.map((item) => ({
+              id: item.code,
+              title: item.name,
+            })),
+          ]}
+        />
         <div className="localgo-results">
           <strong>
             {c.loading ? "Đang tìm địa điểm…" : `${c.places.length} địa điểm`}
@@ -140,11 +127,7 @@ export default function Map({ onBack, localgo: c }: UtilityPageProps) {
             !c.error && (
               <div className="localgo-empty">
                 <h3>Chưa tìm thấy địa điểm</h3>
-                <p>
-                  {c.showSamples
-                    ? "Thử tìm theo tên doanh nghiệp trong danh bạ."
-                    : "Thử danh mục khác hoặc thêm địa điểm đầu tiên của bạn."}
-                </p>
+                <p>Thử danh mục khác hoặc thêm địa điểm đầu tiên của bạn.</p>
               </div>
             )
           )}
