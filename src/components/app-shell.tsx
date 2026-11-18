@@ -196,7 +196,7 @@ export default function AppShell() {
   if (!screen && activeTab === "home") resources.push("banners", "members", homeCategory === "member-visits" ? "visits" : homeCategory);
   if (!screen && ["members", "register"].includes(activeTab)) resources.push("members");
   if (screen?.kind === "list" || screen?.kind === "article") resources.push(screen.category === "member-visits" ? "visits" : screen.category);
-  if (screen?.kind === "utility" && ["event-assistant", "activities"].includes(screen.id)) resources.push("events");
+  if (screen?.kind === "utility" && ["about", "event-assistant", "activities"].includes(screen.id)) resources.push("events");
   if (screen?.kind === "event-workspace" || screen?.kind === "event-resource") resources.push("events");
   const resourceKey = [...new Set(resources)].sort().join(",");
   const previousAttempt = useRef(loadAttempt);

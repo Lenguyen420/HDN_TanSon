@@ -16,7 +16,7 @@ test("protected tab navigation waits for consent and database save", async (t) =
           }
           export function useRef(value) { const h = globalThis.navigationHarness, i = h.index++; return h.values[i] ??= {current: value}; }
           export const useMemo = fn => fn();
-          export const useEffect = () => {};
+          export const useEffect = (fn, deps) => globalThis.navigationHarness.effects?.push({ fn, deps });
           export const useLayoutEffect = () => {};
         `;
         else if (path === "react/jsx-runtime") contents = 'export const jsx = (type, props) => ({type, props}); export const jsxs = jsx; export const Fragment = "fragment";';
@@ -36,7 +36,7 @@ test("protected tab navigation waits for consent and database save", async (t) =
         else if (path.endsWith("services/member-access")) contents = 'export const saveZaloSdkProfile = () => globalThis.navigationHarness.authenticate();';
         else if (path.endsWith("services/registration-notifications")) contents = 'export const updateRegistrationProfile = async () => []; export const syncRegistrationAvatar = async () => [];';
         else if (path.endsWith("services/profile")) contents = 'export const readProfileEdits = () => null; export const applyProfileEdits = data => data; export const saveProfileEdits = () => {};';
-        else if (path.endsWith("services/association")) contents = 'export const getAppData = async () => globalThis.navigationHarness.data;';
+        else if (path.endsWith("services/association")) contents = 'export const getAppData = async (options) => globalThis.navigationHarness.loadData?.(options) ?? globalThis.navigationHarness.data;';
         else if (path.endsWith("services/notifications")) contents = 'export const readNotificationState = () => ({}); export const saveNotificationState = () => true; export const mergeNotifications = (publicNotices, privateNotices) => [...privateNotices, ...publicNotices];';
         else contents = 'export default ' + JSON.stringify(path) + ';';
         return {contents, loader: "js"};
@@ -75,6 +75,28 @@ test("protected tab navigation waits for consent and database save", async (t) =
       const trade=find(render(),node=>node.type==="@/pages/trade/trade");
       assert.equal(trade.props.initialTradePostId,"post-id");assert.equal(trade.props.initialTradeManaged,privateNotice);assert.equal(calls,0);
     }
+  });
+  await t.test("opening About from Home loads events before visiting the event list", async () => {
+    reset();
+    const harness = global.navigationHarness;
+    const home = find(render(), (node) => node.type === "@/pages/home/home");
+    home.props.onOpenUtility("about");
+    const events = [{ id: "upcoming-event" }, { id: "past-event" }];
+    let requested;
+    harness.loadData = ({ resources }) => {
+      requested = resources;
+      return { ...harness.data, content: { events: { articles: events } } };
+    };
+    harness.effects = [];
+    render();
+    const loadAppData = harness.effects.find(({ deps }) => deps?.some((dep) => typeof dep === "string" && dep.split(",").includes("settings")))?.fn;
+    assert.ok(loadAppData);
+    const cleanup = loadAppData();
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.deepEqual(requested, ["events", "settings"]);
+    const about = find(render(), (node) => node.type === "@/pages/about/about");
+    assert.deepEqual(about.props.data.content.events.articles, events);
+    cleanup();
   });
   await t.test("web preview opens profile and registration without invoking Zalo", async () => {
     reset();
