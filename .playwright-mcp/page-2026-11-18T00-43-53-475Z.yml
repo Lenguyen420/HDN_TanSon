@@ -1,0 +1,9 @@
+- generic [ref=e5]:
+  - status [ref=e7]:
+    - paragraph [ref=e8]: Đang tải dữ liệu…
+  - navigation "Điều hướng chính" [ref=e9]:
+    - button "Đăng kí" [ref=e10] [cursor=pointer]
+    - button "Hội viên" [ref=e16] [cursor=pointer]
+    - button "Trang chủ" [ref=e22] [cursor=pointer]
+    - button "Thông báo" [ref=e28] [cursor=pointer]
+    - button "Cá nhân" [ref=e33] [cursor=pointer]
