@@ -30,6 +30,7 @@ export interface LocalGoPlace {
   isVisible: boolean;
   publishedAt: string;
   deletedAt: string | null;
+  isSample?: true;
 }
 export type LocalGoDraft = Pick<
   LocalGoPlace,

@@ -42,7 +42,10 @@ export default function LocalGoDetail({
     place.category;
   return (
     <main className="utility-page localgo-page">
-      <PageToolbar title="Chi tiết địa điểm" onBack={c.back} />
+      <PageToolbar
+        title={place.isSample ? "Địa điểm mẫu" : "Chi tiết địa điểm"}
+        onBack={c.back}
+      />
       <ArticleImage
         src={resolveApiImage(place.coverImage)}
         alt={place.name}
@@ -53,20 +56,22 @@ export default function LocalGoDetail({
         <h1 className="localgo-place-title">{place.name}</h1>
         <p className="localgo-address">⌖ {place.address}</p>
         <p>{place.description}</p>
-        <div className="localgo-actions">
-          <button
-            type="button"
-            className="primary-button"
-            onClick={() => void open(localGoDirections(place))}
-          >
-            Chỉ đường
-          </button>
-          {place.phone && (
-            <a href={`tel:${place.phone.replace(/[^+0-9]/g, "")}`}>
-              Gọi liên hệ
-            </a>
-          )}
-        </div>
+        {!place.isSample && (
+          <div className="localgo-actions">
+            <button
+              type="button"
+              className="primary-button"
+              onClick={() => void open(localGoDirections(place))}
+            >
+              Chỉ đường
+            </button>
+            {place.phone && (
+              <a href={`tel:${place.phone.replace(/[^+0-9]/g, "")}`}>
+                Gọi liên hệ
+              </a>
+            )}
+          </div>
+        )}
         {(linkError || c.error) && (
           <p className="localgo-error" role="alert">
             {linkError || c.error}
@@ -120,7 +125,7 @@ export default function LocalGoDetail({
           </section>
         )}
         <section className="localgo-section">
-          <h2>Vị trí địa điểm</h2>
+          <h2>{place.isSample ? "Ghim minh họa" : "Vị trí địa điểm"}</h2>
           <PlaceMap coordinates={place.location.coordinates} />
         </section>
         {managed && (

@@ -35,7 +35,7 @@ export const utilityPages: UtilityPageData = {
       { id: "hotline-1", label: "Hotline", number: "0909 123 456" },
       { id: "hotline-2", label: "Hotline", number: "0938 654 321" },
     ],
-    zaloUrl: null,
+    zaloUrl: "https://zalo.me/0917545191",
     topics: ["Thông tin hội viên", "Hội phí", "Hoạt động và sự kiện", "Hợp tác, tài trợ", "Nội dung khác"],
   },
   assistant: {

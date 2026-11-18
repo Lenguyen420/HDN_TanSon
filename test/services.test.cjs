@@ -95,6 +95,7 @@ test("public API integration", async (t) => {
     assert.equal(data.content.news.articles[0].image, "http://localhost:4000/uploads/news/photo.jpg");
     assert.deepEqual(data.utilityPages.assistant.questions, [{ question: "Câu hỏi", answer: "Trả lời | chi tiết" }]);
     assert.equal(data.utilityPages.contact.hotlines[0].number, "0901234567");
+    assert.equal(data.utilityPages.contact.zaloUrl, "https://zalo.me/0917545191");
   });
 
   await t.test("scoped screens deduplicate requests and publish partial data before slow content", async () => {

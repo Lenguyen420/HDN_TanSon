@@ -117,7 +117,7 @@ function buildAppData(): AppData {
         hours: settings.hours,
         phone: settings.phone || null,
         email: settings.email || null,
-        zaloUrl: settings.zaloUrl || null,
+        zaloUrl: settings.zaloUrl?.trim() || mockAppData.utilityPages.contact.zaloUrl,
         hotlines: settings.phone
           ? [
               {

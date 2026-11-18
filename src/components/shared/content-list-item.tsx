@@ -6,13 +6,14 @@ import AppIcon from "@/components/icons";
 interface ContentListItemProps { article: ContentArticle; categoryTitle: string; onSelect: (article: ContentArticle) => void; }
 export default function ContentListItem({ article, categoryTitle, onSelect }: ContentListItemProps) {
   const location = article.event?.venue || article.visit?.company;
+  const date = article.event?.date || article.publishedAt;
   return (
     <button className="content-list-item" type="button" onClick={() => onSelect(article)}>
       <ArticleImage src={article.image} alt="" className="content-list-thumb" />
       <div className="content-list-item-copy">
         <span className="content-topic">{article.topic || categoryTitle}</span>
         <h3>{article.title}</h3>
-        <div className="list-item-meta"><AppIcon name="calendar" /><time dateTime={article.event?.date || article.publishedAt}>{formatArticleDate(article.event?.date || article.publishedAt)}</time></div>
+        {date && <div className="list-item-meta"><AppIcon name="calendar" /><time dateTime={date}>{formatArticleDate(date)}</time></div>}
         {location && <div className="list-item-location"><AppIcon name="building" /><span>{location}</span></div>}
         <p>{article.summary}</p>
       </div>
