@@ -29,7 +29,7 @@ type View =
         | "seller-reviews"
         | "notifications";
     }
-  | { kind: "detail"; id: string; managed?: boolean; commentId?: string }
+  | { kind: "detail"; id: string; managed?: boolean; commentId?: string; returnTo?: "saved" }
   | { kind: "edit"; post?: TradePost }
   | { kind: "inbox"; conversation?: TradeConversation };
 export default function Trade({
@@ -116,7 +116,9 @@ export default function Trade({
         title={titles[view.kind]}
         subtitle="Kết nối cộng đồng"
         onBack={() =>
-          view.kind === "browse" ? onBack() : setView({ kind: "browse" })
+          view.kind === "browse"
+            ? onBack()
+            : setView({ kind: view.kind === "detail" ? view.returnTo ?? "browse" : "browse" })
         }
       />
       <div className="trade-body">
@@ -208,7 +210,8 @@ export default function Trade({
           <TradeBrowse
             key={view.kind}
             saved={view.kind === "saved"}
-            onOpen={(id) => detail(id)}
+            actorId={actor?.id}
+            onOpen={(id) => setView({ kind: "detail", id, returnTo: view.kind === "saved" ? "saved" : undefined })}
           />
         ) : view.kind === "detail" ? (
           <TradeDetail

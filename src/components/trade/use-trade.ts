@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { tradeRequest } from "@/services/trade";
 import type { TradeMeta } from "@/services/trade-types";
-export function useTradeList<T>(path: string, required = false, poll = 0) {
+export function useTradeList<T>(path: string, required = false, poll = 0, actorId?: string) {
   const [data, setData] = useState<T[]>([]),
     [meta, setMeta] = useState<TradeMeta>(),
     [error, setError] = useState(""),
@@ -53,7 +53,7 @@ export function useTradeList<T>(path: string, required = false, poll = 0) {
       cancelled = true;
       if (timer) clearTimeout(timer);
     };
-  }, [path, required, revision, poll]);
+  }, [path, required, revision, poll, actorId]);
   return {
     data,
     meta,

@@ -8,9 +8,11 @@ import { useTradeList } from "./use-trade";
 import TradeCard from "./trade-card";
 export default function TradeBrowse({
   saved = false,
+  actorId,
   onOpen,
 }: {
   saved?: boolean;
+  actorId?: string;
   onOpen: (id: string) => void;
 }) {
   const [search, setSearch] = useState(""),
@@ -28,6 +30,8 @@ export default function TradeBrowse({
           sortBy,
         }),
       saved,
+      0,
+      actorId,
     );
   return (
     <section>
@@ -100,7 +104,15 @@ export default function TradeBrowse({
         <p role="status">Đang tải cơ hội giao thương…</p>
       ) : posts.data.length ? (
         posts.data.map((post) => (
-          <TradeCard key={post.id} post={post} onOpen={() => onOpen(post.id)} />
+          <TradeCard
+            key={post.id + ":" + Boolean(post.saved)}
+            post={post}
+            onOpen={() => onOpen(post.id)}
+            onSaveChanged={() => {
+              if (saved && posts.data.length === 1 && page > 1) setPage(page - 1);
+              posts.refresh();
+            }}
+          />
         ))
       ) : (
         <div className="surface-card">

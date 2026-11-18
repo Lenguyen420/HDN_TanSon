@@ -66,7 +66,7 @@ export async function tradeRequest<T>(
   try {
     const result = await apiRequest<TradeResult<T>>(path, {
       method,
-      headers: session
+      headers: session && session.until > Date.now()
         ? { Authorization: "Bearer " + session.accessToken }
         : {},
       body: body === undefined ? undefined : JSON.stringify(body),
@@ -79,6 +79,15 @@ export async function tradeRequest<T>(
     }
     throw error;
   }
+}
+export async function setTradePostSaved(postId: string, saved: boolean) {
+  const { data } = await tradeRequest<{ saved: boolean; saveCount: number }>(
+    "trade-posts/" + encodeURIComponent(postId) + "/save",
+    saved ? "POST" : "DELETE",
+    undefined,
+    true,
+  );
+  return { saved: data?.saved ?? saved, saveCount: data?.saveCount };
 }
 export function tradeImage(value?: string | null) {
   return resolveApiImage(value) || "";

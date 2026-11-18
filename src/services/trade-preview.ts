@@ -251,9 +251,12 @@ export async function previewTradeRequest<T>(
       state.posts.splice(state.posts.indexOf(row), 1);
       result = ok(null);
     } else if (parts[2] === "save") {
-      row.saved = method !== "DELETE";
-      row.saveCount = Math.max(0, row.saveCount + (row.saved ? 1 : -1));
-      result = ok({ saveCount: row.saveCount });
+      const saved = method !== "DELETE";
+      if (saved !== Boolean(row.saved)) {
+        row.saved = saved;
+        row.saveCount = Math.max(0, row.saveCount + (saved ? 1 : -1));
+      }
+      result = ok({ saved, saveCount: row.saveCount });
     } else if (parts[2] === "interactions") result = ok(true);
     else {
       if (method === "PATCH") {

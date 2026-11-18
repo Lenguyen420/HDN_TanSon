@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { tradeRequest, tradeImage, loginTrade } from "@/services/trade";
+import { tradeRequest, tradeImage, loginTrade, setTradePostSaved } from "@/services/trade";
 import {
   tradePrice,
   tradeStatusLabels,
@@ -11,6 +11,8 @@ import { useTradeAction } from "./use-trade";
 import TradeReviews from "./trade-reviews";
 import TradeComments from "./trade-comments";
 import TradeIcon from "./trade-icon";
+import TradeContactLink from "./trade-contact-link";
+import { tradeContactHref } from "@/services/trade-contact";
 import { tradeCategoryLabel } from "@/services/trade-types";
 export default function TradeDetail({
   id,
@@ -73,20 +75,17 @@ export default function TradeDetail({
     }).catch(() => {});
   async function save() {
     await task.run(async () => {
-      const result = await tradeRequest<{ saveCount: number }>(
-        "trade-posts/" + post!.id + "/save",
-        post!.saved ? "DELETE" : "POST",
-        post!.saved ? undefined : {},
-        true,
-      );
+      if (!post) return;
+      const result = await setTradePostSaved(post.id, !post.saved);
       readVersion.current++;
       setError("");
-      setPost({
-        ...post!,
-        saved: !post!.saved,
-        saveCount: post!.saved
-          ? Math.max(0, post!.saveCount - 1)
-          : result.data.saveCount,
+      setPost((current) => {
+        if (!current || current.id !== post.id) return current;
+        return {
+          ...current,
+          saved: result.saved,
+          saveCount: result.saveCount ?? Math.max(0, post.saveCount - 1),
+        };
       });
     });
   }
@@ -121,10 +120,7 @@ export default function TradeDetail({
       onConversation(result.data);
     });
   }
-  const zalo = post.contactZalo
-    ? "https://zalo.me/" +
-      encodeURIComponent(post.contactZalo.replace(/^https:\/\/zalo\.me\//, ""))
-    : "";
+  const hasPhone = Boolean(tradeContactHref("phone", post.contactPhone));
   return (
     <section className="trade-detail-page">
       <div className="trade-hero">
@@ -243,25 +239,15 @@ export default function TradeDetail({
           <div>
             <dt>Điện thoại</dt>
             <dd>
-              <a
-                href={"tel:" + post.contactPhone}
-                onClick={() => void interaction("CONTACT_PHONE")}
-              >
-                {post.contactPhone}
-              </a>
+              {hasPhone ? (
+                <TradeContactLink post={post}>{post.contactPhone}</TradeContactLink>
+              ) : "Chưa cập nhật số điện thoại"}
             </dd>
           </div>
         </dl>
-        {zalo && (
-          <a
-            href={zalo}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => void interaction("CONTACT_ZALO")}
-          >
-            Liên hệ qua Zalo
-          </a>
-        )}
+        <TradeContactLink post={post} channel="zalo">
+          Liên hệ qua Zalo
+        </TradeContactLink>
       </article>
       <article className="surface-card">
         <h3>Nội dung chi tiết</h3>
@@ -359,15 +345,14 @@ export default function TradeDetail({
               <TradeIcon name="bookmark" />
               {post.saved ? "Đã lưu" : "Lưu tin"}
             </button>
-            <a
-              href={"tel:" + post.contactPhone}
-              onClick={() => void interaction("CONTACT_PHONE")}
-            >
-              <TradeIcon name="phone" size={24} />
-              <span>
-                Liên hệ ngay<small>{post.contactPhone}</small>
-              </span>
-            </a>
+            {hasPhone ? (
+              <TradeContactLink post={post}>
+                <TradeIcon name="phone" size={24} />
+                <span>Liên hệ ngay<small>{post.contactPhone}</small></span>
+              </TradeContactLink>
+            ) : (
+              <TradeContactLink post={post} channel="zalo">Liên hệ qua Zalo</TradeContactLink>
+            )}
           </div>
         </>
       )}

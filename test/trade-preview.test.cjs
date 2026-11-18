@@ -27,8 +27,14 @@ test("local trade preview opens protected screens without registration, OA, SDK 
  const managed=await service.tradeRequest("trade-posts/"+created.data.id+"/manage","GET",undefined,true);
  assert.equal(managed.data.status,"PENDING");
  const partner=browse.data.find(p=>!p.isOwner);
- await service.tradeRequest("trade-posts/"+partner.id+"/save","POST",{},true);
+ const savedPost=await service.setTradePostSaved(partner.id,true);
+ assert.equal(savedPost.saved,true);
+ assert.equal(savedPost.saveCount,partner.saveCount+1);
+ assert.deepEqual(await service.setTradePostSaved(partner.id,true),savedPost);
  assert.equal((await service.tradeRequest("trade-posts/me/saved","GET",undefined,true)).data[0].id,partner.id);
+ assert.equal((await service.tradeRequest("trade-posts/"+partner.id)).data.saved,true);
+ assert.deepEqual(await service.setTradePostSaved(partner.id,false),{saved:false,saveCount:partner.saveCount});
+ assert.deepEqual((await service.tradeRequest("trade-posts/me/saved","GET",undefined,true)).data,[]);
  const conversation=await service.tradeRequest("trade-conversations","POST",{tradePostId:partner.id,message:"Xin chào"},true);
  let updates=0;const stop=service.watchTradeConversation(conversation.data.id,()=>updates++);
  await service.tradeRequest("trade-conversations/"+conversation.data.id+"/messages","POST",{content:"Tin nhắn test"},true);

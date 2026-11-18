@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { tradeImage, tradeRequest } from "@/services/trade";
+import { setTradePostSaved, tradeImage } from "@/services/trade";
 import {
   tradePrice,
   tradeStatusLabels,
@@ -8,26 +8,25 @@ import {
 } from "@/services/trade-types";
 import { useTradeAction } from "./use-trade";
 import TradeIcon from "./trade-icon";
+import TradeContactLink from "./trade-contact-link";
 export default function TradeCard({
   post,
   onOpen,
+  onSaveChanged,
   managed = false,
 }: {
   post: TradePost;
   onOpen: () => void;
+  onSaveChanged?: () => void;
   managed?: boolean;
 }) {
   const [saved, setSaved] = useState(Boolean(post.saved)),
     task = useTradeAction();
   async function save() {
     await task.run(async () => {
-      await tradeRequest(
-        "trade-posts/" + post.id + "/save",
-        saved ? "DELETE" : "POST",
-        saved ? undefined : {},
-        true,
-      );
-      setSaved(!saved);
+      const result = await setTradePostSaved(post.id, !saved);
+      setSaved(result.saved);
+      onSaveChanged?.();
     });
   }
   return (
@@ -61,19 +60,9 @@ export default function TradeCard({
               >
                 <TradeIcon name="bookmark" />
               </button>
-              <a
-                href={"tel:" + post.contactPhone}
-                aria-label={"Gọi " + post.contactName}
-                onClick={() =>
-                  void tradeRequest(
-                    "trade-posts/" + post.id + "/interactions",
-                    "POST",
-                    { type: "CONTACT_PHONE" },
-                  ).catch(() => {})
-                }
-              >
+              <TradeContactLink post={post} label={"Gọi " + post.contactName}>
                 <TradeIcon name="phone" />
-              </a>
+              </TradeContactLink>
             </div>
           )}
         </div>
