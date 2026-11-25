@@ -428,6 +428,10 @@ textarea:focus-visible, select:focus-visible { outline: 3px solid #7cabff; outli
 /* Header thống nhất: nền xanh và nút tròn trắng theo mẫu. */
 .page-toolbar { display: flex; align-items: center; gap: 14px; min-height: 112px; padding: calc(22px + env(safe-area-inset-top, 0px)) 18px 26px; color: #fff; background-color: #1c9fd1; background-image: url('../assets/background/header-lines.svg'), linear-gradient(115deg, #147cbe, #2ec3e1); background-size: cover; background-position: right center; }
 .page-toolbar.is-sticky { position: sticky; top: 0; z-index: 12; min-height: 90px; padding-top: calc(17px + env(safe-area-inset-top, 0px)); padding-bottom: 17px; }
+.page-toolbar.page-toolbar-with-banner { position: relative; display: block; min-height: 0; padding: env(safe-area-inset-top, 0px) 0 0; background-image: none; }
+.page-toolbar-with-banner.is-sticky { position: sticky; }
+.page-toolbar-banner { display: block; width: 100%; height: auto; }
+.page-toolbar-with-banner > .page-back-button { position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); left: 13px; }
 .page-back-button { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; padding: 0; border-radius: 50%; background: #fff; color: #17648a; box-shadow: 0 2px 5px #0d5b8b08; }
 .page-back-button > svg { width: 22px; height: 22px; transform: rotate(180deg); stroke-width: 2; }
 .page-back-button:active { background: #eaf8ff; }
@@ -479,17 +483,9 @@ textarea:focus-visible, select:focus-visible { outline: 3px solid #7cabff; outli
   .content-list-item-copy > p { font-size: 14px; }
 }
 
-/* Danh bạ hội viên: logo nổi trên header và thẻ danh thiếp. */
+/* Danh bạ hội viên */
 .members-page { min-height: 100%; background: #f8f9fc; }
-.members-header { position: relative; padding: calc(30px + env(safe-area-inset-top, 0px)) 45px 93px; text-align: center; color: white; background-color: #1777e8; background-image: url('../assets/background/header-lines.svg'); background-position: right top; background-size: cover; }
-.members-header h1 { margin: 0; font-size: 21px; line-height: 1.5; font-weight: 750; letter-spacing: -.3px; text-transform: uppercase; color: white; }
-.members-header > p { margin: 12px -22px 0; font-size: 13px; line-height: 1.7; color: #d9edff; }
-.members-back { position: absolute; top: calc(28px + env(safe-area-inset-top, 0px)); left: 13px; }
-.members-back .page-back-button { width: 32px; height: 32px; }
-.members-back .page-back-button svg { width: 18px; height: 18px; }
-.members-association-logo { position: absolute; left: 50%; bottom: -83px; transform: translateX(-50%); display: grid; place-items: center; width: 142px; height: 142px; padding: 6px; background: white; border-radius: 50%; box-shadow: 0 11px 22px #24355220; }
-.members-association-logo img { display: block; width: 100%; height: 100%; object-fit: contain; border-radius: 50%; }
-.members-directory-body { padding: 107px 16px 24px; }
+.members-directory-body { padding: 18px 16px 24px; }
 .members-directory-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 3px 13px; font-size: 12px; color: #9ba7b8; }
 .members-directory-meta .demo-badge { margin: 0; }
 .member-cards { display: grid; gap: 13px; }
@@ -522,9 +518,6 @@ textarea:focus-visible, select:focus-visible { outline: 3px solid #7cabff; outli
 .member-sheet-details dt { font-size: 13px; line-height: 1.6; color: #8291a5; font-weight: 600; margin-bottom: 6px; }
 .member-sheet-details dd { font-size: 15px; line-height: 1.7; font-weight: 650; color: #1f2b3a; margin: 0; overflow-wrap: anywhere; }
 @media (max-width: 350px) {
-  .members-header { padding-left: 42px; padding-right: 30px; }
-  .members-header h1 { font-size: 18px; }
-  .members-header > p { font-size: 12px; }
   .members-directory-body { padding-left: 12px; padding-right: 12px; }
   .member-directory-card { grid-template-columns: 52px minmax(0, 1fr) 22px; gap: 10px; padding: 15px 11px; }
   .member-directory-card .directory-photo { width: 52px; height: 60px; }
@@ -536,13 +529,7 @@ textarea:focus-visible, select:focus-visible { outline: 3px solid #7cabff; outli
   .member-sheet-heading h2 { font-size: 19px; }
 }
 @media (min-width: 480px) {
-  .members-header { padding-top: calc(38px + env(safe-area-inset-top, 0px)); padding-bottom: 110px; }
-  .members-header h1 { font-size: 27px; }
-  .members-header > p { font-size: 16px; }
-  .members-back { left: 20px; top: calc(36px + env(safe-area-inset-top, 0px)); }
-  .members-back .page-back-button { width: 38px; height: 38px; }
-  .members-association-logo { width: 170px; height: 170px; bottom: -95px; padding: 7px; }
-  .members-directory-body { padding: 120px 23px 28px; }
+  .members-directory-body { padding: 22px 23px 28px; }
   .member-directory-card { grid-template-columns: 82px minmax(0, 1fr) 29px; gap: 17px; padding: 20px 18px; border-radius: 21px; }
   .directory-photo { width: 82px; height: 82px; border-radius: 15px; }
   .member-directory-copy h3 { font-size: 20px; }
