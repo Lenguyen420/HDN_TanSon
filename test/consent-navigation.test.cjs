@@ -76,6 +76,24 @@ test("protected tab navigation waits for consent and database save", async (t) =
       assert.equal(trade.props.initialTradePostId,"post-id");assert.equal(trade.props.initialTradeManaged,privateNotice);assert.equal(calls,0);
     }
   });
+  await t.test("Home opens the selected directory and keeps the Members tab on the full list", async () => {
+    reset();
+    const home = () => find(render(), node => node.type === "@/pages/home/home");
+    const members = () => find(render(), node => node.type === "@/pages/members/members");
+
+    for (const scope of ["board", "all"]) {
+      home().props.onOpenMemberDirectory(scope);
+      assert.equal(members().props.scope, scope);
+      assert.equal(home(), null);
+      members().props.onBack();
+      assert.ok(home());
+    }
+
+    home().props.onOpenMemberDirectory("board");
+    await nav().onChange("members");
+    assert.equal(nav().activeTab, "members");
+    assert.equal(members().props.scope ?? "all", "all");
+  });
   await t.test("opening About from Home loads events before visiting the event list", async () => {
     reset();
     const harness = global.navigationHarness;

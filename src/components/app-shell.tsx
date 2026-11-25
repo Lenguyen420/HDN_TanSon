@@ -51,7 +51,7 @@ import { readNotificationState, saveNotificationState, mergeNotifications } from
 import type { NotificationReadState } from "@/services/notifications";
 import { applyProfileEdits, readProfileEdits, saveProfileEdits } from "@/services/profile";
 import type { AppData, ContentCategory, NavigationTab, ProfileEdits, UtilityId } from "@/datas/types";
-import type { ArticlePageProps, ContentListPageProps, UtilityPageProps } from "@/components/shared/page-props";
+import type { ArticlePageProps, ContentListPageProps, MemberDirectoryScope, UtilityPageProps } from "@/components/shared/page-props";
 
 import { saveZaloSdkProfile, type MemberIdentity } from "@/services/member-access";
 
@@ -61,6 +61,7 @@ import PoliciesPage from "@/pages/policies/policies";
 import { updateRegistrationProfile, syncRegistrationAvatar } from "@/services/registration-notifications";
 
 type Screen =
+  | { kind: "member-directory"; scope: MemberDirectoryScope }
   | { kind: "partner-detail"; partnerId: string; contributionId?: string }
   | { kind: "event-workspace"; section: EventSection }
   | { kind: "event-resource"; section: EventResourceSection; articleId: string }
@@ -194,7 +195,7 @@ export default function AppShell() {
   const localgo = useLocalGo(screen?.kind === "utility" && screen.id === "ban-do");
   const resources: AppResource[] = ["settings"];
   if (!screen && activeTab === "home") resources.push("banners", "members", homeCategory === "member-visits" ? "visits" : homeCategory);
-  if (!screen && ["members", "register"].includes(activeTab)) resources.push("members");
+  if (screen?.kind === "member-directory" || (!screen && ["members", "register"].includes(activeTab))) resources.push("members");
   if (screen?.kind === "list" || screen?.kind === "article") resources.push(screen.category === "member-visits" ? "visits" : screen.category);
   if (screen?.kind === "utility" && ["about", "event-assistant", "activities"].includes(screen.id)) resources.push("events");
   if (screen?.kind === "event-workspace" || screen?.kind === "event-resource") resources.push("events");
@@ -286,6 +287,10 @@ export default function AppShell() {
     pendingScroll.current = 0;
     setScreens((current) => [...current, screen]);
   };
+  const openMemberDirectory = (scope: MemberDirectoryScope) => {
+    navigationAttempt.current++;
+    openScreen({ kind: "member-directory", scope });
+  };
   const goBack = () => {
     pendingScroll.current = scrollHistory.current.pop() || 0;
     setScreens((current) => current.slice(0, -1));
@@ -367,6 +372,7 @@ export default function AppShell() {
       const ResourcePage = eventResourcePages[screen.section];
       return <ResourcePage key={screen.section + article.id} {...workspaceProps} article={article} onCheckIn={submitCheckIn} onOpenFile={openEventFile} />;
     }
+    if (screen?.kind === "member-directory") return <MembersPage key={screen.scope} data={data} scope={screen.scope} onBack={goBack} />;
     if (screen?.kind === "partner-detail") return <PartnerDetailPage partners={partners} contributionId={screen.contributionId} onBack={goBack} />;
     if (screen?.kind === "policies") return <PoliciesPage onBack={goBack} />;
     if (screen?.kind === "profile-edit") return <ProfileEditPage data={data} onBack={goBack} onSave={savePersonalProfile} />;
@@ -400,7 +406,7 @@ export default function AppShell() {
       case "members": return <MembersPage data={data} onBack={() => navigate("home")} />;
       case "notifications": return <NotificationsPage data={{ ...data, notifications }} onBack={() => navigate("home")} onOpenNotification={openNotification} onMarkAllRead={markAllNotificationsRead} storageMessage={[notificationStorageMessage, publicNoticeError, registrationNoticeError, eventUpdatesError, tradeNoticeError].filter(Boolean).join(" ")} />;
       case "profile": return <ProfilePage onSupport={(action) => action === "policies" ? openScreen({kind:"policies"}) : openScreen({kind:"utility",id:action})} data={data} onBack={() => navigate("home")} onEdit={() => { setProfileSaveMessage(""); openScreen({ kind: "profile-edit" }); }} saveMessage={profileSaveMessage} />;
-      case "home": return <HomePage onOpenWardMiniApp={() => void openWardMiniApp()} data={data} onNavigate={navigate} onOpenContent={openContent} onOpenUtility={(id) => openScreen({ kind: "utility", id })} onOpenArticle={openArticle} contentCategory={homeCategory} onChangeCategory={setHomeCategory} />;
+      case "home": return <HomePage onOpenWardMiniApp={() => void openWardMiniApp()} data={data} onOpenMemberDirectory={openMemberDirectory} onOpenContent={openContent} onOpenUtility={(id) => openScreen({ kind: "utility", id })} onOpenArticle={openArticle} contentCategory={homeCategory} onChangeCategory={setHomeCategory} />;
     }
   };
   return (

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavigationTab } from "../bottom-navigation";
+import type { MemberDirectoryScope } from "@/components/shared/page-props";
 import HomeHeader from "./header";
 import Banner from "./banner";
 import FollowCard from "./follow-card";
@@ -11,7 +11,7 @@ import type { AppData, ContentCategory, UtilityId } from "@/datas/types";
 
 interface HomeProps {
   data: AppData;
-  onNavigate: (tab: NavigationTab) => void;
+  onOpenMemberDirectory: (scope: MemberDirectoryScope) => void;
   onOpenContent: (category: ContentCategory) => void;
   onOpenUtility: (id: UtilityId) => void;
   onOpenWardMiniApp: () => void;
@@ -20,7 +20,7 @@ interface HomeProps {
   onChangeCategory: (category: ContentCategory) => void;
 }
 
-export default function Home({ data, onNavigate, onOpenContent, onOpenUtility, onOpenWardMiniApp, onOpenArticle, contentCategory, onChangeCategory }: HomeProps) {
+export default function Home({ data, onOpenMemberDirectory, onOpenContent, onOpenUtility, onOpenWardMiniApp, onOpenArticle, contentCategory, onChangeCategory }: HomeProps) {
   const [showOaNotice, setShowOaNotice] = useState(false);
 
   return (
@@ -37,8 +37,8 @@ export default function Home({ data, onNavigate, onOpenContent, onOpenUtility, o
           if (id === "tan-son-ward") onOpenWardMiniApp();
           else onOpenUtility(id);
         }} />
-        <ExecutiveBoard members={data.members.filter((member) => member.isBoard)} isDemo={data.isDemo} accessRequired={data.memberAccess === "required"} onViewAll={() => onNavigate("members")} />
-        <HomeMembers members={data.memberAccess === "required" ? [] : data.members} onViewAll={() => onNavigate("members")} />
+        <ExecutiveBoard members={data.members.filter((member) => member.isBoard)} isDemo={data.isDemo} accessRequired={data.memberAccess === "required"} onViewAll={() => onOpenMemberDirectory("board")} />
+        <HomeMembers members={data.memberAccess === "required" ? [] : data.members} onViewAll={() => onOpenMemberDirectory("all")} />
         <ContentBrowser data={data} category={contentCategory} onChangeCategory={onChangeCategory} onOpenContent={onOpenContent} onOpenArticle={onOpenArticle} />
         <div className="community-note">
           <span /><p>{data.association.slogan}</p><span />

@@ -17,7 +17,10 @@ export interface EventResourcePageProps extends EventWorkspacePageProps {
   onOpenFile: (url: string) => Promise<void>;
 }
 export interface TabPageProps { data: AppData; onBack: () => void; }
-export interface MembersPageProps extends TabPageProps {}
+export type MemberDirectoryScope = "all" | "board";
+export interface MembersPageProps extends TabPageProps {
+  scope?: MemberDirectoryScope;
+}
 export interface ProfilePageProps extends TabPageProps { onEdit: () => void; onSupport: (action: "contact" | "about" | "policies") => void; saveMessage?: string; }
 export interface ProfileEditPageProps extends TabPageProps { onSave: (edits: ProfileEdits) => void | Promise<void>; }
 export interface NotificationsPageProps extends TabPageProps {

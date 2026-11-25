@@ -1,9 +1,10 @@
-import type { AppData, ContentCategory, NavigationTab, UtilityId } from "@/datas/types";
+import type { MemberDirectoryScope } from "@/components/shared/page-props";
+import type { AppData, ContentCategory, UtilityId } from "@/datas/types";
 import Home from "@/components/home";
 
 interface HomePageProps {
   data: AppData;
-  onNavigate: (tab: NavigationTab) => void;
+  onOpenMemberDirectory: (scope: MemberDirectoryScope) => void;
   onOpenContent: (category: ContentCategory) => void;
   onOpenUtility: (id: UtilityId) => void;
   onOpenWardMiniApp: () => void;
